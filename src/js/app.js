@@ -11,6 +11,34 @@ const media = {
 };
 let activeTheme = 'home';
 let previousDefault = '';
+const layoutDefaults = {
+  desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
+  mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
+};
+const positionElements = {
+  profile: $('profile-block'), social: document.querySelector('.social-links'),
+  views: document.querySelector('.visitor-counter'), themes: document.querySelector('.controls'),
+  audio: document.querySelector('.top-controls')
+};
+const positionWrappers = {};
+for (const [key, element] of Object.entries(positionElements)) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `position-wrapper position-${key}`;
+  document.body.append(wrapper);
+  wrapper.append(element);
+  positionWrappers[key] = wrapper;
+}
+
+function applyLayout(data) {
+  const device = matchMedia('(max-width: 640px)').matches ? 'mobile' : 'desktop';
+  for (const [key, wrapper] of Object.entries(positionWrappers)) {
+    const position = data.layout?.[device]?.[key] || layoutDefaults[device][key];
+    wrapper.style.left = `${position.x}%`;
+    wrapper.style.top = `${position.y}%`;
+  }
+}
+addEventListener('resize', () => { if (window.profileSettings) applyLayout(window.profileSettings); });
+applyLayout({});
 
 function safeUrl(value) {
   if (typeof value !== 'string' || !value.trim()) return '';
@@ -30,7 +58,11 @@ function render(data) {
   document.title = `${data.name || 'Profile'} · profile`;
   window.dispatchEvent(new CustomEvent('profile:settings', { detail: data }));
   document.querySelector('.profile-picture').src = safeUrl(data.avatarUrl) || 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%3E%3Cstop%20stop-color%3D%22%237afcff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%239b5cff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22url%28%23g%29%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2259%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E';
-  for (const [social, field] of [['discord', 'discordUrl'], ['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl']]) {
+  const discordName = typeof data.discordUsername === 'string' ? data.discordUsername.trim().replace(/^@/, '') : '';
+  $('discord-link').hidden = !discordName;
+  $('discord-link').dataset.username = discordName;
+  $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
+  for (const [social, field] of [['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl']]) {
     const link = $(`${social}-link`);
     const url = safeUrl(data[field]);
     link.hidden = !url;
@@ -51,6 +83,12 @@ function render(data) {
   if (!previousDefault || previousDefault !== nextDefault) activeTheme = nextDefault;
   previousDefault = nextDefault;
   window.applyTheme?.(activeTheme);
+  applyBackgroundCrop(data);
+  applyLayout(data);
+  document.body.classList.toggle('no-ambience', data.animatedBackground === false);
+  document.body.classList.toggle('no-avatar-motion', data.profileFloat === false);
+  document.body.classList.toggle('system-cursor', data.cursorStyle === 'system');
+  document.body.dataset.cursor = ['orb', 'dot', 'crosshair', 'system'].includes(data.cursorStyle) ? data.cursorStyle : 'orb';
   setSnow(data.snowEnabled === true);
   $('api-status').textContent = '';
   updateMusicToggle();
@@ -137,6 +175,46 @@ function connectLive() {
   });
   socket.addEventListener('error', () => socket.close());
 }
+
+let discordTipTimer;
+$('discord-link').addEventListener('click', async event => {
+  event.preventDefault();
+  const username = $('discord-link').dataset.username;
+  if (!username) return;
+  try {
+    await navigator.clipboard.writeText(username);
+    $('discord-tooltip').textContent = `Copied @${username}`;
+    $('discord-link').classList.add('copied');
+    clearTimeout(discordTipTimer);
+    discordTipTimer = setTimeout(() => {
+      $('discord-tooltip').textContent = `Copy @${username}`;
+      $('discord-link').classList.remove('copied');
+    }, 2400);
+  } catch {
+    $('discord-tooltip').textContent = `@${username}`;
+    $('discord-link').classList.add('copied');
+  }
+});
+
+const background = $('background');
+function applyBackgroundCrop(data) {
+  const zoom = Number(data.backgroundZoom) || 1;
+  const x = Number.isFinite(Number(data.backgroundX)) ? Number(data.backgroundX) : 50;
+  const y = Number.isFinite(Number(data.backgroundY)) ? Number(data.backgroundY) : 50;
+  background.style.transform = `scale(${zoom})`;
+  background.style.transformOrigin = `${x}% ${y}%`;
+  background.style.objectPosition = `${x}% ${y}%`;
+  background.style.backgroundPosition = `${x}% ${y}%`;
+}
+background.addEventListener('loadedmetadata', () => {
+  const start = Number(window.profileSettings?.backgroundStart) || 0;
+  if (start > 0 && start < background.duration) background.currentTime = start;
+});
+background.addEventListener('timeupdate', () => {
+  const start = Number(window.profileSettings?.backgroundStart) || 0;
+  const end = Number(window.profileSettings?.backgroundEnd) || 0;
+  if (end > start && background.currentTime >= end) background.currentTime = start;
+});
 async function updateViews() {
   try {
     const response = await fetch(`${apiUrl}/views`, { method: 'POST', cache: 'no-store' });

@@ -12,9 +12,9 @@ function initMedia() {
   backgroundVideo.muted = true; 
 
   
-  backgroundVideo.play().catch(err => {
-    console.error("Failed to play background video:", err);
-  });
+  if (backgroundVideo.currentSrc || backgroundVideo.getAttribute('src')) {
+    backgroundVideo.play().catch(() => {});
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -122,18 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
   startScreen.addEventListener('click', () => {
     startScreen.classList.add('hidden');
     backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
-      console.error("Failed to play music after start screen click:", err);
-    });
+    if (backgroundMusic.getAttribute('src')) backgroundMusic.play().catch(() => {});
     profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
+    if (window.profileSettings?.animateEntrance !== false) gsap.fromTo(profileBlock,
       { opacity: 0, y: -50 },
       { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
         profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
+        if (window.profileSettings?.profileFloat !== false) profileContainer.classList.add('orbit');
       }}
     );
-    if (!isTouchDevice) {
+    else profileBlock.classList.add('profile-appear');
+    if (!isTouchDevice && typeof cursorTrailEffect === 'function') {
       try {
         new cursorTrailEffect({
           length: 10,
@@ -145,26 +144,24 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Failed to initialize cursor trail effect:", err);
       }
     }
-    typeWriterName();
-    typeWriterBio();
+    if (window.profileSettings?.animateText !== false) { typeWriterName(); typeWriterBio(); }
   });
 
   startScreen.addEventListener('touchstart', (e) => {
     e.preventDefault();
     startScreen.classList.add('hidden');
     backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
-      console.error("Failed to play music after start screen touch:", err);
-    });
+    if (backgroundMusic.getAttribute('src')) backgroundMusic.play().catch(() => {});
     profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
+    if (window.profileSettings?.animateEntrance !== false) gsap.fromTo(profileBlock,
       { opacity: 0, y: -50 },
       { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
         profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
+        if (window.profileSettings?.profileFloat !== false) profileContainer.classList.add('orbit');
       }}
     );
-    if (!isTouchDevice) {
+    else profileBlock.classList.add('profile-appear');
+    if (!isTouchDevice && typeof cursorTrailEffect === 'function') {
       try {
         new cursorTrailEffect({
           length: 10,
@@ -176,8 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Failed to initialize cursor trail effect:", err);
       }
     }
-    typeWriterName();
-    typeWriterBio();
+    if (window.profileSettings?.animateText !== false) { typeWriterName(); typeWriterBio(); }
   });
 
 
@@ -188,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let nameCursorVisible = true;
 
   function typeWriterName() {
+    if (window.profileSettings?.animateText === false) { profileName.textContent = name; return; }
     if (!isNameDeleting && nameIndex < name.length) {
       nameText = name.slice(0, nameIndex + 1);
       nameIndex++;
@@ -210,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setInterval(() => {
+    if (window.profileSettings?.animateText === false) return;
     nameCursorVisible = !nameCursorVisible;
     profileName.textContent = nameText + (nameCursorVisible ? '|' : ' ');
   }, 500);
@@ -223,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let bioCursorVisible = true;
 
   function typeWriterBio() {
+    if (window.profileSettings?.animateText === false) { profileBio.textContent = bioMessages[0]; return; }
     if (!isBioDeleting && bioIndex < bioMessages[bioMessageIndex].length) {
       bioText = bioMessages[bioMessageIndex].slice(0, bioIndex + 1);
       bioIndex++;
@@ -246,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setInterval(() => {
+    if (window.profileSettings?.animateText === false) return;
     bioCursorVisible = !bioCursorVisible;
     profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
   }, 500);
@@ -360,7 +360,19 @@ document.addEventListener('DOMContentLoaded', () => {
       duration: 0.5,
       ease: 'power2.in',
       onComplete: () => {
-        backgroundVideo.src = videoSrc || "";
+        const imageBackground = /\.(gif|png|jpe?g|webp)(?:[?#]|$)/i.test(videoSrc || '');
+        backgroundVideo.pause();
+        if (imageBackground) {
+          backgroundVideo.removeAttribute('src');
+          backgroundVideo.style.backgroundImage = `url("${videoSrc.replaceAll('"', '%22')}")`;
+          backgroundVideo.style.backgroundSize = 'cover';
+        } else {
+          backgroundVideo.style.backgroundImage = '';
+          if (videoSrc) {
+            backgroundVideo.src = videoSrc;
+            backgroundVideo.play().catch(() => {});
+          } else backgroundVideo.removeAttribute('src');
+        }
 
         if (currentAudio) {
           currentAudio.pause();
@@ -399,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
           onComplete: () => {
             profileContainer.classList.remove('orbit');
             void profileContainer.offsetWidth;
-            profileContainer.classList.add('orbit');
+            if (window.profileSettings?.profileFloat !== false) profileContainer.classList.add('orbit');
           }
         });
       }
@@ -449,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
  
   function handleTilt(e, element) {
+    if (window.profileSettings?.hoverTilt === false) return;
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
