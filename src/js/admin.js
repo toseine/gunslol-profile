@@ -2,9 +2,9 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "showViews", "showThemes", "showVolume"];
 const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
-const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
+const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
@@ -123,7 +123,8 @@ const sectionCopy = {
   profile: ["Profile", "Edit your identity and avatar. Changes appear on the live page when saved."],
   media: ["Media & music", "Edit the one theme visitors see, then trim and preview its music."],
   socials: ["Social links", "Add the links visitors can open and a Discord username they can copy."],
-  appearance: ["Appearance", "Tune colors, typography, motion and what visitors can see."],
+  appearance: ["Appearance", "Tune colors, icons, typography and what visitors can see."],
+  animations: ["Animations", "Switch individual movement effects on or off."],
   layout: ["Layout", "Drag profile elements into place for desktop and phone separately."],
   presets: ["Presets", "Save this design and activate another one whenever you want."]
 };
@@ -151,6 +152,7 @@ function updateMiniPreview() {
     miniBadges.append(icon);
   }
   const miniSocials = document.querySelector(".mini-socials");
+  miniSocials.dataset.iconSet = $("social-icon-set").value;
   miniSocials.replaceChildren();
   for (const [name, id] of [["discord", "discord-username"], ["github", "github-url"], ["youtube", "youtube-url"], ["tiktok", "tiktok-url"], ["telegram", "telegram-url"]]) {
     const value = $(id).value.trim();
@@ -191,7 +193,7 @@ $("mini-avatar").addEventListener("error", event => {
     event.target.src = "./assets/avatar.svg";
   }
 });
-for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 for (const id of ["discord-username", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 
@@ -231,9 +233,20 @@ for (const block of $("layout-canvas").querySelectorAll("[data-item]")) {
     dirty = true;
     message("editor-status", "You have unsaved changes.");
   };
-  block.addEventListener("pointerdown", event => { block.setPointerCapture(event.pointerId); move(event); });
+  block.addEventListener("pointerdown", event => { if (event.target.closest(".layout-edit")) return; block.setPointerCapture(event.pointerId); move(event); });
   block.addEventListener("pointermove", event => { if (block.hasPointerCapture(event.pointerId)) move(event); });
+  block.addEventListener("click", event => {
+    if (!event.target.closest(".layout-edit")) return;
+    const section = { profile: "profile", social: "socials", views: "appearance", audio: "media" }[block.dataset.item];
+    document.querySelector(`.nav-button[data-target="${section}"]`).click();
+    if (block.dataset.item === "views") $("show-views").focus({ preventScroll: true });
+  });
   block.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      block.querySelector(".layout-edit").click();
+      return;
+    }
     const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
     if (!direction) return;
     event.preventDefault();
