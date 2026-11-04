@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "gunslol-profile-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-04",
+  "durable_objects": {
+    "bindings": [
+      { "name": "PROFILE", "class_name": "ProfileStore" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["ProfileStore"] }
+  ],
+  "vars": {
+    "ALLOWED_ORIGIN": "https://toseine.github.io"
+  }
+}
