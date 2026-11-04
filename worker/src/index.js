@@ -40,6 +40,7 @@ const defaults = {
   accentColor: "#b99af7",
   textColor: "#ffffff",
   backgroundColor: "#090b10",
+  socialIconColor: "#ffffff",
   fontStyle: "serif",
   nameEffect: "none",
   socialStyle: "glass",
@@ -179,7 +180,7 @@ function cleanSettings(input) {
   result.cursorStyle = input.cursorStyle || "orb";
   if (input.enterText != null && (typeof input.enterText !== "string" || input.enterText.length > 60)) return null;
   result.enterText = (input.enterText || defaults.enterText).trim();
-  for (const key of ["accentColor", "textColor", "backgroundColor"]) {
+  for (const key of ["accentColor", "textColor", "backgroundColor", "socialIconColor"]) {
     const value = input[key] ?? defaults[key];
     if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return null;
     result[key] = value;
