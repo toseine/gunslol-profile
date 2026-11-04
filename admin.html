@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=2">
-  <script type="module" src="./src/js/admin.js?v=2"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=3">
+  <script type="module" src="./src/js/admin.js?v=3"></script>
 </head>
 <body>
   <main class="admin-shell">
-    <header class="topbar"><a href="./index.html" class="brand">◈ <span>CONTROL / 001</span></a><a href="./index.html" class="preview-link">View profile ↗</a></header>
+    <header class="topbar"><a href="./index.html" class="brand"><span class="brand-mark">◈</span><span>profile<span class="brand-dot">.control</span></span></a><a href="./index.html" class="preview-link">Open live profile ↗</a></header>
 
     <section id="login-panel" class="panel login-panel" aria-labelledby="login-title">
       <p class="kicker">OWNER ACCESS</p>
@@ -26,18 +26,30 @@
     </section>
 
     <section id="editor-panel" class="editor" aria-labelledby="editor-title" hidden>
-      <div class="editor-heading"><div><p class="kicker">CONTROL PANEL</p><h1 id="editor-title">Profile settings</h1><p class="muted">Visitors will see changes as soon as you save them.</p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
+      <nav class="dashboard-nav" aria-label="Editor sections">
+        <div class="nav-caption">WORKSPACE</div>
+        <div class="nav-user"><span class="nav-user-avatar">◈</span><span><strong id="nav-display-name">Your profile</strong><small>Owner dashboard</small></span></div>
+        <div class="nav-caption">CUSTOMIZE</div>
+        <button type="button" class="nav-button active" data-target="profile">◉ <span>Profile</span></button>
+        <button type="button" class="nav-button" data-target="media">▧ <span>Media & themes</span></button>
+        <button type="button" class="nav-button" data-target="socials">⌁ <span>Social links</span></button>
+        <button type="button" class="nav-button" data-target="appearance">✦ <span>Appearance</span></button>
+        <button type="button" class="nav-button" data-target="layout">▦ <span>Layout</span></button>
+        <div class="nav-spacer"></div><a href="./index.html" target="_blank" rel="noopener" class="nav-footer-link">↗ View profile</a>
+      </nav>
+      <div class="editor-heading"><div><p class="kicker">PROFILE STUDIO</p><h1 id="editor-title">Customize profile</h1><p class="muted" id="section-description">Edit your identity and avatar. Changes appear on the live page when saved.</p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
       <form id="settings-form">
-        <div class="panel section-panel">
+        <div class="panel section-panel" data-section="profile">
           <div class="section-heading"><span class="section-number">01</span><h2>Profile</h2></div>
           <div class="field-grid">
             <div><label for="profile-name">Display name</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Your name"></div>
             <div><label for="profile-bio">Short bio</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Your space on the web"></div>
             <div class="media-field"><label for="avatar-url">Avatar or GIF URL</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
             <div><label for="default-theme">Default theme</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
+            <div><label for="enter-text">Entry screen text</label><input id="enter-text" name="enterText" type="text" maxlength="60" placeholder="Click to enter"></div>
           </div>
         </div>
-        <div class="panel section-panel">
+        <div class="panel section-panel" data-section="media" hidden>
           <div class="section-heading"><span class="section-number">02</span><h2>Media for five themes</h2></div>
           <div class="field-stack">
             <div class="theme-fields"><h3>1 · Home</h3><div class="media-field"><label for="video-url">Background video or GIF</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"></div><div class="media-field"><label for="music-url">Music</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"></div></div>
@@ -61,7 +73,7 @@
             <label class="toggle-row" for="snow-enabled"><span><strong>Snow effect</strong><small>Animated snow on the profile page</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
           </div>
         </div>
-        <div class="panel section-panel">
+        <div class="panel section-panel" data-section="socials" hidden>
           <div class="section-heading"><span class="section-number">03</span><h2>Social media</h2></div>
           <div class="field-stack">
             <div><label for="discord-username">Discord username (click to copy)</label><input id="discord-username" name="discordUsername" type="text" maxlength="64" placeholder="yourname"></div>
@@ -70,29 +82,50 @@
             <div><label for="tiktok-url">TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
           </div>
         </div>
-        <div class="panel section-panel">
+        <div class="panel section-panel" data-section="appearance" hidden>
           <div class="section-heading"><span class="section-number">04</span><h2>Appearance and layout</h2></div>
           <div class="field-stack">
+            <div class="field-grid custom-grid">
+              <div><label for="accent-color">Accent color</label><input id="accent-color" name="accentColor" type="color" value="#b99af7"></div>
+              <div><label for="text-color">Text color</label><input id="text-color" name="textColor" type="color" value="#ffffff"></div>
+              <div><label for="background-color">Background color</label><input id="background-color" name="backgroundColor" type="color" value="#090b10"></div>
+              <div><label for="font-style">Profile font</label><select id="font-style" name="fontStyle"><option value="serif">Editorial serif</option><option value="sans">Modern sans</option><option value="mono">Terminal mono</option></select></div>
+              <div><label for="name-effect">Name effect</label><select id="name-effect" name="nameEffect"><option value="none">None</option><option value="glow">Glow</option><option value="gradient">Gradient</option></select></div>
+              <div><label for="social-style">Social icon style</label><select id="social-style" name="socialStyle"><option value="glass">Glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div>
+            </div>
+            <div class="slider-grid">
+              <div><label for="profile-opacity">Profile opacity <output id="opacity-value">100%</output></label><input id="profile-opacity" name="profileOpacity" type="range" min="20" max="100" value="100"></div>
+              <div><label for="profile-blur">Profile blur <output id="blur-value">0px</output></label><input id="profile-blur" name="profileBlur" type="range" min="0" max="24" value="0"></div>
+              <div><label for="avatar-radius">Avatar corners <output id="radius-value">28px</output></label><input id="avatar-radius" name="avatarRadius" type="range" min="0" max="87" value="28"></div>
+            </div>
             <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
+            <label class="toggle-row" for="show-views"><span><strong>Show view counter</strong><small>Monthly unique visitors</small></span><span class="switch"><input id="show-views" name="showViews" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="show-themes"><span><strong>Show theme switcher</strong><small>Let visitors choose one of five themes</small></span><span class="switch"><input id="show-themes" name="showThemes" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="show-volume"><span><strong>Show music control</strong><small>Volume slider on the public page</small></span><span class="switch"><input id="show-volume" name="showVolume" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="animate-entrance"><span><strong>Entrance animation</strong><small>Profile fades in after the visitor enters</small></span><span class="switch"><input id="animate-entrance" name="animateEntrance" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="animate-text"><span><strong>Animated name and bio</strong><small>Typing effect on the profile</small></span><span class="switch"><input id="animate-text" name="animateText" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="animated-background"><span><strong>Animated ambience</strong><small>Slow moving color behind the profile</small></span><span class="switch"><input id="animated-background" name="animatedBackground" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="profile-float"><span><strong>Avatar motion</strong><small>Animated avatar ring</small></span><span class="switch"><input id="profile-float" name="profileFloat" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="hover-tilt"><span><strong>Hover tilt</strong><small>Profile follows the pointer</small></span><span class="switch"><input id="hover-tilt" name="hoverTilt" type="checkbox" checked><span class="slider"></span></span></label>
-            <div class="layout-editor">
-              <div class="layout-toolbar"><div><h3>Arrange your page</h3><p class="muted">Drag the blocks to place them. Set desktop and phone layouts separately.</p></div><div class="layout-actions"><button id="layout-desktop" type="button" class="quiet-button selected">Desktop</button><button id="layout-mobile" type="button" class="quiet-button">Phone</button><button id="layout-reset" type="button" class="quiet-button">Reset</button></div></div>
-              <div class="layout-canvas" id="layout-canvas" data-device="desktop" aria-label="Drag blocks to arrange the public page">
-                <button class="layout-item layout-profile" data-item="profile" type="button"><span class="layout-avatar">◈</span><span><strong id="layout-name">Your name</strong><small id="layout-bio">Your space on the web</small></span></button>
-                <button class="layout-item layout-social" data-item="social" type="button">◉ &nbsp; Social links</button>
-                <button class="layout-item layout-views" data-item="views" type="button">◉ &nbsp; Views</button>
-                <button class="layout-item layout-themes" data-item="themes" type="button">● ● ● ● ●</button>
-                <button class="layout-item layout-audio" data-item="audio" type="button">♫ &nbsp; Music</button>
-              </div>
+          </div>
+        </div>
+        <div class="panel section-panel" data-section="layout" hidden>
+          <div class="section-heading"><span class="section-number">05</span><h2>Arrange your page</h2></div>
+          <p class="muted">Drag each block. Desktop and phone positions are saved separately.</p>
+          <div class="layout-editor">
+            <div class="layout-toolbar"><h3>Interactive layout</h3><div class="layout-actions"><button id="layout-desktop" type="button" class="quiet-button selected">Desktop</button><button id="layout-mobile" type="button" class="quiet-button">Phone</button><button id="layout-reset" type="button" class="quiet-button">Reset</button></div></div>
+            <div class="layout-canvas" id="layout-canvas" data-device="desktop" aria-label="Drag blocks to arrange the public page">
+              <button class="layout-item layout-profile" data-item="profile" type="button"><span class="layout-avatar">◈</span><span><strong id="layout-name">Your name</strong><small id="layout-bio">Your space on the web</small></span></button>
+              <button class="layout-item layout-social" data-item="social" type="button">◉ &nbsp; Social links</button>
+              <button class="layout-item layout-views" data-item="views" type="button">◉ &nbsp; Views</button>
+              <button class="layout-item layout-themes" data-item="themes" type="button">● ● ● ● ●</button>
+              <button class="layout-item layout-audio" data-item="audio" type="button">♫ &nbsp; Music</button>
             </div>
           </div>
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Save changes <span>↗</span></button></div>
       </form>
+      <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-bio">Your space on the web</span><div class="mini-socials">● ● ●</div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
     </section>
   </main>
 </body>
