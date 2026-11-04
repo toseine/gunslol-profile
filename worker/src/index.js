@@ -1,8 +1,8 @@
 import { DurableObject } from "cloudflare:workers";
 
 const defaults = {
-  name: "Twój nick",
-  bio: "Twoja przestrzeń w sieci.",
+  name: "Your name",
+  bio: "Your space on the web.",
   avatarUrl: "",
   defaultTheme: "home",
   videoUrl: "",
@@ -108,6 +108,15 @@ export class ProfileStore extends DurableObject {
       return json((await this.ctx.storage.get("settings")) || defaults);
     }
 
+    if (path === "/views" && request.method === "GET") {
+      return json({ count: (await this.ctx.storage.get("viewCount")) || 0 });
+    }
+    if (path === "/views" && request.method === "POST") {
+      const count = ((await this.ctx.storage.get("viewCount")) || 0) + 1;
+      await this.ctx.storage.put("viewCount", count);
+      return json({ count });
+    }
+
     if (path === "/login" && request.method === "POST") {
       if (!this.env.ADMIN_PASSWORD || this.env.ADMIN_PASSWORD.length < 16) return json({ error: "Admin password is not configured" }, 503);
       const key = await ipKey(request.headers.get("CF-Connecting-IP") || "unknown");
@@ -165,7 +174,7 @@ export default {
     };
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const path = new URL(request.url).pathname;
-    if (!["/settings", "/login", "/session", "/socket"].includes(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/views", "/login", "/session", "/socket"].includes(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
