@@ -33,13 +33,19 @@
           <div class="field-grid">
             <div><label for="profile-name">Nazwa / nick</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Twój nick"></div>
             <div><label for="profile-bio">Krótki opis</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Twoja przestrzeń w sieci"></div>
+            <div><label for="avatar-url">URL zdjęcia / GIF profilu</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
+            <div><label for="default-theme">Motyw startowy</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Podstawowy</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Deszcz</option><option value="anime">4 · Anime</option><option value="car">5 · Samochód</option></select></div>
           </div>
         </div>
         <div class="panel section-panel">
-          <div class="section-heading"><span class="section-number">02</span><h2>Media i efekty</h2></div>
+          <div class="section-heading"><span class="section-number">02</span><h2>Media pięciu motywów</h2></div>
           <div class="field-stack">
-            <div><label for="video-url">URL tła wideo (.mp4)</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"><small>Pusty adres wyłącza wideo. Serwer pliku musi pozwalać na odtwarzanie z GitHub Pages.</small></div>
-            <div><label for="music-url">URL muzyki (.mp3)</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"><small>Przeglądarki mogą wymagać kliknięcia „Włącz muzykę”.</small></div>
+            <div class="theme-fields"><h3>1 · Podstawowy</h3><label for="video-url">Tło wideo</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"><label for="music-url">Muzyka</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"></div>
+            <div class="theme-fields"><h3>2 · Hacker</h3><label for="hacker-video">Tło wideo</label><input id="hacker-video" name="hackerVideoUrl" type="url" maxlength="2000"><label for="hacker-music">Muzyka</label><input id="hacker-music" name="hackerMusicUrl" type="url" maxlength="2000"></div>
+            <div class="theme-fields"><h3>3 · Deszcz</h3><label for="rain-video">Tło wideo</label><input id="rain-video" name="rainVideoUrl" type="url" maxlength="2000"><label for="rain-music">Muzyka</label><input id="rain-music" name="rainMusicUrl" type="url" maxlength="2000"></div>
+            <div class="theme-fields"><h3>4 · Anime</h3><label for="anime-video">Tło wideo</label><input id="anime-video" name="animeVideoUrl" type="url" maxlength="2000"><label for="anime-music">Muzyka</label><input id="anime-music" name="animeMusicUrl" type="url" maxlength="2000"></div>
+            <div class="theme-fields"><h3>5 · Samochód</h3><label for="car-video">Tło wideo</label><input id="car-video" name="carVideoUrl" type="url" maxlength="2000"><label for="car-music">Muzyka</label><input id="car-music" name="carMusicUrl" type="url" maxlength="2000"></div>
+            <small>Pusty adres wyłącza dane medium. Podaj bezpośrednie linki do MP4/MOV i MP3. Autoodtwarzanie muzyki może wymagać kliknięcia.</small>
             <label class="toggle-row" for="snow-enabled"><span><strong>Efekt śniegu</strong><small>Animowany śnieg na stronie głównej</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
           </div>
         </div>
@@ -49,6 +55,7 @@
             <div><label for="discord-url">Discord</label><input id="discord-url" name="discordUrl" type="url" maxlength="2000" placeholder="https://discord.gg/..."></div>
             <div><label for="github-url">GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
             <div><label for="youtube-url">YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
+            <div><label for="tiktok-url">TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
           </div>
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Zapisz zmiany <span>↗</span></button></div>
