@@ -138,3 +138,11 @@ input[type="color"] { padding: 4px !important; cursor: pointer; }.custom-grid { 
 .preset-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
 .preset-actions button { flex: 1 1 130px; }
 @media (max-width: 620px) { .trim-numbers { grid-template-columns: 1fr; }.music-trim { padding: 14px; } }
+.badge-editor { margin-top: 20px; padding: 18px; border: 1px solid #343043; border-radius: 12px; background: #15131d; }
+.badge-editor h3 { margin: 0; color: #d8c6ff; font-size: 14px; }
+.badge-editor .muted { margin-bottom: 15px; }
+.badge-options { display: flex; flex-wrap: wrap; gap: 9px; }
+form .badge-options label { display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 9px 12px; border: 1px solid #494256; border-radius: 999px; background: #211c2d; color: #eee5ff; cursor: pointer; }
+.badge-options input { accent-color: #ad8bf5; }
+#mini-badges { color: #c5a8ff; font-size: 10px; line-height: 1.4; }
+#mini-badges:empty { display: none; }

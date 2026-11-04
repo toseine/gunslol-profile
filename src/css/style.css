@@ -964,6 +964,12 @@ body[data-name-effect="gradient"] #profile-name { background: linear-gradient(11
 body[data-social-style="solid"] .social-links a { background: var(--accentColor, #b99af7); border-color: var(--accentColor, #b99af7); }
 body[data-social-style="outline"] .social-links a { background: transparent; border-color: var(--accentColor, #b99af7); backdrop-filter: none; }
 .custom-cursor, .theme-button.active, .theme-button:hover { box-shadow: 0 0 14px var(--accentColor, #b99af7); }
+.profile-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 5px; }
+.profile-badges[hidden] { display: none !important; }
+.profile-badge { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; border: 1px solid color-mix(in srgb, var(--accentColor, #b99af7), transparent 50%); border-radius: 999px; background: rgba(20, 17, 29, .64); color: var(--textColor, #fff); font: 600 10px/1.1 Arial, sans-serif; letter-spacing: .02em; backdrop-filter: blur(8px); }
+.profile-badge.badge-verified { color: #a9e9ff; border-color: rgba(105, 207, 255, .55); }
+.profile-badge.badge-owner { color: #e4c1ff; }
+@media (max-width: 640px) { .profile-badge { font-size: 9px; padding: 3px 6px; } }
 
 /* Sizes controlled in the owner dashboard. */
 .position-profile { width: min(var(--cardWidth, 760px), calc(100vw - 44px)); }
