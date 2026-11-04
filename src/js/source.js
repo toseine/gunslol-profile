@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  const startMessage = "Click to enter";
+  let startMessage = "Click to enter";
   let startTextContent = '';
   let startIndex = 0;
   let startCursorVisible = true;
@@ -665,6 +665,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   window.addEventListener('profile:settings', event => {
     const data = event.detail;
+    if (data.enterText && data.enterText !== startMessage) {
+      startMessage = data.enterText;
+      startIndex = 0;
+      startTextContent = '';
+    }
     name = data.name || 'Your name';
     bioMessages = [data.bio || 'Your space on the web.'];
     nameText = name;

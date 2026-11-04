@@ -2,8 +2,10 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle"];
-const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt"]);
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
+const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
+const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
+const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -44,11 +46,12 @@ function fillForm(data = {}) {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
     if (toggleFields.has(key)) el.checked = data[key] ?? (key !== "snowEnabled");
-    else el.value = typeof data[key] === "string" ? data[key] : key === "defaultTheme" ? "home" : key === "cursorStyle" ? "orb" : "";
+    else el.value = typeof data[key] === "string" ? data[key] : (fieldDefaults[key] ?? "");
   }
   for (const [key, fallback] of Object.entries(cropDefaults)) {
     form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   }
+  for (const [key, fallback] of Object.entries(styleDefaults)) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   if (!data.name) form.elements.namedItem("name").value = "Your name";
   layout = structuredClone(defaultLayout);
   for (const device of ["desktop", "mobile"]) for (const item of Object.keys(defaultLayout[device])) {
@@ -57,6 +60,7 @@ function fillForm(data = {}) {
   }
   updateLayoutPreview();
   updatePreview();
+  updateMiniPreview();
   dirty = false;
 }
 
@@ -69,6 +73,7 @@ function readForm() {
   data.layout = structuredClone(layout);
   data.discordUrl = "";
   for (const key of Object.keys(cropDefaults)) data[key] = Number(form.elements.namedItem(key).value);
+  for (const key of Object.keys(styleDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   return data;
 }
 
@@ -77,6 +82,43 @@ function validUrl(value) {
   try { return ["https:", "http:"].includes(new URL(value).protocol); }
   catch { return false; }
 }
+
+const sectionCopy = {
+  profile: ["Profile", "Edit your identity and avatar. Changes appear on the live page when saved."],
+  media: ["Media & themes", "Choose backgrounds and music for each theme, then adjust the crop and loop."],
+  socials: ["Social links", "Add the links visitors can open and a Discord username they can copy."],
+  appearance: ["Appearance", "Tune colors, typography, motion and what visitors can see."],
+  layout: ["Layout", "Drag profile elements into place for desktop and phone separately."]
+};
+for (const button of document.querySelectorAll(".nav-button")) button.addEventListener("click", () => {
+  const target = button.dataset.target;
+  document.querySelectorAll(".nav-button").forEach(item => item.classList.toggle("active", item === button));
+  document.querySelectorAll("[data-section]").forEach(section => { section.hidden = section.dataset.section !== target; });
+  $("editor-title").textContent = sectionCopy[target][0];
+  $("section-description").textContent = sectionCopy[target][1];
+  document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+function updateMiniPreview() {
+  $("nav-display-name").textContent = $("profile-name").value || "Your profile";
+  $("mini-name").textContent = $("profile-name").value || "Your name";
+  $("mini-bio").textContent = $("profile-bio").value || "Your space on the web";
+  const avatar = $("avatar-url").value.trim();
+  $("mini-avatar").src = avatar && validUrl(avatar) ? avatar : "./assets/avatar.svg";
+  const stage = $("mini-stage");
+  stage.style.setProperty("--mini-bg", $("background-color").value);
+  stage.style.setProperty("--mini-accent", $("accent-color").value);
+  stage.style.setProperty("--mini-text", $("text-color").value);
+  stage.style.setProperty("--mini-opacity", String(Number($("profile-opacity").value) / 100));
+  stage.style.setProperty("--mini-blur", `${$("profile-blur").value}px`);
+  stage.style.setProperty("--mini-radius", `${$("avatar-radius").value}px`);
+  $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
+  $("opacity-value").textContent = `${$("profile-opacity").value}%`;
+  $("blur-value").textContent = `${$("profile-blur").value}px`;
+  $("radius-value").textContent = `${$("avatar-radius").value}px`;
+}
+$("mini-avatar").addEventListener("error", event => { event.target.src = "./assets/avatar.svg"; }, { once: true });
+for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius"]) $(key).addEventListener("input", updateMiniPreview);
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");
@@ -199,7 +241,7 @@ for (const [fieldId, kind, accept] of uploadFields) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "quiet-button";
-  button.textContent = "Upload to GitHub";
+  button.textContent = "Upload file";
   button.disabled = true;
   const status = document.createElement("small");
   status.setAttribute("role", "status");
@@ -239,12 +281,12 @@ for (const [fieldId, kind, accept] of uploadFields) {
         body: base64
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      if (!response.ok) throw new Error(response.status === 503 ? "GitHub upload token is missing in Cloudflare. You can still paste a direct file URL." : result.error || `HTTP ${response.status}`);
       field.value = result.url;
       dirty = true;
       status.textContent = "Uploaded. GitHub Pages may need about a minute to publish the file.";
       message("editor-status", "Media uploaded. Saving its URL…");
-      await saveChanges();
+      if (!await saveChanges()) throw new Error("File uploaded, but its URL was not saved. Click Save changes.");
     } catch (error) {
       status.textContent = `Upload failed: ${error.message}`;
     } finally { button.disabled = false; }
@@ -304,16 +346,16 @@ form.addEventListener("input", () => {
 });
 
 async function saveChanges() {
-  if (!token) return;
+  if (!token) return false;
   const data = readForm();
   const urls = fields.filter(key => key.endsWith("Url"));
   if (urls.some(key => !validUrl(data[key]))) {
     message("editor-status", "URLs must start with https:// or http://.", "error");
-    return;
+    return false;
   }
   if (data.backgroundEnd && data.backgroundEnd <= data.backgroundStart) {
     message("editor-status", "Video end must be after video start.", "error");
-    return;
+    return false;
   }
   $("save-button").disabled = true;
   message("editor-status", "Saving…");
@@ -321,6 +363,7 @@ async function saveChanges() {
     await api("/settings", { method: "PUT", body: JSON.stringify(data) });
     dirty = false;
     message("editor-status", "Saved. The profile page will update automatically.", "success");
+    return true;
   } catch (error) {
     if (error.message === "Unauthorized") {
       token = "";
@@ -328,6 +371,7 @@ async function saveChanges() {
       showEditor(false);
       message("login-status", "Session expired. Please sign in again.", "error");
     } else message("editor-status", `Could not save: ${error.message}`, "error");
+    return false;
   } finally { $("save-button").disabled = false; }
 }
 

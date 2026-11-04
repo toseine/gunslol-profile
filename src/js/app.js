@@ -92,6 +92,16 @@ function render(data) {
   document.body.classList.toggle('no-avatar-motion', data.profileFloat === false);
   document.body.classList.toggle('system-cursor', data.cursorStyle === 'system');
   document.body.dataset.cursor = ['orb', 'dot', 'crosshair', 'system'].includes(data.cursorStyle) ? data.cursorStyle : 'orb';
+  document.body.dataset.fontStyle = ['serif', 'sans', 'mono'].includes(data.fontStyle) ? data.fontStyle : 'serif';
+  document.body.dataset.nameEffect = ['none', 'glow', 'gradient'].includes(data.nameEffect) ? data.nameEffect : 'none';
+  document.body.dataset.socialStyle = ['glass', 'solid', 'outline'].includes(data.socialStyle) ? data.socialStyle : 'glass';
+  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10']]) {
+    document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
+  }
+  document.body.style.setProperty('--profileOpacity', String((Number(data.profileOpacity) || 100) / 100));
+  document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
+  document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);
+  for (const [key, visible] of [['views', data.showViews !== false], ['themes', data.showThemes !== false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
   setSnow(data.snowEnabled === true);
   $('api-status').textContent = '';
   updateMusicToggle();
