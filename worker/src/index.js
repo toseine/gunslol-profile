@@ -15,7 +15,23 @@ const defaults = {
   animeMusicUrl: "",
   carVideoUrl: "",
   carMusicUrl: "",
+  backgroundStart: 0,
+  backgroundEnd: 0,
+  backgroundZoom: 1,
+  backgroundX: 50,
+  backgroundY: 50,
+  animateEntrance: true,
+  animateText: true,
+  animatedBackground: true,
+  profileFloat: true,
+  hoverTilt: true,
+  cursorStyle: "orb",
+  layout: {
+    desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
+    mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
+  },
   snowEnabled: false,
+  discordUsername: "",
   discordUrl: "",
   githubUrl: "",
   youtubeUrl: "",
@@ -95,7 +111,33 @@ function cleanSettings(input) {
     result[key] = input[key].trim();
   }
   if (!result.name || typeof input.snowEnabled !== "boolean") return null;
+  if (input.discordUsername != null && (typeof input.discordUsername !== "string" || input.discordUsername.length > 64)) return null;
+  result.discordUsername = (input.discordUsername || "").trim().replace(/^@/, "");
   result.snowEnabled = input.snowEnabled;
+  for (const [key, min, max, fallback] of [
+    ["backgroundStart", 0, 3600, 0], ["backgroundEnd", 0, 3600, 0],
+    ["backgroundZoom", 1, 3, 1], ["backgroundX", 0, 100, 50],
+    ["backgroundY", 0, 100, 50]
+  ]) {
+    const value = input[key] ?? fallback;
+    if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) return null;
+    result[key] = value;
+  }
+  if (result.backgroundEnd && result.backgroundEnd <= result.backgroundStart) return null;
+  for (const key of ["animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt"]) {
+    if (input[key] != null && typeof input[key] !== "boolean") return null;
+    result[key] = input[key] ?? defaults[key];
+  }
+  if (input.cursorStyle != null && !["orb", "dot", "crosshair", "system"].includes(input.cursorStyle)) return null;
+  result.cursorStyle = input.cursorStyle || "orb";
+  result.layout = { desktop: {}, mobile: {} };
+  for (const device of ["desktop", "mobile"]) {
+    for (const item of ["profile", "social", "views", "themes", "audio"]) {
+      const position = input.layout?.[device]?.[item] ?? defaults.layout[device][item];
+      if (!position || typeof position.x !== "number" || typeof position.y !== "number" || !Number.isFinite(position.x) || !Number.isFinite(position.y) || position.x < 0 || position.x > 100 || position.y < 0 || position.y > 100) return null;
+      result.layout[device][item] = { x: position.x, y: position.y };
+    }
+  }
   if (!["home", "hacker", "rain", "anime", "car"].includes(input.defaultTheme)) return null;
   result.defaultTheme = input.defaultTheme;
   for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl"]) {
@@ -193,11 +235,51 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": allowed,
       "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Media-Kind, X-File-Size",
       "Vary": "Origin"
     };
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const path = new URL(request.url).pathname;
+    if (path === "/upload" && request.method === "POST") {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+      if (!(await validToken(token, env.ADMIN_PASSWORD))) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
+      if (!env.GITHUB_UPLOAD_TOKEN) return new Response(JSON.stringify({ error: "GitHub uploads are not configured yet" }), { status: 503, headers: { ...cors, "Content-Type": "application/json" } });
+      const kind = request.headers.get("X-Media-Kind");
+      const mime = request.headers.get("Content-Type")?.split(";")[0]?.toLowerCase();
+      const formats = {
+        avatar: { "image/gif": "gif", "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" },
+        background: { "image/gif": "gif", "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "video/mp4": "mp4", "video/webm": "webm" },
+        music: { "audio/mpeg": "mp3", "audio/mp3": "mp3", "audio/ogg": "ogg", "audio/wav": "wav", "audio/webm": "webm" }
+      };
+      const extension = formats[kind]?.[mime];
+      const size = Number(request.headers.get("X-File-Size"));
+      const limit = kind === "avatar" ? 5 * 1024 * 1024 : 15 * 1024 * 1024;
+      if (!extension || !Number.isSafeInteger(size) || size < 1 || size > limit) {
+        return new Response(JSON.stringify({ error: `Unsupported file or too large (avatar 5 MB, other media 15 MB)` }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      }
+      const content = await request.text();
+      if (content.length < 4 || content.length > Math.ceil(size / 3) * 4 + 4) {
+        return new Response(JSON.stringify({ error: "Invalid upload size" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      }
+      const filename = `${crypto.randomUUID()}.${extension}`;
+      const github = await fetch(`https://api.github.com/repos/toseine/gunslol-profile/contents/media/${filename}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${env.GITHUB_UPLOAD_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "User-Agent": "gunslol-profile-media-upload"
+        },
+        body: JSON.stringify({ message: `Upload profile ${kind} ${filename}`, content, branch: "main" })
+      });
+      if (!github.ok) {
+        const error = github.status === 401 || github.status === 403
+          ? "GitHub token needs access to this repository with Contents: Read and write"
+          : `GitHub rejected the upload (HTTP ${github.status})`;
+        return new Response(JSON.stringify({ error }), { status: 502, headers: { ...cors, "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    }
     if (!["/settings", "/views", "/login", "/session", "/socket"].includes(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
