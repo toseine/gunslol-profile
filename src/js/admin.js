@@ -24,7 +24,7 @@ function fillForm(data = {}) {
     if (key === "snowEnabled") el.checked = data[key] === true;
     else el.value = typeof data[key] === "string" ? data[key] : key === "defaultTheme" ? "home" : "";
   }
-  if (!data.name) form.elements.namedItem("name").value = "Twój nick";
+  if (!data.name) form.elements.namedItem("name").value = "Your name";
   dirty = false;
 }
 
@@ -59,14 +59,14 @@ async function openEditor() {
     const settings = await api("/settings");
     fillForm(settings);
     showEditor(true);
-    message("editor-status", "Dane są aktualne.");
+    message("editor-status", "Settings are up to date.");
   } catch (error) {
-    message("login-status", `Nie udało się pobrać ustawień: ${error.message}`, "error");
+    message("login-status", `Could not load settings: ${error.message}`, "error");
   }
 }
 
 if (!isConfigured) {
-  message("login-status", "Najpierw uzupełnij src/js/api-config.js.", "error");
+  message("login-status", "Set the API URL in src/js/api-config.js first.", "error");
   $("login-button").disabled = true;
 } else if (token) {
   api("/session").then(openEditor).catch(() => {
@@ -82,7 +82,7 @@ $("login-form").addEventListener("submit", async event => {
   const password = $("password").value;
   $("password").value = "";
   $("login-button").disabled = true;
-  message("login-status", "Sprawdzanie dostępu…");
+  message("login-status", "Checking access…");
   try {
     const result = await api("/login", { method: "POST", body: JSON.stringify({ password }) });
     token = result.token;
@@ -90,7 +90,7 @@ $("login-form").addEventListener("submit", async event => {
     message("login-status", "");
     await openEditor();
   } catch (error) {
-    message("login-status", error.message === "Invalid credentials" ? "Nieprawidłowe hasło." : `Logowanie nie powiodło się: ${error.message}`, "error");
+    message("login-status", error.message === "Invalid credentials" ? "Incorrect password." : `Sign in failed: ${error.message}`, "error");
   } finally { $("login-button").disabled = false; }
 });
 
@@ -103,7 +103,7 @@ $("logout-button").addEventListener("click", () => {
 
 form.addEventListener("input", () => {
   dirty = true;
-  message("editor-status", "Masz niezapisane zmiany.");
+  message("editor-status", "You have unsaved changes.");
 });
 
 form.addEventListener("submit", async event => {
@@ -112,21 +112,21 @@ form.addEventListener("submit", async event => {
   const data = readForm();
   const urls = fields.filter(key => key.endsWith("Url"));
   if (urls.some(key => !validUrl(data[key]))) {
-    message("editor-status", "Adresy muszą zaczynać się od https:// lub http://.", "error");
+    message("editor-status", "URLs must start with https:// or http://.", "error");
     return;
   }
   $("save-button").disabled = true;
-  message("editor-status", "Zapisywanie…");
+  message("editor-status", "Saving…");
   try {
     await api("/settings", { method: "PUT", body: JSON.stringify(data) });
     dirty = false;
-    message("editor-status", "Zapisano. Strona główna zaktualizuje się automatycznie.", "success");
+    message("editor-status", "Saved. The profile page will update automatically.", "success");
   } catch (error) {
     if (error.message === "Unauthorized") {
       token = "";
       sessionStorage.removeItem(tokenKey);
       showEditor(false);
-      message("login-status", "Sesja wygasła. Zaloguj się ponownie.", "error");
-    } else message("editor-status", `Nie udało się zapisać: ${error.message}`, "error");
+      message("login-status", "Session expired. Please sign in again.", "error");
+    } else message("editor-status", `Could not save: ${error.message}`, "error");
   } finally { $("save-button").disabled = false; }
 });
