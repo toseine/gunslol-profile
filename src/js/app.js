@@ -5,8 +5,23 @@ const video = $("background-video");
 const music = $("music");
 const musicToggle = $("music-toggle");
 const status = $("status");
+$("profile-picture").addEventListener("error", () => {
+  $("profile-picture").hidden = true;
+  $("avatar-letter").hidden = false;
+});
 let currentMusicUrl = "";
 let musicWanted = true;
+let settings = {};
+let activeTheme = "";
+let lastDefaultTheme = "";
+const themes = ["home", "hacker", "rain", "anime", "car"];
+const mediaKeys = {
+  home: ["videoUrl", "musicUrl"],
+  hacker: ["hackerVideoUrl", "hackerMusicUrl"],
+  rain: ["rainVideoUrl", "rainMusicUrl"],
+  anime: ["animeVideoUrl", "animeMusicUrl"],
+  car: ["carVideoUrl", "carMusicUrl"]
+};
 
 function safeUrl(value) {
   if (typeof value !== "string" || !value.trim()) return "";
@@ -73,6 +88,26 @@ musicToggle.addEventListener("click", async () => {
 });
 music.addEventListener("play", syncMusicButton);
 music.addEventListener("pause", syncMusicButton);
+music.volume = 0.3;
+$("volume-slider").addEventListener("input", event => { music.volume = Number(event.target.value); });
+$("transparency-slider").addEventListener("input", event => {
+  document.documentElement.style.setProperty("--card-alpha", event.target.value);
+});
+
+function setTheme(theme) {
+  activeTheme = themes.includes(theme) ? theme : "home";
+  document.body.classList.remove(...themes.map(name => `${name}-theme`));
+  document.body.classList.add(`${activeTheme}-theme`);
+  for (const button of document.querySelectorAll(".theme-button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.theme === activeTheme));
+  }
+  const [videoKey, musicKey] = mediaKeys[activeTheme];
+  setVideo(settings[videoKey]);
+  setMusic(settings[musicKey]);
+}
+document.querySelectorAll(".theme-button").forEach(button => {
+  button.addEventListener("click", () => setTheme(button.dataset.theme));
+});
 
 // Przy niektórych ustawieniach przeglądarki autoplay ruszy dopiero po pierwszym geście.
 document.addEventListener("pointerdown", () => {
@@ -143,17 +178,27 @@ if (matchMedia("(pointer: fine)").matches) {
 }
 
 function render(data) {
+  settings = data || {};
   const name = typeof data?.name === "string" && data.name.trim() ? data.name.trim() : "Twój nick";
   $("profile-name").textContent = name;
   $("avatar-letter").textContent = [...name][0]?.toUpperCase() || "N";
+  const avatar = $("profile-picture");
+  const avatarUrl = safeUrl(data?.avatarUrl);
+  avatar.hidden = !avatarUrl;
+  $("avatar-letter").hidden = !!avatarUrl;
+  if (avatarUrl) avatar.src = avatarUrl;
+  else avatar.removeAttribute("src");
   $("profile-bio").textContent = typeof data?.bio === "string" ? data.bio : "Twoja przestrzeń w sieci.";
   document.title = `${name} · profil`;
-  setVideo(data?.videoUrl);
-  setMusic(data?.musicUrl);
+  const nextDefault = themes.includes(data?.defaultTheme) ? data.defaultTheme : "home";
+  if (!activeTheme || nextDefault !== lastDefaultTheme) activeTheme = nextDefault;
+  lastDefaultTheme = nextDefault;
+  setTheme(activeTheme);
   setSnow(data?.snowEnabled === true);
   setSocial("discord-link", data?.discordUrl);
   setSocial("github-link", data?.githubUrl);
   setSocial("youtube-link", data?.youtubeUrl);
+  setSocial("tiktok-link", data?.tiktokUrl);
   status.textContent = data ? "" : "Profil czeka na pierwszą konfigurację w panelu admina.";
 }
 
