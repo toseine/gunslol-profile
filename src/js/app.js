@@ -148,7 +148,7 @@ function render(data) {
   document.body.dataset.fontStyle = ['serif', 'sans', 'mono'].includes(data.fontStyle) ? data.fontStyle : 'serif';
   document.body.dataset.nameEffect = ['none', 'glow', 'gradient'].includes(data.nameEffect) ? data.nameEffect : 'none';
   document.body.dataset.socialStyle = ['glass', 'solid', 'outline'].includes(data.socialStyle) ? data.socialStyle : 'glass';
-  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10']]) {
+  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }
   document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
@@ -266,6 +266,10 @@ $('discord-link').addEventListener('click', async event => {
 });
 
 const background = $('background');
+function backgroundStart() {
+  const requested = Number(window.profileSettings?.backgroundStart) || 0;
+  return requested > 0 && requested < background.duration ? requested : 0;
+}
 function applyBackgroundCrop(data) {
   const zoom = Number(data.backgroundZoom) || 1;
   const x = Number.isFinite(Number(data.backgroundX)) ? Number(data.backgroundX) : 50;
@@ -276,13 +280,16 @@ function applyBackgroundCrop(data) {
   background.style.backgroundPosition = `${x}% ${y}%`;
 }
 background.addEventListener('loadedmetadata', () => {
-  const start = Number(window.profileSettings?.backgroundStart) || 0;
-  if (start > 0 && start < background.duration) background.currentTime = start;
+  background.currentTime = backgroundStart();
 });
 background.addEventListener('timeupdate', () => {
-  const start = Number(window.profileSettings?.backgroundStart) || 0;
+  const start = backgroundStart();
   const end = Number(window.profileSettings?.backgroundEnd) || 0;
-  if (end > start && background.currentTime >= end) background.currentTime = start;
+  if (end > start && background.currentTime >= Math.min(end, background.duration) - 0.05) background.currentTime = start;
+});
+background.addEventListener('ended', () => {
+  background.currentTime = backgroundStart();
+  background.play().catch(() => {});
 });
 async function updateViews() {
   try {

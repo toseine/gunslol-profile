@@ -2,9 +2,9 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
 const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
-const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
+const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
@@ -135,6 +135,7 @@ for (const button of document.querySelectorAll(".nav-button")) button.addEventLi
   $("section-description").textContent = sectionCopy[target][1];
   document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
 });
+$("edit-icon-style").addEventListener("click", () => document.querySelector('.nav-button[data-target="appearance"]').click());
 
 let failedAvatarUrl = "";
 function updateMiniPreview() {
@@ -154,9 +155,10 @@ function updateMiniPreview() {
   for (const [name, id] of [["discord", "discord-username"], ["github", "github-url"], ["youtube", "youtube-url"], ["tiktok", "tiktok-url"], ["telegram", "telegram-url"]]) {
     const value = $(id).value.trim();
     if (!value || (name !== "discord" && !validUrl(value))) continue;
-    const icon = document.createElement("img");
-    icon.src = `./assets/${name}.svg`;
-    icon.alt = name;
+    const icon = document.createElement("span");
+    icon.className = `mini-social-icon icon-${name}`;
+    icon.setAttribute("role", "img");
+    icon.setAttribute("aria-label", name);
     miniSocials.append(icon);
   }
   const avatar = $("avatar-url").value.trim();
@@ -175,6 +177,7 @@ function updateMiniPreview() {
   $("mini-name").style.fontSize = `${Math.round(Number($("name-size").value) / 59 * 25)}px`;
   $("mini-bio").style.fontSize = `${Math.round(Number($("bio-size").value) / 19 * 11)}px`;
   miniSocials.style.setProperty("--mini-social-size", `${Math.round(Number($("social-size").value) / 42 * 18)}px`);
+  miniSocials.style.setProperty("--mini-icon-color", $("social-icon-color").value);
   $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
   $("blur-value").textContent = `${$("profile-blur").value}px`;
@@ -188,7 +191,7 @@ $("mini-avatar").addEventListener("error", event => {
     event.target.src = "./assets/avatar.svg";
   }
 });
-for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 for (const id of ["discord-username", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 
