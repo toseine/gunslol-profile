@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=7">
-  <script type="module" src="./src/js/admin.js?v=11"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=8">
+  <script type="module" src="./src/js/admin.js?v=12"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -84,6 +84,7 @@
             <div><label for="youtube-url"><img class="field-icon" src="./assets/youtube.svg" alt=""> YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
             <div><label for="tiktok-url"><img class="field-icon" src="./assets/tiktok.svg" alt=""> TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
             <div><label for="telegram-url"><img class="field-icon" src="./assets/telegram.svg" alt=""> Telegram</label><input id="telegram-url" name="telegramUrl" type="url" maxlength="2000" placeholder="https://t.me/yourname"></div>
+            <button id="edit-icon-style" type="button" class="quiet-button">Customize icon color and style →</button>
           </div>
         </div>
         <div class="panel section-panel" data-section="appearance" hidden>
@@ -93,6 +94,7 @@
               <div><label for="accent-color">Accent color</label><input id="accent-color" name="accentColor" type="color" value="#b99af7"></div>
               <div><label for="text-color">Text color</label><input id="text-color" name="textColor" type="color" value="#ffffff"></div>
               <div><label for="background-color">Background color</label><input id="background-color" name="backgroundColor" type="color" value="#090b10"></div>
+              <div><label for="social-icon-color">Social icon color</label><input id="social-icon-color" name="socialIconColor" type="color" value="#ffffff"><small>Use the accent color or choose any shade.</small></div>
               <div><label for="font-style">Profile font</label><select id="font-style" name="fontStyle"><option value="serif">Editorial serif</option><option value="sans">Modern sans</option><option value="mono">Terminal mono</option></select></div>
               <div><label for="name-effect">Name effect</label><select id="name-effect" name="nameEffect"><option value="none">None</option><option value="glow">Glow</option><option value="gradient">Gradient</option></select></div>
               <div><label for="social-style">Social icon style</label><select id="social-style" name="socialStyle"><option value="glass">Glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div>
