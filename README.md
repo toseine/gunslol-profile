@@ -10,6 +10,7 @@ Publiczna strona `index.html` działa na GitHub Pages. Ustawienia profilu są za
 - `src/js/admin.js` — panel właściciela
 - `src/js/api-config.js` — publiczny adres API Workera
 - `worker/src/index.js`, `worker/wrangler.jsonc` — backend Cloudflare
+- `LICENSE` — licencja MIT projektu JAQLIV, którego układ profilu i motywy zostały zaadaptowane
 
 ## Wdrożenie
 
@@ -23,6 +24,7 @@ Publiczna strona `index.html` działa na GitHub Pages. Ustawienia profilu są za
 
 - Panel nie tworzy kont dla odwiedzających. Hasło jest sprawdzane wyłącznie w Workerze; przeglądarka przechowuje tymczasowy token w `sessionStorage` przez maksymalnie 12 godzin.
 - Użyj publicznych, bezpośrednich URL do plików `.mp4` i `.mp3`. Autostart dźwięku może być zablokowany przez przeglądarkę; wtedy pojawi się przycisk **Włącz muzykę**.
+- Panel pozwala ustawić zdjęcie/GIF profilu, motyw startowy i osobne tło oraz muzykę dla pięciu motywów: podstawowego, hacker, deszcz, anime i samochód. Odwiedzający mogą chwilowo przełączyć motyw przyciskami 1–5. Puste pola mediów są dozwolone.
 - Darmowy plan Workers i Durable Objects ma limity użycia. Przy przekroczeniu limitów API może przestać odpowiadać do ich odnowienia.
 
-Projekt wizualnie inspirowany [JAQLIV/gunslol-open-source](https://github.com/JAQLIV/gunslol-open-source); kod napisany od podstaw.
+Układ profilu, pięć motywów i część stylów zaadaptowano z [JAQLIV/gunslol-open-source](https://github.com/JAQLIV/gunslol-open-source) na licencji MIT. Oryginalny kod właściciela JAQLIV nie zawiera hostowanych plików mediów; dodaj swoje URL w panelu. Integracja z Cloudflare i panel administracyjny zostały dopisane do tej wersji.
