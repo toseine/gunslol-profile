@@ -46,7 +46,23 @@ function showEditor(enabled) {
   $("editor-panel").hidden = !enabled;
 }
 
-function fillForm(data = {}) {
+function formatMusicTime(seconds) {
+  const whole = Math.floor(Number(seconds) || 0);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+function showMusicRanges(data, label = "Saved clip") {
+  for (const [, [fieldId, prefix]] of Object.entries(musicFields)) {
+    const status = $(fieldId).closest(".theme-fields").querySelector(".music-trim small");
+    const start = Number(data[`${prefix}Start`]) || 0;
+    const end = Number(data[`${prefix}End`]) || 0;
+    status.textContent = end
+      ? `${label}: ${formatMusicTime(start)}–${formatMusicTime(end)} (${formatMusicTime(end - start)} long).`
+      : start ? `${label}: from ${formatMusicTime(start)} to the end of the track.` : `${label}: full track.`;
+  }
+}
+
+function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
     if (toggleFields.has(key)) el.checked = data[key] ?? (key !== "snowEnabled");
@@ -67,6 +83,7 @@ function fillForm(data = {}) {
   updatePreview();
   updateMiniPreview();
   showSelectedTheme();
+  showMusicRanges(data, clipLabel);
   dirty = false;
 }
 
@@ -329,12 +346,15 @@ for (const [theme, [fieldId, prefix]] of Object.entries(musicFields)) {
   const section = $(fieldId).closest(".theme-fields");
   const box = document.createElement("div");
   box.className = "music-trim";
-  box.innerHTML = `<h4>Trim music for ${theme}</h4><p>Choose a segment to play on the profile. The original file stays unchanged.</p><div class="trim-numbers"><div><label for="${prefix}-start">Start (seconds)</label><input id="${prefix}-start" name="${prefix}Start" type="number" min="0" max="3600" step="0.1" value="0"></div><div><label for="${prefix}-end">End (seconds; 0 = full track)</label><input id="${prefix}-end" name="${prefix}End" type="number" min="0" max="3600" step="0.1" value="0"></div></div><audio controls preload="none"></audio><div class="trim-actions"><button type="button" class="quiet-button" data-action="mark-start">Set start at playhead</button><button type="button" class="quiet-button" data-action="mark-end">Set end at playhead</button><button type="button" class="quiet-button" data-action="preview">Preview clip</button><button type="button" class="quiet-button" data-action="stop">Stop</button></div><small role="status"></small>`;
+  box.innerHTML = `<h4>Trim music for ${theme}</h4><p>Choose a segment to play on the profile. The original file stays unchanged.</p><div class="trim-numbers"><div><label for="${prefix}-start">Start at (seconds)</label><input id="${prefix}-start" name="${prefix}Start" type="number" min="0" max="3600" step="0.1" value="0"></div><div><label for="${prefix}-end">Stop at (seconds from track start; 0 = full track)</label><input id="${prefix}-end" name="${prefix}End" type="number" min="0" max="3600" step="0.1" value="0"></div></div><audio controls preload="none"></audio><div class="trim-actions"><button type="button" class="quiet-button" data-action="mark-start">Set start at playhead</button><button type="button" class="quiet-button" data-action="mark-end">Set end at playhead</button><button type="button" class="quiet-button" data-action="preview">Preview clip</button><button type="button" class="quiet-button" data-action="stop">Stop</button></div><small role="status"></small>`;
   section.append(box);
   const audio = box.querySelector("audio");
   const status = box.querySelector("small");
   const startInput = form.elements.namedItem(`${prefix}Start`);
   const endInput = form.elements.namedItem(`${prefix}End`);
+  for (const input of [startInput, endInput]) input.addEventListener("input", () => {
+    status.textContent = "Clip range changed. Click Save changes to publish it.";
+  });
   let previewing = false;
   box.querySelector('[data-action="preview"]').addEventListener("click", async () => {
     const source = previewFiles.get(fieldId)?.url || $(fieldId).value.trim();
@@ -479,7 +499,7 @@ $("preset-save").addEventListener("click", async () => {
 $("preset-load").addEventListener("click", () => {
   const selected = presets.find(item => item.id === $("preset-list").value);
   if (!selected) { message("preset-status", "Choose a preset first.", "error"); return; }
-  fillForm(selected.settings);
+  fillForm(selected.settings, "Preset clip");
   dirty = true;
   message("editor-status", "Preset loaded. Save changes to make these edits live.");
   message("preset-status", `Loaded “${selected.name}” into the editor.`);
@@ -519,7 +539,8 @@ async function saveChanges() {
   $("save-button").disabled = true;
   message("editor-status", "Saving…");
   try {
-    await api("/settings", { method: "PUT", body: JSON.stringify(data) });
+    const saved = await api("/settings", { method: "PUT", body: JSON.stringify(data) });
+    fillForm(saved);
     activePresetId = null;
     renderPresetList();
     dirty = false;
