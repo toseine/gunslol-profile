@@ -16,8 +16,12 @@
     <section id="login-panel" class="panel login-panel" aria-labelledby="login-title">
       <p class="kicker">DOSTĘP WŁAŚCICIELA</p>
       <h1 id="login-title">Zaloguj się</h1>
-      <p class="muted">Panel otworzy się tylko dla Twojego konta Google wskazanego w konfiguracji.</p>
-      <button id="login-button" type="button" class="primary-button login-button">Zaloguj przez Google</button>
+      <p class="muted">Dostęp do edycji ma tylko właściciel znający hasło zapisane jako sekret Cloudflare Workera.</p>
+      <form id="login-form">
+        <label for="password">Hasło właściciela</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button id="login-button" type="submit" class="primary-button login-button">Otwórz panel</button>
+      </form>
       <p id="login-status" class="status" role="status" aria-live="polite"></p>
     </section>
 
