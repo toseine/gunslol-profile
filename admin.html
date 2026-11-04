@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css">
-  <script type="module" src="./src/js/admin.js"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=2">
+  <script type="module" src="./src/js/admin.js?v=2"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -33,29 +33,62 @@
           <div class="field-grid">
             <div><label for="profile-name">Display name</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Your name"></div>
             <div><label for="profile-bio">Short bio</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Your space on the web"></div>
-            <div><label for="avatar-url">Avatar or GIF URL</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
+            <div class="media-field"><label for="avatar-url">Avatar or GIF URL</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
             <div><label for="default-theme">Default theme</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
           </div>
         </div>
         <div class="panel section-panel">
           <div class="section-heading"><span class="section-number">02</span><h2>Media for five themes</h2></div>
           <div class="field-stack">
-            <div class="theme-fields"><h3>1 · Home</h3><label for="video-url">Background video</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"><label for="music-url">Music</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"></div>
-            <div class="theme-fields"><h3>2 · Hacker</h3><label for="hacker-video">Background video</label><input id="hacker-video" name="hackerVideoUrl" type="url" maxlength="2000"><label for="hacker-music">Music</label><input id="hacker-music" name="hackerMusicUrl" type="url" maxlength="2000"></div>
-            <div class="theme-fields"><h3>3 · Rain</h3><label for="rain-video">Background video</label><input id="rain-video" name="rainVideoUrl" type="url" maxlength="2000"><label for="rain-music">Music</label><input id="rain-music" name="rainMusicUrl" type="url" maxlength="2000"></div>
-            <div class="theme-fields"><h3>4 · Anime</h3><label for="anime-video">Background video</label><input id="anime-video" name="animeVideoUrl" type="url" maxlength="2000"><label for="anime-music">Music</label><input id="anime-music" name="animeMusicUrl" type="url" maxlength="2000"></div>
-            <div class="theme-fields"><h3>5 · Car</h3><label for="car-video">Background video</label><input id="car-video" name="carVideoUrl" type="url" maxlength="2000"><label for="car-music">Music</label><input id="car-music" name="carMusicUrl" type="url" maxlength="2000"></div>
-            <small>Leave a field blank to disable that medium. Use direct MP4/MOV and MP3 links. Music autoplay may require a click.</small>
+            <div class="theme-fields"><h3>1 · Home</h3><div class="media-field"><label for="video-url">Background video or GIF</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"></div><div class="media-field"><label for="music-url">Music</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"></div></div>
+            <div class="theme-fields"><h3>2 · Hacker</h3><div class="media-field"><label for="hacker-video">Background video or GIF</label><input id="hacker-video" name="hackerVideoUrl" type="url" maxlength="2000"></div><div class="media-field"><label for="hacker-music">Music</label><input id="hacker-music" name="hackerMusicUrl" type="url" maxlength="2000"></div></div>
+            <div class="theme-fields"><h3>3 · Rain</h3><div class="media-field"><label for="rain-video">Background video or GIF</label><input id="rain-video" name="rainVideoUrl" type="url" maxlength="2000"></div><div class="media-field"><label for="rain-music">Music</label><input id="rain-music" name="rainMusicUrl" type="url" maxlength="2000"></div></div>
+            <div class="theme-fields"><h3>4 · Anime</h3><div class="media-field"><label for="anime-video">Background video or GIF</label><input id="anime-video" name="animeVideoUrl" type="url" maxlength="2000"></div><div class="media-field"><label for="anime-music">Music</label><input id="anime-music" name="animeMusicUrl" type="url" maxlength="2000"></div></div>
+            <div class="theme-fields"><h3>5 · Car</h3><div class="media-field"><label for="car-video">Background video or GIF</label><input id="car-video" name="carVideoUrl" type="url" maxlength="2000"></div><div class="media-field"><label for="car-music">Music</label><input id="car-music" name="carMusicUrl" type="url" maxlength="2000"></div></div>
+            <small>Upload your own files to GitHub or paste a direct URL. Avatar: up to 5 MB. Background and music: up to 15 MB. GIF, PNG, JPG, WebP, MP4, WebM, MP3, OGG and WAV are supported.</small>
+            <div class="background-editor">
+              <h3>Background crop and video loop</h3>
+              <p class="muted">These settings apply to all five themes. Select a default theme above to preview its background. Video start/end change playback, not the saved file.</p>
+              <div class="background-preview" id="background-preview-box"><video id="background-preview-video" muted loop playsinline hidden></video><img id="background-preview-image" alt="Background preview" hidden><span id="background-preview-empty">Add a background to see a preview</span></div>
+              <div class="crop-fields">
+                <div><label for="background-start">Start at (seconds)</label><input id="background-start" name="backgroundStart" type="number" min="0" max="3600" step="0.1" value="0"></div>
+                <div><label for="background-end">End at (seconds; 0 = full video)</label><input id="background-end" name="backgroundEnd" type="number" min="0" max="3600" step="0.1" value="0"></div>
+                <div><label for="background-zoom">Zoom <output id="zoom-value">1×</output></label><input id="background-zoom" name="backgroundZoom" type="range" min="1" max="3" step="0.05" value="1"></div>
+                <div><label for="background-x">Horizontal focus <output id="x-value">50%</output></label><input id="background-x" name="backgroundX" type="range" min="0" max="100" step="1" value="50"></div>
+                <div><label for="background-y">Vertical focus <output id="y-value">50%</output></label><input id="background-y" name="backgroundY" type="range" min="0" max="100" step="1" value="50"></div>
+              </div>
+            </div>
             <label class="toggle-row" for="snow-enabled"><span><strong>Snow effect</strong><small>Animated snow on the profile page</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
           </div>
         </div>
         <div class="panel section-panel">
           <div class="section-heading"><span class="section-number">03</span><h2>Social media</h2></div>
           <div class="field-stack">
-            <div><label for="discord-url">Discord</label><input id="discord-url" name="discordUrl" type="url" maxlength="2000" placeholder="https://discord.gg/..."></div>
+            <div><label for="discord-username">Discord username (click to copy)</label><input id="discord-username" name="discordUsername" type="text" maxlength="64" placeholder="yourname"></div>
             <div><label for="github-url">GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
             <div><label for="youtube-url">YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
             <div><label for="tiktok-url">TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
+          </div>
+        </div>
+        <div class="panel section-panel">
+          <div class="section-heading"><span class="section-number">04</span><h2>Appearance and layout</h2></div>
+          <div class="field-stack">
+            <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
+            <label class="toggle-row" for="animate-entrance"><span><strong>Entrance animation</strong><small>Profile fades in after the visitor enters</small></span><span class="switch"><input id="animate-entrance" name="animateEntrance" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="animate-text"><span><strong>Animated name and bio</strong><small>Typing effect on the profile</small></span><span class="switch"><input id="animate-text" name="animateText" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="animated-background"><span><strong>Animated ambience</strong><small>Slow moving color behind the profile</small></span><span class="switch"><input id="animated-background" name="animatedBackground" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="profile-float"><span><strong>Avatar motion</strong><small>Animated avatar ring</small></span><span class="switch"><input id="profile-float" name="profileFloat" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="hover-tilt"><span><strong>Hover tilt</strong><small>Profile follows the pointer</small></span><span class="switch"><input id="hover-tilt" name="hoverTilt" type="checkbox" checked><span class="slider"></span></span></label>
+            <div class="layout-editor">
+              <div class="layout-toolbar"><div><h3>Arrange your page</h3><p class="muted">Drag the blocks to place them. Set desktop and phone layouts separately.</p></div><div class="layout-actions"><button id="layout-desktop" type="button" class="quiet-button selected">Desktop</button><button id="layout-mobile" type="button" class="quiet-button">Phone</button><button id="layout-reset" type="button" class="quiet-button">Reset</button></div></div>
+              <div class="layout-canvas" id="layout-canvas" data-device="desktop" aria-label="Drag blocks to arrange the public page">
+                <button class="layout-item layout-profile" data-item="profile" type="button"><span class="layout-avatar">◈</span><span><strong id="layout-name">Your name</strong><small id="layout-bio">Your space on the web</small></span></button>
+                <button class="layout-item layout-social" data-item="social" type="button">◉ &nbsp; Social links</button>
+                <button class="layout-item layout-views" data-item="views" type="button">◉ &nbsp; Views</button>
+                <button class="layout-item layout-themes" data-item="themes" type="button">● ● ● ● ●</button>
+                <button class="layout-item layout-audio" data-item="audio" type="button">♫ &nbsp; Music</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Save changes <span>↗</span></button></div>
