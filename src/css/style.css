@@ -921,3 +921,30 @@ body { font-family: Georgia, 'Times New Roman', serif; }
     .top-controls { top: 19px; left: 18px; }
 }
 @media (pointer: coarse) { .custom-cursor { display: none !important; } }
+.position-wrapper { position: fixed; z-index: 25; transform: translate(-50%, -50%); pointer-events: none; }
+.position-wrapper > * { pointer-events: auto; }
+.position-profile { z-index: 21; width: min(760px, calc(100vw - 44px)); }
+.position-profile #profile-block { position: relative !important; top: auto !important; left: auto !important; transform: none; width: 100%; }
+.position-social { z-index: 25; }
+.position-social .social-links { display: flex; }
+.position-views { z-index: 25; }
+.position-views .visitor-counter { position: static; }
+.position-themes { z-index: 25; }
+.position-themes .controls { position: static; transform: none; flex-direction: column; }
+.position-audio { z-index: 25; }
+.position-audio .top-controls { position: static; transform: none; }
+.profile-footer { display: none; }
+body.no-ambience .container::before { animation: none; }
+body.no-avatar-motion .profile-container, body.no-avatar-motion .profile-container::after { animation: none !important; }
+body.system-cursor { cursor: auto !important; }
+body.system-cursor .custom-cursor { display: none !important; }
+body[data-cursor="dot"] .custom-cursor { width: 9px; height: 9px; background: #fff; border: 0; box-shadow: 0 0 10px #fff; }
+body[data-cursor="crosshair"] .custom-cursor { width: 23px; height: 23px; border: 1px solid #fff; border-radius: 50%; background: transparent; box-shadow: 0 0 12px #b99af7; }
+body[data-cursor="crosshair"] .custom-cursor::before, body[data-cursor="crosshair"] .custom-cursor::after { content: ''; position: absolute; background: #fff; }
+body[data-cursor="crosshair"] .custom-cursor::before { width: 1px; height: 31px; left: 50%; top: -5px; }
+body[data-cursor="crosshair"] .custom-cursor::after { width: 31px; height: 1px; top: 50%; left: -5px; }
+.social-links #discord-link { position: relative; }
+.social-links #discord-link .tooltip { position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%); min-width: max-content; padding: 6px 9px; border-radius: 6px; background: #181622; color: #fff; font: 12px Arial, sans-serif; opacity: 0; visibility: hidden; pointer-events: none; box-shadow: 0 4px 14px #0008; }
+.social-links #discord-link:hover .tooltip, .social-links #discord-link:focus-visible .tooltip, .social-links #discord-link.copied .tooltip { opacity: 1; visibility: visible; }
+@media (max-width: 640px) { .position-profile { width: calc(100vw - 48px); } }
+@media (prefers-reduced-motion: reduce) { .container::before, .profile-container, .profile-container::after { animation: none !important; } }
