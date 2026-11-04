@@ -46,6 +46,11 @@ const defaults = {
   profileOpacity: 100,
   profileBlur: 0,
   avatarRadius: 28,
+  cardWidth: 760,
+  avatarSize: 174,
+  nameSize: 59,
+  bioSize: 19,
+  socialSize: 42,
   showViews: true,
   showThemes: true,
   showVolume: true,
@@ -176,7 +181,7 @@ function cleanSettings(input) {
     if (!choices.includes(value)) return null;
     result[key] = value;
   }
-  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87]]) {
+  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87], ["cardWidth", 300, 900], ["avatarSize", 60, 220], ["nameSize", 22, 80], ["bioSize", 11, 30], ["socialSize", 28, 72]]) {
     const value = input[key] ?? defaults[key];
     if (!Number.isInteger(value) || value < min || value > max) return null;
     result[key] = value;
