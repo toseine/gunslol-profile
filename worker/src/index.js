@@ -3,12 +3,23 @@ import { DurableObject } from "cloudflare:workers";
 const defaults = {
   name: "Twój nick",
   bio: "Twoja przestrzeń w sieci.",
+  avatarUrl: "",
+  defaultTheme: "home",
   videoUrl: "",
   musicUrl: "",
+  hackerVideoUrl: "",
+  hackerMusicUrl: "",
+  rainVideoUrl: "",
+  rainMusicUrl: "",
+  animeVideoUrl: "",
+  animeMusicUrl: "",
+  carVideoUrl: "",
+  carMusicUrl: "",
   snowEnabled: false,
   discordUrl: "",
   githubUrl: "",
-  youtubeUrl: ""
+  youtubeUrl: "",
+  tiktokUrl: ""
 };
 const encoder = new TextEncoder();
 
@@ -66,13 +77,15 @@ async function ipKey(ip) {
 function cleanSettings(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const result = {};
-  for (const [key, max] of Object.entries({ name: 50, bio: 140, videoUrl: 2000, musicUrl: 2000, discordUrl: 2000, githubUrl: 2000, youtubeUrl: 2000 })) {
+  for (const [key, max] of Object.entries({ name: 50, bio: 140, avatarUrl: 2000, videoUrl: 2000, musicUrl: 2000, hackerVideoUrl: 2000, hackerMusicUrl: 2000, rainVideoUrl: 2000, rainMusicUrl: 2000, animeVideoUrl: 2000, animeMusicUrl: 2000, carVideoUrl: 2000, carMusicUrl: 2000, discordUrl: 2000, githubUrl: 2000, youtubeUrl: 2000, tiktokUrl: 2000 })) {
     if (typeof input[key] !== "string" || input[key].length > max) return null;
     result[key] = input[key].trim();
   }
   if (!result.name || typeof input.snowEnabled !== "boolean") return null;
   result.snowEnabled = input.snowEnabled;
-  for (const key of ["videoUrl", "musicUrl", "discordUrl", "githubUrl", "youtubeUrl"]) {
+  if (!["home", "hacker", "rain", "anime", "car"].includes(input.defaultTheme)) return null;
+  result.defaultTheme = input.defaultTheme;
+  for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl"]) {
     if (!result[key]) continue;
     try {
       if (!["https:", "http:"].includes(new URL(result[key]).protocol)) return null;
