@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=6">
-  <script type="module" src="./src/js/admin.js?v=10"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=7">
+  <script type="module" src="./src/js/admin.js?v=11"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -30,12 +30,12 @@
         <div class="nav-caption">WORKSPACE</div>
         <div class="nav-user"><span class="nav-user-avatar">◈</span><span><strong id="nav-display-name">Your profile</strong><small>Owner dashboard</small></span></div>
         <div class="nav-caption">CUSTOMIZE</div>
-        <button type="button" class="nav-button active" data-target="profile">◉ <span>Profile</span></button>
-        <button type="button" class="nav-button" data-target="media">▧ <span>Media & music</span></button>
-        <button type="button" class="nav-button" data-target="socials">⌁ <span>Social links</span></button>
-        <button type="button" class="nav-button" data-target="appearance">✦ <span>Appearance</span></button>
-        <button type="button" class="nav-button" data-target="layout">▦ <span>Layout</span></button>
-        <button type="button" class="nav-button" data-target="presets">◇ <span>Presets</span></button>
+        <button type="button" class="nav-button active" data-target="profile"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Profile</span></button>
+        <button type="button" class="nav-button" data-target="media"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg><span>Media & music</span></button>
+        <button type="button" class="nav-button" data-target="socials"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 .5l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg><span>Social links</span></button>
+        <button type="button" class="nav-button" data-target="appearance"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8zM19 18l.6 1.4L21 20l-1.4.6L19 22l-.6-1.4L17 20l1.4-.6z"/></svg><span>Appearance</span></button>
+        <button type="button" class="nav-button" data-target="layout"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg><span>Layout</span></button>
+        <button type="button" class="nav-button" data-target="presets"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg><span>Presets</span></button>
         <div class="nav-spacer"></div><a href="./index.html" target="_blank" rel="noopener" class="nav-footer-link">↗ View profile</a>
       </nav>
       <div class="editor-heading"><div><p class="kicker">PROFILE STUDIO</p><h1 id="editor-title">Customize profile</h1><p class="muted" id="section-description">Edit your identity and avatar. Changes appear on the live page when saved.</p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
@@ -49,7 +49,7 @@
             <div><label for="default-theme">Profile style</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
             <div><label for="enter-text">Entry screen text</label><input id="enter-text" name="enterText" type="text" maxlength="60" placeholder="Click to enter"></div>
           </div>
-          <div class="badge-editor"><h3>Profile badges</h3><p class="muted">Decorative labels shown beside your name on this site.</p><div class="badge-options"><label><input id="badge-owner" type="checkbox"> ◈ Owner</label><label><input id="badge-verified" type="checkbox"> ✓ Verified</label><label><input id="badge-developer" type="checkbox"> ⌘ Developer</label><label><input id="badge-partner" type="checkbox"> ✦ Partner</label><label><input id="badge-supporter" type="checkbox"> ♥ Supporter</label></div></div>
+          <div class="badge-editor"><h3>Profile badges</h3><p class="muted">Decorative labels shown beside your name on this site.</p><div class="badge-options"><label><input id="badge-owner" type="checkbox"><img src="./assets/badge-owner.svg" alt=""> ◈ Owner</label><label><input id="badge-verified" type="checkbox"><img src="./assets/badge-verified.svg" alt=""> ✓ Verified</label><label><input id="badge-developer" type="checkbox"><img src="./assets/badge-developer.svg" alt=""> ⌘ Developer</label><label><input id="badge-partner" type="checkbox"><img src="./assets/badge-partner.svg" alt=""> ✦ Partner</label><label><input id="badge-supporter" type="checkbox"><img src="./assets/badge-supporter.svg" alt=""> ♥ Supporter</label></div></div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
           <div class="section-heading"><span class="section-number">02</span><h2>Media & music</h2></div>
@@ -79,11 +79,11 @@
         <div class="panel section-panel" data-section="socials" hidden>
           <div class="section-heading"><span class="section-number">03</span><h2>Social media</h2></div>
           <div class="field-stack">
-            <div><label for="discord-username">Discord username (click to copy)</label><input id="discord-username" name="discordUsername" type="text" maxlength="64" placeholder="yourname"></div>
-            <div><label for="github-url">GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
-            <div><label for="youtube-url">YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
-            <div><label for="tiktok-url">TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
-            <div><label for="telegram-url">Telegram</label><input id="telegram-url" name="telegramUrl" type="url" maxlength="2000" placeholder="https://t.me/yourname"></div>
+            <div><label for="discord-username"><img class="field-icon" src="./assets/discord.svg" alt=""> Discord username</label><input id="discord-username" name="discordUsername" type="text" maxlength="64" placeholder="yourname"><small>Visitors click the icon to copy your username.</small></div>
+            <div><label for="github-url"><img class="field-icon" src="./assets/github.svg" alt=""> GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
+            <div><label for="youtube-url"><img class="field-icon" src="./assets/youtube.svg" alt=""> YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
+            <div><label for="tiktok-url"><img class="field-icon" src="./assets/tiktok.svg" alt=""> TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
+            <div><label for="telegram-url"><img class="field-icon" src="./assets/telegram.svg" alt=""> Telegram</label><input id="telegram-url" name="telegramUrl" type="url" maxlength="2000" placeholder="https://t.me/yourname"></div>
           </div>
         </div>
         <div class="panel section-panel" data-section="appearance" hidden>
@@ -140,7 +140,7 @@
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Save changes <span>↗</span></button></div>
       </form>
-      <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-badges"></span><span id="mini-bio">Your space on the web</span><div class="mini-socials">● ● ●</div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
+      <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-badges"></span><span id="mini-bio">Your space on the web</span><div class="mini-socials" aria-label="Social link preview"></div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
     </section>
   </main>
 </body>
