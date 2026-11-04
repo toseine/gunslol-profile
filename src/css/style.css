@@ -948,3 +948,19 @@ body[data-cursor="crosshair"] .custom-cursor::after { width: 31px; height: 1px; 
 .social-links #discord-link:hover .tooltip, .social-links #discord-link:focus-visible .tooltip, .social-links #discord-link.copied .tooltip { opacity: 1; visibility: visible; }
 @media (max-width: 640px) { .position-profile { width: calc(100vw - 48px); } }
 @media (prefers-reduced-motion: reduce) { .container::before, .profile-container, .profile-container::after { animation: none !important; } }
+
+/* Owner appearance settings */
+body { background: var(--backgroundColor, #090b10); color: var(--textColor, #fff); }
+.container::before { background-color: var(--backgroundColor, #090b10); }
+.position-profile #profile-block { opacity: var(--profileOpacity, 1); backdrop-filter: blur(var(--profileBlur, 0px)) !important; }
+.profile-picture { border-radius: var(--avatarRadius, 28px) !important; }
+#profile-name { color: var(--textColor, #fff); }
+#profile-bio { color: var(--textColor, #fff); }
+.profile-container { filter: drop-shadow(0 0 20px var(--accentColor, #b99af7)); }
+body[data-font-style="sans"] #profile-name, body[data-font-style="sans"] #profile-bio { font-family: Arial, Helvetica, sans-serif; }
+body[data-font-style="mono"] #profile-name, body[data-font-style="mono"] #profile-bio { font-family: 'Courier New', monospace; }
+body[data-name-effect="glow"] #profile-name { text-shadow: 0 0 16px var(--accentColor, #b99af7), 0 0 36px var(--accentColor, #b99af7); }
+body[data-name-effect="gradient"] #profile-name { background: linear-gradient(110deg, var(--accentColor, #b99af7), var(--textColor, #fff)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+body[data-social-style="solid"] .social-links a { background: var(--accentColor, #b99af7); border-color: var(--accentColor, #b99af7); }
+body[data-social-style="outline"] .social-links a { background: transparent; border-color: var(--accentColor, #b99af7); backdrop-filter: none; }
+.custom-cursor, .theme-button.active, .theme-button:hover { box-shadow: 0 0 14px var(--accentColor, #b99af7); }
