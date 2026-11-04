@@ -24,6 +24,34 @@ const layoutDefaults = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
 };
+const musicTrim = {
+  'background-music': ['musicStart', 'musicEnd'],
+  'hacker-music': ['hackerMusicStart', 'hackerMusicEnd'],
+  'rain-music': ['rainMusicStart', 'rainMusicEnd'],
+  'anime-music': ['animeMusicStart', 'animeMusicEnd'],
+  'car-music': ['carMusicStart', 'carMusicEnd']
+};
+function audioBounds(audio) {
+  const [startKey, endKey] = musicTrim[audio.id];
+  const settings = window.profileSettings || {};
+  const duration = Number.isFinite(audio.duration) ? audio.duration : Infinity;
+  const requestedStart = Number(settings[startKey]) || 0;
+  const start = requestedStart < duration ? Math.max(0, requestedStart) : 0;
+  const requestedEnd = Number(settings[endKey]) || 0;
+  const end = requestedEnd > start ? Math.min(requestedEnd, duration) : duration;
+  return { start, end };
+}
+function keepAudioInClip(audio) {
+  if (!audio.src || audio.readyState < 1) return;
+  const { start, end } = audioBounds(audio);
+  if (audio.currentTime < start - 0.25 || (Number.isFinite(end) && audio.currentTime >= end)) {
+    try { audio.currentTime = start; } catch { /* Non-seekable media. */ }
+  }
+}
+for (const audioId of Object.keys(musicTrim)) {
+  const audio = document.getElementById(audioId);
+  for (const event of ['loadedmetadata', 'play', 'timeupdate']) audio.addEventListener(event, () => keepAudioInClip(audio));
+}
 const positionElements = {
   profile: $('profile-block'), social: document.querySelector('.social-links'),
   views: document.querySelector('.visitor-counter'), themes: document.querySelector('.controls'),
@@ -109,7 +137,7 @@ function render(data) {
   document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
   document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
   document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);
-  for (const [key, visible] of [['views', data.showViews !== false], ['themes', data.showThemes !== false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
+  for (const [key, visible] of [['views', data.showViews !== false], ['themes', false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
   setSnow(data.snowEnabled === true);
   $('api-status').textContent = '';
   updateMusicToggle();

@@ -14,6 +14,8 @@ let layout = structuredClone(defaultLayout);
 let layoutDevice = "desktop";
 const cropDefaults = { backgroundStart: 0, backgroundEnd: 0, backgroundZoom: 1, backgroundX: 50, backgroundY: 50 };
 const backgroundFields = { home: "video-url", hacker: "hacker-video", rain: "rain-video", anime: "anime-video", car: "car-video" };
+const musicFields = { home: ["music-url", "music"], hacker: ["hacker-music", "hackerMusic"], rain: ["rain-music", "rainMusic"], anime: ["anime-music", "animeMusic"], car: ["car-music", "carMusic"] };
+const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${prefix}Start`, `${prefix}End`]);
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["video-url", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
@@ -30,6 +32,8 @@ const uploadFields = [
 const tokenKey = "profile_admin_session";
 let token = sessionStorage.getItem(tokenKey) || "";
 let dirty = false;
+let presets = [];
+let activePresetId = null;
 
 function message(id, text, kind = "") {
   const el = $(id);
@@ -51,6 +55,7 @@ function fillForm(data = {}) {
   for (const [key, fallback] of Object.entries(cropDefaults)) {
     form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   }
+  for (const key of musicTrimKeys) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : 0;
   for (const [key, fallback] of Object.entries(styleDefaults)) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   if (!data.name) form.elements.namedItem("name").value = "Your name";
   layout = structuredClone(defaultLayout);
@@ -61,6 +66,7 @@ function fillForm(data = {}) {
   updateLayoutPreview();
   updatePreview();
   updateMiniPreview();
+  showSelectedTheme();
   dirty = false;
 }
 
@@ -73,7 +79,9 @@ function readForm() {
   data.layout = structuredClone(layout);
   data.discordUrl = "";
   for (const key of Object.keys(cropDefaults)) data[key] = Number(form.elements.namedItem(key).value);
+  for (const key of musicTrimKeys) data[key] = Number(form.elements.namedItem(key).value);
   for (const key of Object.keys(styleDefaults)) data[key] = Number(form.elements.namedItem(key).value);
+  data.showThemes = false;
   return data;
 }
 
@@ -83,12 +91,21 @@ function validUrl(value) {
   catch { return false; }
 }
 
+function showSelectedTheme() {
+  const selected = $("default-theme").value;
+  document.querySelectorAll(".theme-fields").forEach((section, index) => {
+    section.hidden = ["home", "hacker", "rain", "anime", "car"][index] !== selected;
+  });
+}
+$("default-theme").addEventListener("change", () => { showSelectedTheme(); updatePreview(); });
+
 const sectionCopy = {
   profile: ["Profile", "Edit your identity and avatar. Changes appear on the live page when saved."],
-  media: ["Media & themes", "Choose backgrounds and music for each theme, then adjust the crop and loop."],
+  media: ["Media & music", "Edit the one theme visitors see, then trim and preview its music."],
   socials: ["Social links", "Add the links visitors can open and a Discord username they can copy."],
   appearance: ["Appearance", "Tune colors, typography, motion and what visitors can see."],
-  layout: ["Layout", "Drag profile elements into place for desktop and phone separately."]
+  layout: ["Layout", "Drag profile elements into place for desktop and phone separately."],
+  presets: ["Presets", "Save this design and activate another one whenever you want."]
 };
 for (const button of document.querySelectorAll(".nav-button")) button.addEventListener("click", () => {
   const target = button.dataset.target;
@@ -261,7 +278,7 @@ for (const [fieldId, kind, accept] of uploadFields) {
     const file = picker.files?.[0];
     button.disabled = !file;
     status.textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : "";
-    if (file && kind === "background") previewFiles.set(fieldId, { url: URL.createObjectURL(file), type: file.type });
+    if (file && (kind === "background" || kind === "music")) previewFiles.set(fieldId, { url: URL.createObjectURL(file), type: file.type });
     else previewFiles.delete(fieldId);
     updatePreview();
   });
@@ -301,12 +318,63 @@ for (const [fieldId, kind, accept] of uploadFields) {
   });
 }
 
+for (const [theme, [fieldId, prefix]] of Object.entries(musicFields)) {
+  const section = $(fieldId).closest(".theme-fields");
+  const box = document.createElement("div");
+  box.className = "music-trim";
+  box.innerHTML = `<h4>Trim music for ${theme}</h4><p>Choose a segment to play on the profile. The original file stays unchanged.</p><div class="trim-numbers"><div><label for="${prefix}-start">Start (seconds)</label><input id="${prefix}-start" name="${prefix}Start" type="number" min="0" max="3600" step="0.1" value="0"></div><div><label for="${prefix}-end">End (seconds; 0 = full track)</label><input id="${prefix}-end" name="${prefix}End" type="number" min="0" max="3600" step="0.1" value="0"></div></div><audio controls preload="none"></audio><div class="trim-actions"><button type="button" class="quiet-button" data-action="mark-start">Set start at playhead</button><button type="button" class="quiet-button" data-action="mark-end">Set end at playhead</button><button type="button" class="quiet-button" data-action="preview">Preview clip</button><button type="button" class="quiet-button" data-action="stop">Stop</button></div><small role="status"></small>`;
+  section.append(box);
+  const audio = box.querySelector("audio");
+  const status = box.querySelector("small");
+  const startInput = form.elements.namedItem(`${prefix}Start`);
+  const endInput = form.elements.namedItem(`${prefix}End`);
+  let previewing = false;
+  box.querySelector('[data-action="preview"]').addEventListener("click", async () => {
+    const source = previewFiles.get(fieldId)?.url || $(fieldId).value.trim();
+    const start = Number(startInput.value) || 0;
+    const end = Number(endInput.value) || 0;
+    if (!source) { status.textContent = "Add or upload music first."; return; }
+    if (end && end <= start) { status.textContent = "End must be after start."; return; }
+    if (audio.dataset.source !== source) { audio.src = source; audio.dataset.source = source; }
+    try {
+      if (audio.readyState < 1) await new Promise((resolve, reject) => {
+        audio.addEventListener("loadedmetadata", resolve, { once: true });
+        audio.addEventListener("error", reject, { once: true });
+        audio.load();
+      });
+      if (Number.isFinite(audio.duration) && start >= audio.duration) { status.textContent = "Start is beyond the track length."; return; }
+      audio.currentTime = start;
+      previewing = true;
+      await audio.play();
+      status.textContent = "Playing selected segment.";
+    } catch { previewing = false; status.textContent = "This URL is not a playable audio file."; }
+  });
+  box.querySelector('[data-action="stop"]').addEventListener("click", () => { previewing = false; audio.pause(); status.textContent = "Preview stopped."; });
+  for (const [action, input] of [["mark-start", startInput], ["mark-end", endInput]]) {
+    box.querySelector(`[data-action="${action}"]`).addEventListener("click", () => {
+      if (audio.readyState < 1) { status.textContent = "Play or seek the track first."; return; }
+      previewing = false;
+      input.value = String(Math.round(audio.currentTime * 10) / 10);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      status.textContent = `${action === "mark-start" ? "Start" : "End"} set to ${input.value}s.`;
+    });
+  }
+  audio.addEventListener("timeupdate", () => {
+    if (!previewing) return;
+    const start = Number(startInput.value) || 0;
+    const end = Number(endInput.value) || 0;
+    if (end > start && audio.currentTime >= end) audio.currentTime = start;
+  });
+  audio.addEventListener("ended", () => { previewing = false; status.textContent = "Preview finished."; });
+}
+
 async function openEditor() {
   try {
     const settings = await api("/settings");
     fillForm(settings);
     showEditor(true);
     message("editor-status", "Settings are up to date.");
+    loadPresets();
   } catch (error) {
     message("login-status", `Could not load settings: ${error.message}`, "error");
   }
@@ -348,27 +416,105 @@ $("logout-button").addEventListener("click", () => {
   showEditor(false);
 });
 
-form.addEventListener("input", () => {
+form.addEventListener("input", event => {
+  if (event.target.id?.startsWith("preset-")) return;
   dirty = true;
   message("editor-status", "You have unsaved changes.");
+});
+
+function settingsError(data) {
+  const urls = fields.filter(key => key.endsWith("Url"));
+  if (urls.some(key => !validUrl(data[key]))) return "URLs must start with https:// or http://.";
+  if (data.backgroundEnd && data.backgroundEnd <= data.backgroundStart) return "Video end must be after video start.";
+  for (const [, prefix] of Object.values(musicFields)) {
+    if (data[`${prefix}End`] && data[`${prefix}End`] <= data[`${prefix}Start`]) return "Music end must be after music start.";
+  }
+  return "";
+}
+
+function renderPresetList(selectedId = $("preset-list").value) {
+  const list = $("preset-list");
+  list.replaceChildren(new Option("Choose a preset", ""));
+  for (const preset of presets) list.add(new Option(`${preset.name}${preset.id === activePresetId ? " · active" : ""}`, preset.id));
+  list.value = presets.some(item => item.id === selectedId) ? selectedId : (activePresetId || "");
+}
+
+async function loadPresets() {
+  try {
+    const data = await api("/presets");
+    presets = data.presets || [];
+    activePresetId = data.activePresetId;
+    renderPresetList();
+  } catch (error) { message("preset-status", `Could not load presets: ${error.message}`, "error"); }
+}
+
+$("preset-list").addEventListener("change", () => {
+  const selected = presets.find(item => item.id === $("preset-list").value);
+  $("preset-name").value = selected?.name || "";
+  message("preset-status", selected ? `${selected.name}${selected.id === activePresetId ? " is live." : " is saved."}` : "");
+});
+
+$("preset-save").addEventListener("click", async () => {
+  const name = $("preset-name").value.trim();
+  if (!name) { message("preset-status", "Enter a preset name first.", "error"); return; }
+  const settings = readForm();
+  const error = settingsError(settings);
+  if (error) { message("preset-status", error, "error"); return; }
+  try {
+    const data = await api("/presets", { method: "POST", body: JSON.stringify({ name, settings }) });
+    presets = data.presets;
+    activePresetId = data.activePresetId;
+    renderPresetList(presets.find(item => item.name.toLowerCase() === name.toLowerCase())?.id);
+    message("preset-status", `Preset “${name}” saved. Activate it to show it publicly.`, "success");
+  } catch (error) { message("preset-status", `Could not save preset: ${error.message}`, "error"); }
+});
+
+$("preset-load").addEventListener("click", () => {
+  const selected = presets.find(item => item.id === $("preset-list").value);
+  if (!selected) { message("preset-status", "Choose a preset first.", "error"); return; }
+  fillForm(selected.settings);
+  dirty = true;
+  message("editor-status", "Preset loaded. Save changes to make these edits live.");
+  message("preset-status", `Loaded “${selected.name}” into the editor.`);
+});
+
+$("preset-activate").addEventListener("click", async () => {
+  const id = $("preset-list").value;
+  if (!id) { message("preset-status", "Choose a preset first.", "error"); return; }
+  try {
+    const data = await api(`/presets/${id}/activate`, { method: "POST" });
+    activePresetId = data.activePresetId;
+    fillForm(data.settings);
+    renderPresetList(id);
+    message("preset-status", "Preset activated. Visitors see it now.", "success");
+    message("editor-status", "Active preset is up to date.", "success");
+  } catch (error) { message("preset-status", `Could not activate preset: ${error.message}`, "error"); }
+});
+
+$("preset-delete").addEventListener("click", async () => {
+  const id = $("preset-list").value;
+  if (!id) { message("preset-status", "Choose a preset first.", "error"); return; }
+  try {
+    const data = await api(`/presets/${id}`, { method: "DELETE" });
+    presets = data.presets;
+    activePresetId = data.activePresetId;
+    renderPresetList("");
+    $("preset-name").value = "";
+    message("preset-status", "Preset deleted. The current live profile stays as it is.", "success");
+  } catch (error) { message("preset-status", `Could not delete preset: ${error.message}`, "error"); }
 });
 
 async function saveChanges() {
   if (!token) return false;
   const data = readForm();
-  const urls = fields.filter(key => key.endsWith("Url"));
-  if (urls.some(key => !validUrl(data[key]))) {
-    message("editor-status", "URLs must start with https:// or http://.", "error");
-    return false;
-  }
-  if (data.backgroundEnd && data.backgroundEnd <= data.backgroundStart) {
-    message("editor-status", "Video end must be after video start.", "error");
-    return false;
-  }
+  const error = settingsError(data);
+  if (error) { message("editor-status", error, "error"); return false; }
   $("save-button").disabled = true;
   message("editor-status", "Saving…");
   try {
     await api("/settings", { method: "PUT", body: JSON.stringify(data) });
+    activePresetId = null;
+    renderPresetList();
     dirty = false;
     message("editor-status", "Saved. The profile page will update automatically.", "success");
     return true;
