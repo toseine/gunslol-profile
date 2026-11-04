@@ -174,4 +174,12 @@ form .badge-options label:has(input:checked) { border-color: #b492f6; background
 .mini-social-icon.icon-youtube { --icon-url: url('../../assets/youtube.svg'); }
 .mini-social-icon.icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); }
 .mini-social-icon.icon-telegram { --icon-url: url('../../assets/telegram.svg'); }
+.mini-socials[data-icon-set="minimal"] .icon-discord { --icon-url: url('../../assets/minimal-discord.svg'); }
+.mini-socials[data-icon-set="minimal"] .icon-github { --icon-url: url('../../assets/minimal-github.svg'); }
+.mini-socials[data-icon-set="minimal"] .icon-youtube { --icon-url: url('../../assets/minimal-youtube.svg'); }
+.mini-socials[data-icon-set="minimal"] .icon-tiktok { --icon-url: url('../../assets/minimal-tiktok.svg'); }
+.mini-socials[data-icon-set="minimal"] .icon-telegram { --icon-url: url('../../assets/minimal-telegram.svg'); }
+.layout-edit { display: none; margin-left: 5px; padding: 3px 5px; border-radius: 4px; background: #b99af7; color: #101018; font-size: 10px; font-weight: 700; cursor: pointer; }
+.layout-item:hover .layout-edit, .layout-item:focus-visible .layout-edit { display: inline-block; }
+@media (hover: none) { .layout-edit { display: inline-block; } }
 #edit-icon-style { justify-self: start; color: #d5bfff; }

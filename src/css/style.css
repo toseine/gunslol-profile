@@ -1001,3 +1001,8 @@ body[data-social-style="glass"] .social-links a:hover { border-color: transparen
 .social-links a { transition: transform .18s, filter .18s, background .18s; }
 .social-links a:hover { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 0 8px var(--socialIconColor, #fff)); }
 .social-icon.icon-discord { width: 74%; height: 74%; }
+body[data-social-icon-set="minimal"] .icon-discord { --icon-url: url('../../assets/minimal-discord.svg'); }
+body[data-social-icon-set="minimal"] .icon-github { --icon-url: url('../../assets/minimal-github.svg'); }
+body[data-social-icon-set="minimal"] .icon-youtube { --icon-url: url('../../assets/minimal-youtube.svg'); }
+body[data-social-icon-set="minimal"] .icon-tiktok { --icon-url: url('../../assets/minimal-tiktok.svg'); }
+body[data-social-icon-set="minimal"] .icon-telegram { --icon-url: url('../../assets/minimal-telegram.svg'); }
