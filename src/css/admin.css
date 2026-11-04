@@ -43,6 +43,7 @@ input::placeholder { color: #656e81; }
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .field-stack { display: grid; gap: 19px; }
 .theme-fields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; padding: 18px; border: 1px solid #303542; border-radius: 12px; background: #11141d; }
+.theme-fields[hidden] { display: none !important; }
 .theme-fields h3 { grid-column: 1 / -1; margin: 0 0 14px; color: #c7adfa; font-size: 14px; }
 .media-field { min-width: 0; }
 .upload-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 9px; }
@@ -126,3 +127,14 @@ input[type="color"] { padding: 4px !important; cursor: pointer; }.custom-grid { 
 .login-panel { border-color: #363046; background: #15141e; }.login-panel::before { content: '◈'; display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 22px; border-radius: 12px; background: #332449; color: #ba9cff; font-size: 23px; }
 @media (max-width: 1120px) { .editor { grid-template-columns: 185px minmax(0,1fr); }.preview-aside { display: none; } }
 @media (max-width: 700px) { .admin-shell { width: min(100% - 20px, 620px); }.topbar { margin-bottom: 10px; }.editor { display: block; }.dashboard-nav { position: static; display: flex; flex-direction: row; min-height: 0; gap: 4px; overflow-x: auto; margin-bottom: 18px; padding: 7px; border-radius: 10px; }.nav-caption,.nav-user,.nav-spacer,.nav-footer-link { display: none; }.nav-button { flex: none; width: auto; padding: 9px 12px; white-space: nowrap; font-size: 12px; }.editor-heading { margin-bottom: 18px; }.editor-heading h1 { font-size: 25px; }.section-panel { padding: 18px; }.savebar { bottom: 5px; }.savebar .status { max-width: none; } }
+.music-trim { grid-column: 1 / -1; margin-top: 18px; padding: 18px; border: 1px solid #363144; border-radius: 12px; background: #171420; }
+.music-trim h4 { margin: 0 0 5px; color: #d8c6ff; font-size: 14px; }
+.music-trim p { margin: 0 0 16px; color: #9997ab; font-size: 12px; }
+.trim-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.music-trim audio { display: block; width: 100%; margin: 17px 0 12px; }
+.trim-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.trim-actions .quiet-button { padding: 9px 11px; font-size: 11px; }
+.music-trim small { display: block; margin-top: 11px; color: #b9a3e8; }
+.preset-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.preset-actions button { flex: 1 1 130px; }
+@media (max-width: 620px) { .trim-numbers { grid-template-columns: 1fr; }.music-trim { padding: 14px; } }
