@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=4">
-  <script type="module" src="./src/js/admin.js?v=6"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=5">
+  <script type="module" src="./src/js/admin.js?v=7"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -99,6 +99,11 @@
               <div><label for="profile-opacity">Profile opacity <output id="opacity-value">100%</output></label><input id="profile-opacity" name="profileOpacity" type="range" min="20" max="100" value="100"></div>
               <div><label for="profile-blur">Profile blur <output id="blur-value">0px</output></label><input id="profile-blur" name="profileBlur" type="range" min="0" max="24" value="0"></div>
               <div><label for="avatar-radius">Avatar corners <output id="radius-value">28px</output></label><input id="avatar-radius" name="avatarRadius" type="range" min="0" max="87" value="28"></div>
+              <div><label for="card-width">Profile width <output id="card-width-value">760px</output></label><input id="card-width" name="cardWidth" type="range" min="300" max="900" step="10" value="760"></div>
+              <div><label for="avatar-size">Avatar size <output id="avatar-size-value">174px</output></label><input id="avatar-size" name="avatarSize" type="range" min="60" max="220" step="2" value="174"></div>
+              <div><label for="name-size">Name size <output id="name-size-value">59px</output></label><input id="name-size" name="nameSize" type="range" min="22" max="80" value="59"></div>
+              <div><label for="bio-size">Bio size <output id="bio-size-value">19px</output></label><input id="bio-size" name="bioSize" type="range" min="11" max="30" value="19"></div>
+              <div><label for="social-size">Social button size <output id="social-size-value">42px</output></label><input id="social-size" name="socialSize" type="range" min="28" max="72" step="2" value="42"></div>
             </div>
             <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
             <label class="toggle-row" for="show-views"><span><strong>Show view counter</strong><small>Monthly unique visitors</small></span><span class="switch"><input id="show-views" name="showViews" type="checkbox" checked><span class="slider"></span></span></label>

@@ -27,6 +27,7 @@ Publiczna strona `index.html` działa na GitHub Pages. Ustawienia profilu są za
 - Użyj publicznych, bezpośrednich URL do plików `.mp4` i `.mp3`. Autostart dźwięku może być zablokowany przez przeglądarkę; wtedy pojawi się przycisk **Włącz muzykę**.
 - Panel pozwala ustawić zdjęcie/GIF profilu i wybrać jeden aktywny styl z pięciu wariantów. Można zapisać do 20 nazwanych presetów obejmujących cały profil i aktywować dowolny bez ponownego ustawiania pól.
 - Panel ma upload obrazów/GIF, MP4 i MP3 do Cloudflare Durable Object (maksymalnie 5 MB dla avatara i 15 MB dla innych plików). Plik jest dostępny od razu pod adresem Workera. Gdy jest ustawiony `GITHUB_UPLOAD_TOKEN`, upload używa katalogu `media/` na GitHubie. W zakładce Media & music można wybrać początek i koniec muzyki w sekundach oraz odsłuchać fragment. Przycięcie dotyczy odtwarzania na profilu; oryginalny plik pozostaje bez zmian. Można też ustawić fragment filmu, kadr tła, animacje, kursor i położenie elementów osobno dla komputera i telefonu.
+- Suwaki w zakładce Appearance zmieniają szerokość profilu, rozmiar avatara, nazwy, opisu i przycisków społecznościowych. Podgląd pokazuje te zmiany przed zapisem. Na telefonie rozmiary są ograniczone do szerokości ekranu.
 - Discord przyjmuje nazwę użytkownika; przycisk na profilu kopiuje ją do schowka. Nie wymaga kont odwiedzających.
 - Darmowy plan Workers i Durable Objects ma limity użycia. Przy przekroczeniu limitów API może przestać odpowiadać do ich odnowienia.
 
