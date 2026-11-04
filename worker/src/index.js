@@ -74,6 +74,19 @@ async function ipKey(ip) {
   return `attempt:${base64url(new Uint8Array(digest))}`;
 }
 
+function currentMonth() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Warsaw", year: "numeric", month: "2-digit"
+  }).format(new Date());
+}
+
+async function monthlyVisitorKey(month, ip, secret) {
+  const signature = await crypto.subtle.sign(
+    "HMAC", await hmacKey(secret), encoder.encode(`${month}:${ip}`)
+  );
+  return `views:${month}:ip:${base64url(new Uint8Array(signature))}`;
+}
+
 function cleanSettings(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const result = {};
@@ -109,12 +122,23 @@ export class ProfileStore extends DurableObject {
     }
 
     if (path === "/views" && request.method === "GET") {
-      return json({ count: (await this.ctx.storage.get("viewCount")) || 0 });
+      const month = currentMonth();
+      return json({ month, count: (await this.ctx.storage.get(`views:${month}:count`)) || 0 });
     }
     if (path === "/views" && request.method === "POST") {
-      const count = ((await this.ctx.storage.get("viewCount")) || 0) + 1;
-      await this.ctx.storage.put("viewCount", count);
-      return json({ count });
+      const ip = request.headers.get("CF-Connecting-IP");
+      if (!ip || !this.env.ADMIN_PASSWORD) return json({ error: "View counter unavailable" }, 503);
+      const month = currentMonth();
+      const visitorKey = await monthlyVisitorKey(month, ip, this.env.ADMIN_PASSWORD);
+      const countKey = `views:${month}:count`;
+      const count = await this.ctx.storage.transaction(async transaction => {
+        const current = (await transaction.get(countKey)) || 0;
+        if (await transaction.get(visitorKey)) return current;
+        await transaction.put(visitorKey, true);
+        await transaction.put(countKey, current + 1);
+        return current + 1;
+      });
+      return json({ month, count });
     }
 
     if (path === "/login" && request.method === "POST") {
