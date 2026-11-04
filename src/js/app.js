@@ -137,6 +137,9 @@ function render(data) {
   document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
   document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
   document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);
+  for (const [key, fallback] of [['cardWidth', 760], ['avatarSize', 174], ['nameSize', 59], ['bioSize', 19], ['socialSize', 42]]) {
+    document.body.style.setProperty(`--${key}`, `${Number.isFinite(Number(data[key])) ? Number(data[key]) : fallback}px`);
+  }
   for (const [key, visible] of [['views', data.showViews !== false], ['themes', false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
   setSnow(data.snowEnabled === true);
   $('api-status').textContent = '';

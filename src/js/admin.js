@@ -5,7 +5,7 @@ const form = $("settings-form");
 const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
 const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
 const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
-const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28 };
+const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -131,10 +131,17 @@ function updateMiniPreview() {
   stage.style.setProperty("--mini-opacity", String(Number($("profile-opacity").value) / 100));
   stage.style.setProperty("--mini-blur", `${$("profile-blur").value}px`);
   stage.style.setProperty("--mini-radius", `${$("avatar-radius").value}px`);
+  $("mini-card").style.width = `${Math.min(93, Number($("card-width").value) / 760 * 93)}%`;
+  $("mini-avatar").style.width = `${Math.round(Number($("avatar-size").value) / 174 * 58)}px`;
+  $("mini-avatar").style.height = $("mini-avatar").style.width;
+  $("mini-name").style.fontSize = `${Math.round(Number($("name-size").value) / 59 * 25)}px`;
+  $("mini-bio").style.fontSize = `${Math.round(Number($("bio-size").value) / 19 * 11)}px`;
+  document.querySelector(".mini-socials").style.fontSize = `${Math.round(Number($("social-size").value) / 42 * 13)}px`;
   $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
   $("blur-value").textContent = `${$("profile-blur").value}px`;
   $("radius-value").textContent = `${$("avatar-radius").value}px`;
+  for (const key of ["card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(`${key}-value`).textContent = `${$(key).value}px`;
 }
 $("mini-avatar").addEventListener("error", event => {
   const source = event.target.getAttribute("src");
@@ -143,7 +150,7 @@ $("mini-avatar").addEventListener("error", event => {
     event.target.src = "./assets/avatar.svg";
   }
 });
-for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");
