@@ -7,14 +7,24 @@ const defaults = {
   defaultTheme: "home",
   videoUrl: "",
   musicUrl: "",
+  musicStart: 0,
+  musicEnd: 0,
   hackerVideoUrl: "",
   hackerMusicUrl: "",
+  hackerMusicStart: 0,
+  hackerMusicEnd: 0,
   rainVideoUrl: "",
   rainMusicUrl: "",
+  rainMusicStart: 0,
+  rainMusicEnd: 0,
   animeVideoUrl: "",
   animeMusicUrl: "",
+  animeMusicStart: 0,
+  animeMusicEnd: 0,
   carVideoUrl: "",
   carMusicUrl: "",
+  carMusicStart: 0,
+  carMusicEnd: 0,
   backgroundStart: 0,
   backgroundEnd: 0,
   backgroundZoom: 1,
@@ -139,6 +149,15 @@ function cleanSettings(input) {
     result[key] = value;
   }
   if (result.backgroundEnd && result.backgroundEnd <= result.backgroundStart) return null;
+  for (const theme of ["", "hacker", "rain", "anime", "car"]) {
+    const prefix = theme ? `${theme}Music` : "music";
+    const start = input[`${prefix}Start`] ?? 0;
+    const end = input[`${prefix}End`] ?? 0;
+    if (![start, end].every(value => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 3600)) return null;
+    if (end && end <= start) return null;
+    result[`${prefix}Start`] = start;
+    result[`${prefix}End`] = end;
+  }
   for (const key of ["animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? defaults[key];
@@ -166,6 +185,7 @@ function cleanSettings(input) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? true;
   }
+  result.showThemes = false;
   result.layout = { desktop: {}, mobile: {} };
   for (const device of ["desktop", "mobile"]) {
     for (const item of ["profile", "social", "views", "themes", "audio"]) {
@@ -186,6 +206,13 @@ function cleanSettings(input) {
 }
 
 export class ProfileStore extends DurableObject {
+  broadcastSettings(data) {
+    const update = JSON.stringify({ type: "settings", data });
+    for (const socket of this.ctx.getWebSockets()) {
+      try { socket.send(update); } catch { /* Disconnected client. */ }
+    }
+  }
+
   async fetch(request) {
     const path = new URL(request.url).pathname;
     if (path === "/upload" && request.method === "POST") {
@@ -306,6 +333,41 @@ export class ProfileStore extends DurableObject {
       return (await validToken(token, this.env.ADMIN_PASSWORD)) ? new Response(null, { status: 204 }) : json({ error: "Unauthorized" }, 401);
     }
 
+    if (path === "/presets" || /^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path)) {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+      if (!(await validToken(token, this.env.ADMIN_PASSWORD))) return json({ error: "Unauthorized" }, 401);
+      const presets = (await this.ctx.storage.get("presets")) || [];
+      if (path === "/presets" && request.method === "GET") return json({ presets, activePresetId: (await this.ctx.storage.get("activePresetId")) || null });
+      if (path === "/presets" && request.method === "POST") {
+        let input;
+        try { input = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+        const name = typeof input.name === "string" ? input.name.trim() : "";
+        const settings = cleanSettings(input.settings);
+        if (!name || name.length > 40 || !settings) return json({ error: "Invalid preset" }, 400);
+        const existing = presets.find(item => item.name.toLowerCase() === name.toLowerCase());
+        if (!existing && presets.length >= 20) return json({ error: "Maximum 20 presets" }, 400);
+        const preset = { id: existing?.id || crypto.randomUUID(), name, settings, updatedAt: Date.now() };
+        const next = existing ? presets.map(item => item.id === existing.id ? preset : item) : [...presets, preset];
+        await this.ctx.storage.put("presets", next);
+        return json({ presets: next, activePresetId: (await this.ctx.storage.get("activePresetId")) || null }, existing ? 200 : 201);
+      }
+      const id = path.split("/")[2];
+      const selected = presets.find(item => item.id === id);
+      if (!selected) return json({ error: "Preset not found" }, 404);
+      if (path.endsWith("/activate") && request.method === "POST") {
+        await this.ctx.storage.put("settings", selected.settings);
+        await this.ctx.storage.put("activePresetId", id);
+        this.broadcastSettings(selected.settings);
+        return json({ settings: selected.settings, activePresetId: id });
+      }
+      if (request.method === "DELETE" && path === `/presets/${id}`) {
+        await this.ctx.storage.put("presets", presets.filter(item => item.id !== id));
+        if ((await this.ctx.storage.get("activePresetId")) === id) await this.ctx.storage.delete("activePresetId");
+        return json({ presets: presets.filter(item => item.id !== id), activePresetId: (await this.ctx.storage.get("activePresetId")) || null });
+      }
+      return json({ error: "Not found" }, 404);
+    }
+
     if (path === "/settings" && request.method === "PUT") {
       const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!(await validToken(token, this.env.ADMIN_PASSWORD))) return json({ error: "Unauthorized" }, 401);
@@ -314,10 +376,8 @@ export class ProfileStore extends DurableObject {
       const data = cleanSettings(input);
       if (!data) return json({ error: "Invalid settings" }, 400);
       await this.ctx.storage.put("settings", data);
-      const update = JSON.stringify({ type: "settings", data });
-      for (const socket of this.ctx.getWebSockets()) {
-        try { socket.send(update); } catch { /* Usunięte połączenie. */ }
-      }
+      await this.ctx.storage.delete("activePresetId");
+      this.broadcastSettings(data);
       return json(data);
     }
     return json({ error: "Not found" }, 404);
@@ -335,7 +395,7 @@ export default {
     if (origin && origin !== allowed) return json({ error: "Forbidden origin" }, 403);
     const cors = {
       "Access-Control-Allow-Origin": allowed,
-      "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Media-Kind, X-File-Size",
       "Vary": "Origin"
     };
@@ -389,7 +449,7 @@ export default {
       }
       return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
-    if (!["/settings", "/views", "/login", "/session", "/socket"].includes(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/views", "/login", "/session", "/socket", "/presets"].includes(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
