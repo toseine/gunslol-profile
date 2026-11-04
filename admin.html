@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b10">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel sterowania</title>
+  <link rel="stylesheet" href="./src/css/admin.css">
+  <script type="module" src="./src/js/admin.js"></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="topbar"><a href="./index.html" class="brand">◈ <span>CONTROL / 001</span></a><a href="./index.html" class="preview-link">Zobacz stronę ↗</a></header>
+
+    <section id="login-panel" class="panel login-panel" aria-labelledby="login-title">
+      <p class="kicker">DOSTĘP WŁAŚCICIELA</p>
+      <h1 id="login-title">Zaloguj się</h1>
+      <p class="muted">Panel otworzy się tylko dla Twojego konta Google wskazanego w konfiguracji.</p>
+      <button id="login-button" type="button" class="primary-button login-button">Zaloguj przez Google</button>
+      <p id="login-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="editor-panel" class="editor" aria-labelledby="editor-title" hidden>
+      <div class="editor-heading"><div><p class="kicker">PANEL STEROWANIA</p><h1 id="editor-title">Ustawienia wizytówki</h1><p class="muted">Zmiany będą widoczne u odwiedzających zaraz po zapisaniu.</p></div><button id="logout-button" type="button" class="quiet-button">Wyloguj</button></div>
+      <form id="settings-form">
+        <div class="panel section-panel">
+          <div class="section-heading"><span class="section-number">01</span><h2>Profil</h2></div>
+          <div class="field-grid">
+            <div><label for="profile-name">Nazwa / nick</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Twój nick"></div>
+            <div><label for="profile-bio">Krótki opis</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Twoja przestrzeń w sieci"></div>
+          </div>
+        </div>
+        <div class="panel section-panel">
+          <div class="section-heading"><span class="section-number">02</span><h2>Media i efekty</h2></div>
+          <div class="field-stack">
+            <div><label for="video-url">URL tła wideo (.mp4)</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"><small>Pusty adres wyłącza wideo. Serwer pliku musi pozwalać na odtwarzanie z GitHub Pages.</small></div>
+            <div><label for="music-url">URL muzyki (.mp3)</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"><small>Przeglądarki mogą wymagać kliknięcia „Włącz muzykę”.</small></div>
+            <label class="toggle-row" for="snow-enabled"><span><strong>Efekt śniegu</strong><small>Animowany śnieg na stronie głównej</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
+          </div>
+        </div>
+        <div class="panel section-panel">
+          <div class="section-heading"><span class="section-number">03</span><h2>Social media</h2></div>
+          <div class="field-stack">
+            <div><label for="discord-url">Discord</label><input id="discord-url" name="discordUrl" type="url" maxlength="2000" placeholder="https://discord.gg/..."></div>
+            <div><label for="github-url">GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
+            <div><label for="youtube-url">YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
+          </div>
+        </div>
+        <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Zapisz zmiany <span>↗</span></button></div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
