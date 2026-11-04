@@ -1,125 +1,85 @@
-import { apiUrl, isConfigured } from "./api-config.js";
+import { apiUrl, isConfigured } from './api-config.js';
 
 const $ = id => document.getElementById(id);
-const video = $("background-video");
-const music = $("music");
-const musicToggle = $("music-toggle");
-const status = $("status");
-$("profile-picture").addEventListener("error", () => {
-  $("profile-picture").hidden = true;
-  $("avatar-letter").hidden = false;
-});
-let currentMusicUrl = "";
-let musicWanted = true;
-let settings = {};
-let activeTheme = "";
-let lastDefaultTheme = "";
-const themes = ["home", "hacker", "rain", "anime", "car"];
-const mediaKeys = {
-  home: ["videoUrl", "musicUrl"],
-  hacker: ["hackerVideoUrl", "hackerMusicUrl"],
-  rain: ["rainVideoUrl", "rainMusicUrl"],
-  anime: ["animeVideoUrl", "animeMusicUrl"],
-  car: ["carVideoUrl", "carMusicUrl"]
+const themes = ['home', 'hacker', 'rain', 'anime', 'car'];
+const media = {
+  home: ['videoUrl', 'musicUrl', 'background-music'],
+  hacker: ['hackerVideoUrl', 'hackerMusicUrl', 'hacker-music'],
+  rain: ['rainVideoUrl', 'rainMusicUrl', 'rain-music'],
+  anime: ['animeVideoUrl', 'animeMusicUrl', 'anime-music'],
+  car: ['carVideoUrl', 'carMusicUrl', 'car-music']
 };
+let activeTheme = 'home';
+let previousDefault = '';
 
 function safeUrl(value) {
-  if (typeof value !== "string" || !value.trim()) return "";
+  if (typeof value !== 'string' || !value.trim()) return '';
   try {
-    const url = new URL(value.trim(), location.href);
-    return ["https:", "http:"].includes(url.protocol) ? url.href : "";
-  } catch { return ""; }
+    const url = new URL(value.trim());
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+  } catch { return ''; }
 }
 
-function setSocial(id, value) {
-  const link = $(id);
-  const url = safeUrl(value);
-  link.hidden = !url;
-  if (url) link.href = url;
-  else link.removeAttribute("href");
+function updateMusicToggle() {
+  const audio = $(media[activeTheme][2]);
+  $('music-toggle').hidden = !audio.src || !audio.paused;
 }
 
-function setVideo(value) {
-  const url = safeUrl(value);
-  if (video.dataset.url === url) return;
-  video.dataset.url = url;
-  video.pause();
-  video.removeAttribute("src");
-  video.load();
-  video.hidden = !url;
-  if (url) {
-    video.src = url;
-    video.play().catch(() => {});
+function render(data) {
+  window.profileSettings = data;
+  document.title = `${data.name || 'Profile'} · profile`;
+  window.dispatchEvent(new CustomEvent('profile:settings', { detail: data }));
+  document.querySelector('.profile-picture').src = safeUrl(data.avatarUrl) || 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%3E%3Cstop%20stop-color%3D%22%237afcff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%239b5cff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22url%28%23g%29%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2259%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E';
+  for (const [social, field] of [['discord', 'discordUrl'], ['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl']]) {
+    const link = $(`${social}-link`);
+    const url = safeUrl(data[field]);
+    link.hidden = !url;
+    if (url) link.href = url;
+    else link.removeAttribute('href');
   }
-}
-
-function syncMusicButton() {
-  const playing = !music.paused && !!currentMusicUrl;
-  musicToggle.hidden = !currentMusicUrl;
-  musicToggle.setAttribute("aria-pressed", String(playing));
-  $("music-label").textContent = playing ? "Wycisz muzykę" : "Włącz muzykę";
-}
-
-async function setMusic(value) {
-  const url = safeUrl(value);
-  if (url === currentMusicUrl) return;
-  currentMusicUrl = url;
-  music.pause();
-  music.removeAttribute("src");
-  music.load();
-  if (url) {
-    music.src = url;
-    if (musicWanted) {
-      try { await music.play(); } catch { /* Autoplay może wymagać gestu użytkownika. */ }
+  for (const [, audioField, audioId] of Object.values(media)) {
+    const audio = $(audioId);
+    const url = safeUrl(data[audioField]);
+    if (audio.dataset.url !== url) {
+      audio.dataset.url = url;
+      audio.pause();
+      if (url) audio.src = url;
+      else audio.removeAttribute('src');
     }
   }
-  syncMusicButton();
+  const nextDefault = themes.includes(data.defaultTheme) ? data.defaultTheme : 'home';
+  if (!previousDefault || previousDefault !== nextDefault) activeTheme = nextDefault;
+  previousDefault = nextDefault;
+  window.applyTheme?.(activeTheme);
+  setSnow(data.snowEnabled === true);
+  $('api-status').textContent = '';
+  updateMusicToggle();
 }
 
-musicToggle.addEventListener("click", async () => {
-  if (music.paused) {
-    musicWanted = true;
-    try { await music.play(); } catch { /* Niedostępny plik lub ograniczenie przeglądarki. */ }
-  } else {
-    musicWanted = false;
-    music.pause();
-  }
-  syncMusicButton();
-});
-music.addEventListener("play", syncMusicButton);
-music.addEventListener("pause", syncMusicButton);
-music.volume = 0.3;
-$("volume-slider").addEventListener("input", event => { music.volume = Number(event.target.value); });
-$("transparency-slider").addEventListener("input", event => {
-  document.documentElement.style.setProperty("--card-alpha", event.target.value);
-});
-
-function setTheme(theme) {
-  activeTheme = themes.includes(theme) ? theme : "home";
-  document.body.classList.remove(...themes.map(name => `${name}-theme`));
-  document.body.classList.add(`${activeTheme}-theme`);
-  for (const button of document.querySelectorAll(".theme-button")) {
-    button.setAttribute("aria-pressed", String(button.dataset.theme === activeTheme));
-  }
-  const [videoKey, musicKey] = mediaKeys[activeTheme];
-  setVideo(settings[videoKey]);
-  setMusic(settings[musicKey]);
+for (const theme of themes) {
+  const button = $(`${theme}-theme`);
+  button.setAttribute('role', 'button');
+  button.setAttribute('tabindex', '0');
+  button.setAttribute('aria-label', `${theme} theme`);
+  button.addEventListener('click', () => { activeTheme = theme; setTimeout(updateMusicToggle, 100); });
+  button.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); button.click(); }
+  });
 }
-document.querySelectorAll(".theme-button").forEach(button => {
-  button.addEventListener("click", () => setTheme(button.dataset.theme));
+$('music-toggle').addEventListener('click', async () => {
+  try { await $(media[activeTheme][2]).play(); } catch { /* Blokada autoodtwarzania. */ }
+  updateMusicToggle();
 });
+for (const [, , audioId] of Object.values(media)) {
+  $(audioId).addEventListener('play', updateMusicToggle);
+  $(audioId).addEventListener('pause', updateMusicToggle);
+}
 
-// Przy niektórych ustawieniach przeglądarki autoplay ruszy dopiero po pierwszym geście.
-document.addEventListener("pointerdown", () => {
-  if (musicWanted && currentMusicUrl && music.paused) music.play().catch(() => {});
-}, { once: true });
-
-const canvas = $("snow-canvas");
-const ctx = canvas.getContext("2d");
+const canvas = $('snow-canvas');
+const ctx = canvas.getContext('2d');
 let snowEnabled = false;
 let flakes = [];
-let animationFrame = 0;
-
+let frame = 0;
 function resizeSnow() {
   const scale = Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(innerWidth * scale);
@@ -128,111 +88,54 @@ function resizeSnow() {
   canvas.style.height = `${innerHeight}px`;
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   flakes = Array.from({ length: Math.min(110, Math.floor(innerWidth / 12)) }, () => ({
-    x: Math.random() * innerWidth,
-    y: Math.random() * innerHeight,
-    r: Math.random() * 1.9 + 0.7,
-    speed: Math.random() * 1.2 + 0.35,
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    r: Math.random() * 1.9 + 0.7, speed: Math.random() * 1.2 + 0.35,
     drift: Math.random() * 0.8 - 0.4
   }));
 }
-addEventListener("resize", () => { if (snowEnabled) resizeSnow(); });
-
 function drawSnow() {
   if (!snowEnabled) return;
   ctx.clearRect(0, 0, innerWidth, innerHeight);
-  ctx.fillStyle = "rgba(218, 235, 255, .72)";
+  ctx.fillStyle = 'rgba(218, 235, 255, .72)';
   for (const flake of flakes) {
-    ctx.beginPath();
-    ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2);
-    ctx.fill();
-    flake.y += flake.speed;
-    flake.x += flake.drift;
+    ctx.beginPath(); ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2); ctx.fill();
+    flake.y += flake.speed; flake.x += flake.drift;
     if (flake.y > innerHeight + 4) { flake.y = -4; flake.x = Math.random() * innerWidth; }
-    if (flake.x < -4) flake.x = innerWidth + 4;
-    if (flake.x > innerWidth + 4) flake.x = -4;
   }
-  animationFrame = requestAnimationFrame(drawSnow);
+  frame = requestAnimationFrame(drawSnow);
 }
-
 function setSnow(enabled) {
-  if (snowEnabled === enabled) return;
+  if (enabled === snowEnabled) return;
   snowEnabled = enabled;
   canvas.hidden = !enabled;
   if (enabled) { resizeSnow(); drawSnow(); }
-  else { cancelAnimationFrame(animationFrame); ctx.clearRect(0, 0, innerWidth, innerHeight); }
+  else { cancelAnimationFrame(frame); ctx.clearRect(0, 0, innerWidth, innerHeight); }
 }
-
-const cursor = $("cursor");
-if (matchMedia("(pointer: fine)").matches) {
-  document.addEventListener("pointermove", event => {
-    cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
-    cursor.classList.add("visible");
-  });
-  document.addEventListener("pointerout", event => {
-    if (!event.relatedTarget) cursor.classList.remove("visible");
-  });
-  document.querySelectorAll("a, button").forEach(el => {
-    el.addEventListener("pointerenter", () => cursor.classList.add("hover"));
-    el.addEventListener("pointerleave", () => cursor.classList.remove("hover"));
-  });
-}
-
-function render(data) {
-  settings = data || {};
-  const name = typeof data?.name === "string" && data.name.trim() ? data.name.trim() : "Twój nick";
-  $("profile-name").textContent = name;
-  $("avatar-letter").textContent = [...name][0]?.toUpperCase() || "N";
-  const avatar = $("profile-picture");
-  const avatarUrl = safeUrl(data?.avatarUrl);
-  avatar.hidden = !avatarUrl;
-  $("avatar-letter").hidden = !!avatarUrl;
-  if (avatarUrl) avatar.src = avatarUrl;
-  else avatar.removeAttribute("src");
-  $("profile-bio").textContent = typeof data?.bio === "string" ? data.bio : "Twoja przestrzeń w sieci.";
-  document.title = `${name} · profil`;
-  const nextDefault = themes.includes(data?.defaultTheme) ? data.defaultTheme : "home";
-  if (!activeTheme || nextDefault !== lastDefaultTheme) activeTheme = nextDefault;
-  lastDefaultTheme = nextDefault;
-  setTheme(activeTheme);
-  setSnow(data?.snowEnabled === true);
-  setSocial("discord-link", data?.discordUrl);
-  setSocial("github-link", data?.githubUrl);
-  setSocial("youtube-link", data?.youtubeUrl);
-  setSocial("tiktok-link", data?.tiktokUrl);
-  document.querySelector(".social-links").hidden = ["discord-link", "github-link", "youtube-link", "tiktok-link"].every(id => $(id).hidden);
-  status.textContent = data ? "" : "Profil czeka na pierwszą konfigurację w panelu admina.";
-}
+addEventListener('resize', () => { if (snowEnabled) resizeSnow(); });
 
 async function loadSettings() {
   try {
-    const response = await fetch(`${apiUrl}/settings`, { cache: "no-store" });
+    const response = await fetch(`${apiUrl}/settings`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     render(await response.json());
   } catch (error) {
-    status.textContent = "Nie udało się pobrać profilu. Ponawiam połączenie…";
-    console.error("Odczyt profilu:", error);
+    $('api-status').textContent = 'Connecting to profile…';
+    console.error('Profile load failed:', error);
   }
 }
-
 let retryDelay = 1000;
 function connectLive() {
-  const socketUrl = `${apiUrl.replace(/^http/, "ws")}/socket`;
-  let socket;
-  try { socket = new WebSocket(socketUrl); }
-  catch { setTimeout(connectLive, retryDelay); return; }
-  socket.addEventListener("open", () => { retryDelay = 1000; });
-  socket.addEventListener("message", event => {
-    try {
-      const message = JSON.parse(event.data);
-      if (message.type === "settings") render(message.data);
-    } catch (error) { console.error("Nieprawidłowe dane profilu:", error); }
+  const socket = new WebSocket(`${apiUrl.replace(/^http/, 'ws')}/socket`);
+  socket.addEventListener('open', () => { retryDelay = 1000; });
+  socket.addEventListener('message', event => {
+    try { const message = JSON.parse(event.data); if (message.type === 'settings') render(message.data); }
+    catch (error) { console.error('Invalid profile update:', error); }
   });
-  socket.addEventListener("close", () => {
+  socket.addEventListener('close', () => {
     setTimeout(() => { loadSettings(); connectLive(); }, retryDelay);
     retryDelay = Math.min(retryDelay * 2, 30000);
   });
-  socket.addEventListener("error", () => socket.close());
+  socket.addEventListener('error', () => socket.close());
 }
-
-if (!isConfigured) status.textContent = "Uzupełnij adres Workera w src/js/api-config.js.";
-else { loadSettings(); connectLive(); }
+if (isConfigured) { loadSettings(); connectLive(); }
+else $('api-status').textContent = 'Set the API URL in src/js/api-config.js.';
