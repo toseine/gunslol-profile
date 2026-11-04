@@ -275,7 +275,7 @@ for (const [fieldId, kind, accept] of uploadFields) {
       return;
     }
     button.disabled = true;
-    status.textContent = "Uploading to GitHub…";
+    status.textContent = "Uploading…";
     try {
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -289,10 +289,10 @@ for (const [fieldId, kind, accept] of uploadFields) {
         body: base64
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(response.status === 503 ? "GitHub upload token is missing in Cloudflare. You can still paste a direct file URL." : result.error || `HTTP ${response.status}`);
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
       field.value = result.url;
       dirty = true;
-      status.textContent = "Uploaded. GitHub Pages may need about a minute to publish the file.";
+      status.textContent = result.url.includes("workers.dev/media/") ? "Uploaded to Cloudflare and ready now." : "Uploaded to GitHub. Publishing may take about a minute.";
       message("editor-status", "Media uploaded. Saving its URL…");
       if (!await saveChanges()) throw new Error("File uploaded, but its URL was not saved. Click Save changes.");
     } catch (error) {
