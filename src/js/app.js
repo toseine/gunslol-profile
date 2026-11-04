@@ -199,6 +199,7 @@ function render(data) {
   setSocial("github-link", data?.githubUrl);
   setSocial("youtube-link", data?.youtubeUrl);
   setSocial("tiktok-link", data?.tiktokUrl);
+  document.querySelector(".social-links").hidden = ["discord-link", "github-link", "youtube-link", "tiktok-link"].every(id => $(id).hidden);
   status.textContent = data ? "" : "Profil czeka na pierwszą konfigurację w panelu admina.";
 }
 
