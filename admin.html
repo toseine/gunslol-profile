@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=3">
-  <script type="module" src="./src/js/admin.js?v=5"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=4">
+  <script type="module" src="./src/js/admin.js?v=6"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -31,10 +31,11 @@
         <div class="nav-user"><span class="nav-user-avatar">◈</span><span><strong id="nav-display-name">Your profile</strong><small>Owner dashboard</small></span></div>
         <div class="nav-caption">CUSTOMIZE</div>
         <button type="button" class="nav-button active" data-target="profile">◉ <span>Profile</span></button>
-        <button type="button" class="nav-button" data-target="media">▧ <span>Media & themes</span></button>
+        <button type="button" class="nav-button" data-target="media">▧ <span>Media & music</span></button>
         <button type="button" class="nav-button" data-target="socials">⌁ <span>Social links</span></button>
         <button type="button" class="nav-button" data-target="appearance">✦ <span>Appearance</span></button>
         <button type="button" class="nav-button" data-target="layout">▦ <span>Layout</span></button>
+        <button type="button" class="nav-button" data-target="presets">◇ <span>Presets</span></button>
         <div class="nav-spacer"></div><a href="./index.html" target="_blank" rel="noopener" class="nav-footer-link">↗ View profile</a>
       </nav>
       <div class="editor-heading"><div><p class="kicker">PROFILE STUDIO</p><h1 id="editor-title">Customize profile</h1><p class="muted" id="section-description">Edit your identity and avatar. Changes appear on the live page when saved.</p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
@@ -45,12 +46,13 @@
             <div><label for="profile-name">Display name</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Your name"></div>
             <div><label for="profile-bio">Short bio</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Your space on the web"></div>
             <div class="media-field"><label for="avatar-url">Avatar or GIF URL</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
-            <div><label for="default-theme">Default theme</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
+            <div><label for="default-theme">Profile style</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
             <div><label for="enter-text">Entry screen text</label><input id="enter-text" name="enterText" type="text" maxlength="60" placeholder="Click to enter"></div>
           </div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
-          <div class="section-heading"><span class="section-number">02</span><h2>Media for five themes</h2></div>
+          <div class="section-heading"><span class="section-number">02</span><h2>Media & music</h2></div>
+          <p class="muted">Only the selected profile style is visible to visitors. Save different looks as presets.</p>
           <div class="field-stack">
             <div class="theme-fields"><h3>1 · Home</h3><div class="media-field"><label for="video-url">Background video or GIF</label><input id="video-url" name="videoUrl" type="url" maxlength="2000" placeholder="https://example.com/background.mp4"></div><div class="media-field"><label for="music-url">Music</label><input id="music-url" name="musicUrl" type="url" maxlength="2000" placeholder="https://example.com/music.mp3"></div></div>
             <div class="theme-fields"><h3>2 · Hacker</h3><div class="media-field"><label for="hacker-video">Background video or GIF</label><input id="hacker-video" name="hackerVideoUrl" type="url" maxlength="2000"></div><div class="media-field"><label for="hacker-music">Music</label><input id="hacker-music" name="hackerMusicUrl" type="url" maxlength="2000"></div></div>
@@ -100,7 +102,7 @@
             </div>
             <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
             <label class="toggle-row" for="show-views"><span><strong>Show view counter</strong><small>Monthly unique visitors</small></span><span class="switch"><input id="show-views" name="showViews" type="checkbox" checked><span class="slider"></span></span></label>
-            <label class="toggle-row" for="show-themes"><span><strong>Show theme switcher</strong><small>Let visitors choose one of five themes</small></span><span class="switch"><input id="show-themes" name="showThemes" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="show-themes" hidden><span><strong>Show theme switcher</strong><small>Let visitors choose one of five themes</small></span><span class="switch"><input id="show-themes" name="showThemes" type="checkbox"><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-volume"><span><strong>Show music control</strong><small>Volume slider on the public page</small></span><span class="switch"><input id="show-volume" name="showVolume" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="animate-entrance"><span><strong>Entrance animation</strong><small>Profile fades in after the visitor enters</small></span><span class="switch"><input id="animate-entrance" name="animateEntrance" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="animate-text"><span><strong>Animated name and bio</strong><small>Typing effect on the profile</small></span><span class="switch"><input id="animate-text" name="animateText" type="checkbox" checked><span class="slider"></span></span></label>
@@ -118,10 +120,16 @@
               <button class="layout-item layout-profile" data-item="profile" type="button"><span class="layout-avatar">◈</span><span><strong id="layout-name">Your name</strong><small id="layout-bio">Your space on the web</small></span></button>
               <button class="layout-item layout-social" data-item="social" type="button">◉ &nbsp; Social links</button>
               <button class="layout-item layout-views" data-item="views" type="button">◉ &nbsp; Views</button>
-              <button class="layout-item layout-themes" data-item="themes" type="button">● ● ● ● ●</button>
               <button class="layout-item layout-audio" data-item="audio" type="button">♫ &nbsp; Music</button>
             </div>
           </div>
+        </div>
+        <div class="panel section-panel" data-section="presets" hidden>
+          <div class="section-heading"><span class="section-number">06</span><h2>Saved presets</h2></div>
+          <p class="muted">A preset saves the whole profile, including its style, media, music trim, effects and layout. Only one preset is live at a time.</p>
+          <div class="field-grid"><div><label for="preset-name">Preset name</label><input id="preset-name" type="text" maxlength="40" placeholder="e.g. Purple night"></div><div><label for="preset-list">Saved presets</label><select id="preset-list"><option value="">Choose a preset</option></select></div></div>
+          <div class="preset-actions"><button id="preset-save" type="button" class="primary-button">Save current as preset</button><button id="preset-load" type="button" class="quiet-button">Load into editor</button><button id="preset-activate" type="button" class="quiet-button">Activate now</button><button id="preset-delete" type="button" class="quiet-button">Delete preset</button></div>
+          <p id="preset-status" class="status" role="status" aria-live="polite"></p>
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Save changes <span>↗</span></button></div>
       </form>
