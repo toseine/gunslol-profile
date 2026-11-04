@@ -168,3 +168,10 @@ form .badge-options label:has(input:checked) { border-color: #b492f6; background
 @media (max-width: 700px) {
   .preview-aside { margin-top: 16px; }
 }
+.mini-social-icon { display: block; width: var(--mini-social-size, 18px); height: var(--mini-social-size, 18px); background: var(--mini-icon-color, #fff); mask: var(--icon-url) center / contain no-repeat; -webkit-mask: var(--icon-url) center / contain no-repeat; }
+.mini-social-icon.icon-discord { --icon-url: url('../../assets/discord.svg'); }
+.mini-social-icon.icon-github { --icon-url: url('../../assets/github.svg'); }
+.mini-social-icon.icon-youtube { --icon-url: url('../../assets/youtube.svg'); }
+.mini-social-icon.icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); }
+.mini-social-icon.icon-telegram { --icon-url: url('../../assets/telegram.svg'); }
+#edit-icon-style { justify-self: start; color: #d5bfff; }
