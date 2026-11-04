@@ -19,14 +19,14 @@ Publiczna strona `index.html` działa na GitHub Pages. Ustawienia profilu są za
 3. W Cloudflare Worker → **Settings → Variables and Secrets** dodaj sekret `ADMIN_PASSWORD` o długości co najmniej 16 znaków. Hasło ustaw samodzielnie; nie zapisuj go w GitHubie ani w plikach strony.
 4. Skopiuj adres Workera `https://gunslol-profile-api.TWOJ_SUBDOMAIN.workers.dev` do `src/js/api-config.js` i opublikuj ten plik na GitHubie. W `worker/wrangler.jsonc` zmienna `ALLOWED_ORIGIN` powinna być równa origin GitHub Pages, w tym projekcie `https://toseine.github.io`.
 5. Wejdź na `https://toseine.github.io/gunslol-profile/admin.html`, wpisz hasło i zapisz ustawienia. Profil publiczny jest pod `https://toseine.github.io/gunslol-profile/`.
-6. Aby uruchomić upload z panelu, utwórz GitHub fine-grained personal access token z dostępem tylko do `toseine/gunslol-profile` i uprawnieniem **Contents: Read and write**. W Cloudflare Worker → **Settings → Runtime variables and secrets** dodaj go jako sekret `GITHUB_UPLOAD_TOKEN`. Nie umieszczaj tokenu w repozytorium ani na stronie.
+6. Upload działa bez dodatkowego tokenu: pliki są zapisywane w Cloudflare Durable Object. Opcjonalnie, aby zapisywać je w repozytorium GitHub, utwórz fine-grained personal access token tylko dla `toseine/gunslol-profile` z uprawnieniem **Contents: Read and write** i dodaj jako sekret Workera `GITHUB_UPLOAD_TOKEN`. Nie umieszczaj tokenu w repozytorium ani na stronie.
 
 ## Ważne
 
 - Panel nie tworzy kont dla odwiedzających. Hasło jest sprawdzane wyłącznie w Workerze; przeglądarka przechowuje tymczasowy token w `sessionStorage` przez maksymalnie 12 godzin.
 - Użyj publicznych, bezpośrednich URL do plików `.mp4` i `.mp3`. Autostart dźwięku może być zablokowany przez przeglądarkę; wtedy pojawi się przycisk **Włącz muzykę**.
 - Panel pozwala ustawić zdjęcie/GIF profilu, motyw startowy i osobne tło oraz muzykę dla pięciu motywów: podstawowego, hacker, deszcz, anime i samochód. Odwiedzający mogą chwilowo przełączyć motyw przyciskami 1–5. Puste pola mediów są dozwolone.
-- Panel ma upload obrazów/GIF, MP4 i MP3 do katalogu `media/` na GitHubie (maksymalnie 5 MB dla avatara i 15 MB dla innych plików). Po publikacji GitHub Pages zapisuje URL w profilu. Można ustawić fragment filmu, kadr tła, animacje, kursor i położenie elementów osobno dla komputera i telefonu.
+- Panel ma upload obrazów/GIF, MP4 i MP3 do Cloudflare Durable Object (maksymalnie 5 MB dla avatara i 15 MB dla innych plików). Plik jest dostępny od razu pod adresem Workera. Gdy jest ustawiony `GITHUB_UPLOAD_TOKEN`, upload używa katalogu `media/` na GitHubie. Można ustawić fragment filmu, kadr tła, animacje, kursor i położenie elementów osobno dla komputera i telefonu.
 - Discord przyjmuje nazwę użytkownika; przycisk na profilu kopiuje ją do schowka. Nie wymaga kont odwiedzających.
 - Darmowy plan Workers i Durable Objects ma limity użycia. Przy przekroczeniu limitów API może przestać odpowiadać do ich odnowienia.
 
