@@ -63,7 +63,9 @@ const defaults = {
   discordUrl: "",
   githubUrl: "",
   youtubeUrl: "",
-  tiktokUrl: ""
+  tiktokUrl: "",
+  telegramUrl: "",
+  badges: []
 };
 const encoder = new TextEncoder();
 const MEDIA_CHUNK_CHARS = 4 * 128 * 1024;
@@ -143,6 +145,12 @@ function cleanSettings(input) {
   if (!result.name || typeof input.snowEnabled !== "boolean") return null;
   if (input.discordUsername != null && (typeof input.discordUsername !== "string" || input.discordUsername.length > 64)) return null;
   result.discordUsername = (input.discordUsername || "").trim().replace(/^@/, "");
+  if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
+  result.telegramUrl = (input.telegramUrl || "").trim();
+  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter"];
+  const badges = input.badges ?? [];
+  if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
+  result.badges = badges;
   result.snowEnabled = input.snowEnabled;
   for (const [key, min, max, fallback] of [
     ["backgroundStart", 0, 3600, 0], ["backgroundEnd", 0, 3600, 0],
@@ -201,7 +209,7 @@ function cleanSettings(input) {
   }
   if (!["home", "hacker", "rain", "anime", "car"].includes(input.defaultTheme)) return null;
   result.defaultTheme = input.defaultTheme;
-  for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl"]) {
+  for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl"]) {
     if (!result[key]) continue;
     try {
       if (!["https:", "http:"].includes(new URL(result[key]).protocol)) return null;
