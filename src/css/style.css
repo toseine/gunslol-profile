@@ -964,3 +964,19 @@ body[data-name-effect="gradient"] #profile-name { background: linear-gradient(11
 body[data-social-style="solid"] .social-links a { background: var(--accentColor, #b99af7); border-color: var(--accentColor, #b99af7); }
 body[data-social-style="outline"] .social-links a { background: transparent; border-color: var(--accentColor, #b99af7); backdrop-filter: none; }
 .custom-cursor, .theme-button.active, .theme-button:hover { box-shadow: 0 0 14px var(--accentColor, #b99af7); }
+
+/* Sizes controlled in the owner dashboard. */
+.position-profile { width: min(var(--cardWidth, 760px), calc(100vw - 44px)); }
+.profile-container { width: var(--avatarSize, 174px); height: var(--avatarSize, 174px); flex: 0 0 var(--avatarSize, 174px); }
+.profile-picture { width: 100%; height: 100%; }
+#profile-name { font-size: var(--nameSize, 59px); overflow-wrap: anywhere; }
+#profile-bio { font-size: var(--bioSize, 19px); overflow-wrap: anywhere; }
+.social-links a { width: var(--socialSize, 42px); height: var(--socialSize, 42px); }
+.social-icon { width: 72%; height: 72%; }
+@media (max-width: 640px) {
+    .position-profile { width: min(var(--cardWidth, 760px), calc(100vw - 48px)); }
+    .profile-container { width: min(var(--avatarSize, 174px), 125px); height: min(var(--avatarSize, 174px), 125px); flex-basis: min(var(--avatarSize, 174px), 125px); }
+    #profile-name { font-size: min(var(--nameSize, 59px), 48px); }
+    #profile-bio { font-size: min(var(--bioSize, 19px), 25px); }
+    .social-links a { width: min(var(--socialSize, 42px), 58px); height: min(var(--socialSize, 42px), 58px); }
+}
