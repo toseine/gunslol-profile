@@ -44,6 +44,7 @@ const defaults = {
   fontStyle: "serif",
   nameEffect: "none",
   socialStyle: "glass",
+  socialIconSet: "brand",
   profileOpacity: 100,
   profileBlur: 0,
   avatarRadius: 28,
@@ -185,7 +186,7 @@ function cleanSettings(input) {
     if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return null;
     result[key] = value;
   }
-  for (const [key, choices] of Object.entries({ fontStyle: ["serif", "sans", "mono"], nameEffect: ["none", "glow", "gradient"], socialStyle: ["glass", "solid", "outline"] })) {
+  for (const [key, choices] of Object.entries({ fontStyle: ["serif", "sans", "mono"], nameEffect: ["none", "glow", "gradient"], socialStyle: ["glass", "solid", "outline"], socialIconSet: ["brand", "minimal"] })) {
     const value = input[key] ?? defaults[key];
     if (!choices.includes(value)) return null;
     result[key] = value;
