@@ -51,6 +51,8 @@ const defaults = {
   tiktokUrl: ""
 };
 const encoder = new TextEncoder();
+const MEDIA_CHUNK_CHARS = 4 * 128 * 1024;
+const MEDIA_CHUNK_BYTES = MEDIA_CHUNK_CHARS / 4 * 3;
 
 function json(data, status = 200) {
   return Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
@@ -186,6 +188,71 @@ function cleanSettings(input) {
 export class ProfileStore extends DurableObject {
   async fetch(request) {
     const path = new URL(request.url).pathname;
+    if (path === "/upload" && request.method === "POST") {
+      const filename = request.headers.get("X-Media-Id");
+      const mime = request.headers.get("Content-Type")?.split(";")[0]?.toLowerCase();
+      const size = Number(request.headers.get("X-File-Size"));
+      if (!/^[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(filename || "") || !Number.isSafeInteger(size) || size < 1 || size > 15 * 1024 * 1024) return json({ error: "Invalid media" }, 400);
+      const content = await request.text();
+      if (content.length < 4 || content.length > Math.ceil(size / 3) * 4 + 4) return json({ error: "Invalid upload size" }, 400);
+      const chunks = [];
+      let decodedSize = 0;
+      try {
+        for (let offset = 0; offset < content.length; offset += MEDIA_CHUNK_CHARS) {
+          const binary = atob(content.slice(offset, offset + MEDIA_CHUNK_CHARS));
+          const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+          decodedSize += bytes.byteLength;
+          chunks.push(bytes);
+        }
+      } catch { return json({ error: "Invalid file data" }, 400); }
+      if (decodedSize !== size) return json({ error: "Invalid upload size" }, 400);
+      await this.ctx.storage.transaction(async transaction => {
+        for (let index = 0; index < chunks.length; index++) await transaction.put(`media:${filename}:${index}`, chunks[index]);
+        await transaction.put(`media:${filename}:meta`, { mime, size, chunks: chunks.length });
+      });
+      return json({ url: `${new URL(request.url).origin}/media/${filename}` }, 201);
+    }
+    const mediaMatch = path.match(/^\/media\/([0-9a-f-]{36}\.(?:gif|png|jpg|webp|mp4|webm|mp3|ogg|wav))$/);
+    if (mediaMatch && (request.method === "GET" || request.method === "HEAD")) {
+      const filename = mediaMatch[1];
+      const meta = await this.ctx.storage.get(`media:${filename}:meta`);
+      if (!meta) return json({ error: "Media not found" }, 404);
+      const range = request.headers.get("Range");
+      let start = 0, end = meta.size - 1;
+      if (range) {
+        const match = /^bytes=(\d+)-(\d*)$/.exec(range);
+        if (!match) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${meta.size}` } });
+        start = Number(match[1]);
+        end = match[2] ? Math.min(Number(match[2]), end) : end;
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= meta.size) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${meta.size}` } });
+      }
+      const headers = {
+        "Content-Type": meta.mime,
+        "Content-Length": String(end - start + 1),
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
+        "Cross-Origin-Resource-Policy": "cross-origin"
+      };
+      if (range) headers["Content-Range"] = `bytes ${start}-${end}/${meta.size}`;
+      if (request.method === "HEAD") return new Response(null, { status: range ? 206 : 200, headers });
+      let chunkIndex = Math.floor(start / MEDIA_CHUNK_BYTES);
+      let position = start;
+      const stream = new ReadableStream({
+        pull: async controller => {
+          if (position > end) { controller.close(); return; }
+          const stored = await this.ctx.storage.get(`media:${filename}:${chunkIndex}`);
+          if (!stored) { controller.error(new Error("Missing media chunk")); return; }
+          const bytes = stored instanceof Uint8Array ? stored : new Uint8Array(stored);
+          const offset = position - chunkIndex * MEDIA_CHUNK_BYTES;
+          const part = bytes.subarray(offset, Math.min(bytes.length, offset + end - position + 1));
+          controller.enqueue(part);
+          position += part.length;
+          chunkIndex++;
+        }
+      });
+      return new Response(stream, { status: range ? 206 : 200, headers });
+    }
     if (path === "/socket" && request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
       const [client, server] = Object.values(new WebSocketPair());
       this.ctx.acceptWebSocket(server);
@@ -277,7 +344,6 @@ export default {
     if (path === "/upload" && request.method === "POST") {
       const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!(await validToken(token, env.ADMIN_PASSWORD))) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
-      if (!env.GITHUB_UPLOAD_TOKEN) return new Response(JSON.stringify({ error: "GitHub uploads are not configured yet" }), { status: 503, headers: { ...cors, "Content-Type": "application/json" } });
       const kind = request.headers.get("X-Media-Kind");
       const mime = request.headers.get("Content-Type")?.split(";")[0]?.toLowerCase();
       const formats = {
@@ -290,6 +356,15 @@ export default {
       const limit = kind === "avatar" ? 5 * 1024 * 1024 : 15 * 1024 * 1024;
       if (!extension || !Number.isSafeInteger(size) || size < 1 || size > limit) {
         return new Response(JSON.stringify({ error: `Unsupported file or too large (avatar 5 MB, other media 15 MB)` }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      }
+      if (!env.GITHUB_UPLOAD_TOKEN) {
+        const filename = `${crypto.randomUUID()}.${extension}`;
+        const headers = new Headers(request.headers);
+        headers.set("X-Media-Id", filename);
+        const stored = await env.PROFILE.get(env.PROFILE.idFromName("main")).fetch(new Request(request.url, { method: "POST", headers, body: request.body }));
+        const responseHeaders = new Headers(stored.headers);
+        for (const [key, value] of Object.entries(cors)) responseHeaders.set(key, value);
+        return new Response(stored.body, { status: stored.status, headers: responseHeaders });
       }
       const content = await request.text();
       if (content.length < 4 || content.length > Math.ceil(size / 3) * 4 + 4) {
@@ -314,13 +389,13 @@ export default {
       }
       return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
-    if (!["/settings", "/views", "/login", "/session", "/socket"].includes(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/views", "/login", "/session", "/socket"].includes(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
     const headers = new Headers(response.headers);
     for (const [key, value] of Object.entries(cors)) headers.set(key, value);
-    headers.set("Cache-Control", "no-store");
+    if (!path.startsWith("/media/")) headers.set("Cache-Control", "no-store");
     return new Response(response.body, { status: response.status, headers });
   }
 };
