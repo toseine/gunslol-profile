@@ -116,27 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 500);
 
 
-  function initializeVisitorCounter() {
-    let totalVisitors = sessionStorage.getItem('totalVisitorCount');
-    if (!totalVisitors) {
-      totalVisitors = 0;
-      sessionStorage.setItem('totalVisitorCount', totalVisitors);
-    } else {
-      totalVisitors = parseInt(totalVisitors);
-    }
-
-    const hasVisited = sessionStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      totalVisitors++;
-      sessionStorage.setItem('totalVisitorCount', totalVisitors);
-      sessionStorage.setItem('hasVisited', 'true');
-    }
-
-    visitorCount.textContent = totalVisitors.toLocaleString();
-  }
-
-
-  initializeVisitorCounter();
+  visitorCount.textContent = '—';
 
 
   startScreen.addEventListener('click', () => {
