@@ -2,7 +2,7 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "videoUrl", "musicUrl", "snowEnabled", "discordUrl", "githubUrl", "youtubeUrl"];
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl"];
 const tokenKey = "profile_admin_session";
 let token = sessionStorage.getItem(tokenKey) || "";
 let dirty = false;
@@ -22,7 +22,7 @@ function fillForm(data = {}) {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
     if (key === "snowEnabled") el.checked = data[key] === true;
-    else el.value = typeof data[key] === "string" ? data[key] : "";
+    else el.value = typeof data[key] === "string" ? data[key] : key === "defaultTheme" ? "home" : "";
   }
   if (!data.name) form.elements.namedItem("name").value = "Twój nick";
   dirty = false;
@@ -110,7 +110,7 @@ form.addEventListener("submit", async event => {
   event.preventDefault();
   if (!token) return;
   const data = readForm();
-  const urls = ["videoUrl", "musicUrl", "discordUrl", "githubUrl", "youtubeUrl"];
+  const urls = fields.filter(key => key.endsWith("Url"));
   if (urls.some(key => !validUrl(data[key]))) {
     message("editor-status", "Adresy muszą zaczynać się od https:// lub http://.", "error");
     return;
