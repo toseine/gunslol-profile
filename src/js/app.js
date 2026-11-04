@@ -101,15 +101,20 @@ function render(data) {
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
   $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
-  const badgeLabels = { owner: ["◈", "Owner"], verified: ["✓", "Verified"], developer: ["⌘", "Developer"], partner: ["✦", "Partner"], supporter: ["♥", "Supporter"] };
+  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter" };
   const badgeContainer = $('profile-badges');
   badgeContainer.replaceChildren();
   for (const badge of Array.isArray(data.badges) ? data.badges : []) {
     if (!Object.hasOwn(badgeLabels, badge)) continue;
     const chip = document.createElement('span');
     chip.className = `profile-badge badge-${badge}`;
-    chip.title = badgeLabels[badge][1];
-    chip.textContent = `${badgeLabels[badge][0]} ${badgeLabels[badge][1]}`;
+    chip.setAttribute('role', 'img');
+    chip.setAttribute('aria-label', badgeLabels[badge]);
+    chip.dataset.label = badgeLabels[badge];
+    const icon = document.createElement('img');
+    icon.src = `./assets/badge-${badge}.svg`;
+    icon.alt = '';
+    chip.append(icon);
     badgeContainer.append(chip);
   }
   badgeContainer.hidden = !badgeContainer.childElementCount;

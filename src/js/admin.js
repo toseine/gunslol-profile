@@ -141,7 +141,24 @@ function updateMiniPreview() {
   $("nav-display-name").textContent = $("profile-name").value || "Your profile";
   $("mini-name").textContent = $("profile-name").value || "Your name";
   $("mini-bio").textContent = $("profile-bio").value || "Your space on the web";
-  $("mini-badges").textContent = Object.entries(badgeChoices).filter(([badge]) => $(`badge-${badge}`).checked).map(([, label]) => label).join(" · ");
+  const miniBadges = $("mini-badges");
+  miniBadges.replaceChildren();
+  for (const badge of Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked)) {
+    const icon = document.createElement("img");
+    icon.src = `./assets/badge-${badge}.svg`;
+    icon.alt = badgeChoices[badge].replace(/^[^ ]+ /, "");
+    miniBadges.append(icon);
+  }
+  const miniSocials = document.querySelector(".mini-socials");
+  miniSocials.replaceChildren();
+  for (const [name, id] of [["discord", "discord-username"], ["github", "github-url"], ["youtube", "youtube-url"], ["tiktok", "tiktok-url"], ["telegram", "telegram-url"]]) {
+    const value = $(id).value.trim();
+    if (!value || (name !== "discord" && !validUrl(value))) continue;
+    const icon = document.createElement("img");
+    icon.src = `./assets/${name}.svg`;
+    icon.alt = name;
+    miniSocials.append(icon);
+  }
   const avatar = $("avatar-url").value.trim();
   const avatarSource = avatar && validUrl(avatar) && avatar !== failedAvatarUrl ? avatar : "./assets/avatar.svg";
   if ($("mini-avatar").getAttribute("src") !== avatarSource) $("mini-avatar").src = avatarSource;
@@ -157,7 +174,7 @@ function updateMiniPreview() {
   $("mini-avatar").style.height = $("mini-avatar").style.width;
   $("mini-name").style.fontSize = `${Math.round(Number($("name-size").value) / 59 * 25)}px`;
   $("mini-bio").style.fontSize = `${Math.round(Number($("bio-size").value) / 19 * 11)}px`;
-  document.querySelector(".mini-socials").style.fontSize = `${Math.round(Number($("social-size").value) / 42 * 13)}px`;
+  miniSocials.style.setProperty("--mini-social-size", `${Math.round(Number($("social-size").value) / 42 * 18)}px`);
   $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
   $("blur-value").textContent = `${$("profile-blur").value}px`;
@@ -173,6 +190,7 @@ $("mini-avatar").addEventListener("error", event => {
 });
 for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
+for (const id of ["discord-username", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");
