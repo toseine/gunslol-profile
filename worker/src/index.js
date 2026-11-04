@@ -26,6 +26,19 @@ const defaults = {
   profileFloat: true,
   hoverTilt: true,
   cursorStyle: "orb",
+  enterText: "Click to enter",
+  accentColor: "#b99af7",
+  textColor: "#ffffff",
+  backgroundColor: "#090b10",
+  fontStyle: "serif",
+  nameEffect: "none",
+  socialStyle: "glass",
+  profileOpacity: 100,
+  profileBlur: 0,
+  avatarRadius: 28,
+  showViews: true,
+  showThemes: true,
+  showVolume: true,
   layout: {
     desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
     mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -130,6 +143,27 @@ function cleanSettings(input) {
   }
   if (input.cursorStyle != null && !["orb", "dot", "crosshair", "system"].includes(input.cursorStyle)) return null;
   result.cursorStyle = input.cursorStyle || "orb";
+  if (input.enterText != null && (typeof input.enterText !== "string" || input.enterText.length > 60)) return null;
+  result.enterText = (input.enterText || defaults.enterText).trim();
+  for (const key of ["accentColor", "textColor", "backgroundColor"]) {
+    const value = input[key] ?? defaults[key];
+    if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return null;
+    result[key] = value;
+  }
+  for (const [key, choices] of Object.entries({ fontStyle: ["serif", "sans", "mono"], nameEffect: ["none", "glow", "gradient"], socialStyle: ["glass", "solid", "outline"] })) {
+    const value = input[key] ?? defaults[key];
+    if (!choices.includes(value)) return null;
+    result[key] = value;
+  }
+  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87]]) {
+    const value = input[key] ?? defaults[key];
+    if (!Number.isInteger(value) || value < min || value > max) return null;
+    result[key] = value;
+  }
+  for (const key of ["showViews", "showThemes", "showVolume"]) {
+    if (input[key] != null && typeof input[key] !== "boolean") return null;
+    result[key] = input[key] ?? true;
+  }
   result.layout = { desktop: {}, mobile: {} };
   for (const device of ["desktop", "mobile"]) {
     for (const item of ["profile", "social", "views", "themes", "audio"]) {
