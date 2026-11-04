@@ -1,6 +1,9 @@
 import { apiUrl, isConfigured } from './api-config.js';
 
 const $ = id => document.getElementById(id);
+document.querySelector('.profile-picture').addEventListener('error', event => {
+  event.target.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22%237afcff%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2261%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%22%20font-size%3D%2236%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E';
+}, { once: true });
 const themes = ['home', 'hacker', 'rain', 'anime', 'car'];
 const media = {
   home: ['videoUrl', 'musicUrl', 'background-music'],
