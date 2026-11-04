@@ -146,3 +146,25 @@ form .badge-options label { display: inline-flex; align-items: center; gap: 7px;
 .badge-options input { accent-color: #ad8bf5; }
 #mini-badges { color: #c5a8ff; font-size: 10px; line-height: 1.4; }
 #mini-badges:empty { display: none; }
+.badge-options { gap: 10px; }
+form .badge-options label { gap: 9px; min-height: 48px; border-radius: 10px; background: #1b1825; font-size: 12px; transition: border-color .2s, background .2s; }
+form .badge-options label:has(input:checked) { border-color: #b492f6; background: #352447; }
+.badge-options img { width: 27px; height: 27px; flex: none; }
+#mini-badges { display: flex !important; gap: 3px; margin: 5px 0; }
+#mini-badges:empty { display: none !important; }
+#mini-badges img { width: 18px; height: 18px; }
+.mini-socials { display: flex; gap: 7px; align-items: center; min-height: 22px; letter-spacing: normal; }
+.mini-socials img { width: var(--mini-social-size, 18px); height: var(--mini-social-size, 18px); object-fit: contain; }
+.mini-socials:empty::before { content: 'Social icons appear here'; color: #9994aa; font-size: 10px; letter-spacing: 0; }
+.field-icon { display: inline-block; width: 18px; height: 18px; margin-right: 6px; vertical-align: middle; }
+.field-stack small { display: block; margin-top: 7px; color: #878c9c; font-size: 11px; }
+.nav-icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-button[data-target="media"] .nav-icon path { fill: currentColor; stroke: none; }
+.nav-button { gap: 11px; }
+@media (max-width: 1120px) {
+  .preview-aside { display: block; grid-column: 2; grid-row: 3; position: static; margin-top: 16px; }
+  .mini-stage { min-height: 230px; }
+}
+@media (max-width: 700px) {
+  .preview-aside { margin-top: 16px; }
+}

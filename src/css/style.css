@@ -966,10 +966,14 @@ body[data-social-style="outline"] .social-links a { background: transparent; bor
 .custom-cursor, .theme-button.active, .theme-button:hover { box-shadow: 0 0 14px var(--accentColor, #b99af7); }
 .profile-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 5px; }
 .profile-badges[hidden] { display: none !important; }
-.profile-badge { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; border: 1px solid color-mix(in srgb, var(--accentColor, #b99af7), transparent 50%); border-radius: 999px; background: rgba(20, 17, 29, .64); color: var(--textColor, #fff); font: 600 10px/1.1 Arial, sans-serif; letter-spacing: .02em; backdrop-filter: blur(8px); }
-.profile-badge.badge-verified { color: #a9e9ff; border-color: rgba(105, 207, 255, .55); }
-.profile-badge.badge-owner { color: #e4c1ff; }
-@media (max-width: 640px) { .profile-badge { font-size: 9px; padding: 3px 6px; } }
+.profile-badge { position: relative; display: inline-flex; align-items: center; padding: 0; border: 0; background: transparent; border-radius: 50%; cursor: help; }
+.profile-badge img { display: block; width: 30px; height: 30px; filter: drop-shadow(0 2px 5px #0009); transition: transform .2s, filter .2s; }
+.profile-badge:hover img { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 3px 9px #ab7dff99); }
+.profile-badge::after { content: attr(data-label); position: absolute; left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%); padding: 5px 8px; border: 1px solid #ffffff30; border-radius: 6px; background: #17121f; color: #fff; font: 11px Arial,sans-serif; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.profile-badge:hover::after { opacity: 1; }
+.social-links a { border-radius: 10px; background: rgba(16,14,24,.55); }
+.social-links a:hover { border-color: var(--accentColor, #b99af7); box-shadow: 0 0 15px color-mix(in srgb, var(--accentColor, #b99af7), transparent 65%); }
+.social-icon { object-fit: contain; }
 
 /* Sizes controlled in the owner dashboard. */
 .position-profile { width: min(var(--cardWidth, 760px), calc(100vw - 44px)); }
@@ -978,7 +982,7 @@ body[data-social-style="outline"] .social-links a { background: transparent; bor
 #profile-name { font-size: var(--nameSize, 59px); overflow-wrap: anywhere; }
 #profile-bio { font-size: var(--bioSize, 19px); overflow-wrap: anywhere; }
 .social-links a { width: var(--socialSize, 42px); height: var(--socialSize, 42px); }
-.social-icon { width: 72%; height: 72%; }
+.social-icon { width: 58%; height: 58%; }
 @media (max-width: 640px) {
     .position-profile { width: min(var(--cardWidth, 760px), calc(100vw - 48px)); }
     .profile-container { width: min(var(--avatarSize, 174px), 125px); height: min(var(--avatarSize, 174px), 125px); flex-basis: min(var(--avatarSize, 174px), 125px); }
