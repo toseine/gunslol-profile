@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=5">
-  <script type="module" src="./src/js/admin.js?v=8"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=6">
+  <script type="module" src="./src/js/admin.js?v=10"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -49,6 +49,7 @@
             <div><label for="default-theme">Profile style</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
             <div><label for="enter-text">Entry screen text</label><input id="enter-text" name="enterText" type="text" maxlength="60" placeholder="Click to enter"></div>
           </div>
+          <div class="badge-editor"><h3>Profile badges</h3><p class="muted">Decorative labels shown beside your name on this site.</p><div class="badge-options"><label><input id="badge-owner" type="checkbox"> ◈ Owner</label><label><input id="badge-verified" type="checkbox"> ✓ Verified</label><label><input id="badge-developer" type="checkbox"> ⌘ Developer</label><label><input id="badge-partner" type="checkbox"> ✦ Partner</label><label><input id="badge-supporter" type="checkbox"> ♥ Supporter</label></div></div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
           <div class="section-heading"><span class="section-number">02</span><h2>Media & music</h2></div>
@@ -82,6 +83,7 @@
             <div><label for="github-url">GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
             <div><label for="youtube-url">YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
             <div><label for="tiktok-url">TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
+            <div><label for="telegram-url">Telegram</label><input id="telegram-url" name="telegramUrl" type="url" maxlength="2000" placeholder="https://t.me/yourname"></div>
           </div>
         </div>
         <div class="panel section-panel" data-section="appearance" hidden>
@@ -138,7 +140,7 @@
         </div>
         <div class="savebar"><p id="editor-status" class="status" role="status" aria-live="polite"></p><button id="save-button" type="submit" class="primary-button">Save changes <span>↗</span></button></div>
       </form>
-      <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-bio">Your space on the web</span><div class="mini-socials">● ● ●</div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
+      <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-badges"></span><span id="mini-bio">Your space on the web</span><div class="mini-socials">● ● ●</div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
     </section>
   </main>
 </body>
