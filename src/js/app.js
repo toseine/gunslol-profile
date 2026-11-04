@@ -1,9 +1,15 @@
 import { apiUrl, isConfigured } from './api-config.js';
 
 const $ = id => document.getElementById(id);
-document.querySelector('.profile-picture').addEventListener('error', event => {
-  event.target.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22%237afcff%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2261%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%22%20font-size%3D%2236%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E';
-}, { once: true });
+const avatarImage = document.querySelector('.profile-picture');
+const avatarFallback = avatarImage.getAttribute('src');
+let failedAvatarUrl = '';
+avatarImage.addEventListener('error', () => {
+  if (avatarImage.getAttribute('src') !== avatarFallback) {
+    failedAvatarUrl = avatarImage.getAttribute('src');
+    avatarImage.src = avatarFallback;
+  }
+});
 const themes = ['home', 'hacker', 'rain', 'anime', 'car'];
 const media = {
   home: ['videoUrl', 'musicUrl', 'background-music'],
@@ -60,7 +66,9 @@ function render(data) {
   window.profileSettings = data;
   document.title = `${data.name || 'Profile'} · profile`;
   window.dispatchEvent(new CustomEvent('profile:settings', { detail: data }));
-  document.querySelector('.profile-picture').src = safeUrl(data.avatarUrl) || 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%3E%3Cstop%20stop-color%3D%22%237afcff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%239b5cff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22url%28%23g%29%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2259%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E';
+  const avatarUrl = safeUrl(data.avatarUrl);
+  const avatarSource = avatarUrl && avatarUrl !== failedAvatarUrl ? avatarUrl : avatarFallback;
+  if (avatarImage.getAttribute('src') !== avatarSource) avatarImage.src = avatarSource;
   const discordName = typeof data.discordUsername === 'string' ? data.discordUsername.trim().replace(/^@/, '') : '';
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
@@ -98,7 +106,7 @@ function render(data) {
   for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }
-  document.body.style.setProperty('--profileOpacity', String((Number(data.profileOpacity) || 100) / 100));
+  document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
   document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
   document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);
   for (const [key, visible] of [['views', data.showViews !== false], ['themes', data.showThemes !== false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;

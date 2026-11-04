@@ -99,12 +99,14 @@ for (const button of document.querySelectorAll(".nav-button")) button.addEventLi
   document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
+let failedAvatarUrl = "";
 function updateMiniPreview() {
   $("nav-display-name").textContent = $("profile-name").value || "Your profile";
   $("mini-name").textContent = $("profile-name").value || "Your name";
   $("mini-bio").textContent = $("profile-bio").value || "Your space on the web";
   const avatar = $("avatar-url").value.trim();
-  $("mini-avatar").src = avatar && validUrl(avatar) ? avatar : "./assets/avatar.svg";
+  const avatarSource = avatar && validUrl(avatar) && avatar !== failedAvatarUrl ? avatar : "./assets/avatar.svg";
+  if ($("mini-avatar").getAttribute("src") !== avatarSource) $("mini-avatar").src = avatarSource;
   const stage = $("mini-stage");
   stage.style.setProperty("--mini-bg", $("background-color").value);
   stage.style.setProperty("--mini-accent", $("accent-color").value);
@@ -117,7 +119,13 @@ function updateMiniPreview() {
   $("blur-value").textContent = `${$("profile-blur").value}px`;
   $("radius-value").textContent = `${$("avatar-radius").value}px`;
 }
-$("mini-avatar").addEventListener("error", event => { event.target.src = "./assets/avatar.svg"; }, { once: true });
+$("mini-avatar").addEventListener("error", event => {
+  const source = event.target.getAttribute("src");
+  if (source !== "./assets/avatar.svg") {
+    failedAvatarUrl = source;
+    event.target.src = "./assets/avatar.svg";
+  }
+});
 for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius"]) $(key).addEventListener("input", updateMiniPreview);
 
 function updateLayoutPreview() {
