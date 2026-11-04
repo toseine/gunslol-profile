@@ -2,7 +2,7 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "fontStyle", "nameEffect", "socialStyle", "showViews", "showThemes", "showVolume"];
 const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
 const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", fontStyle: "serif", nameEffect: "none", socialStyle: "glass" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
@@ -16,6 +16,7 @@ const cropDefaults = { backgroundStart: 0, backgroundEnd: 0, backgroundZoom: 1, 
 const backgroundFields = { home: "video-url", hacker: "hacker-video", rain: "rain-video", anime: "anime-video", car: "car-video" };
 const musicFields = { home: ["music-url", "music"], hacker: ["hacker-music", "hackerMusic"], rain: ["rain-music", "rainMusic"], anime: ["anime-music", "animeMusic"], car: ["car-music", "carMusic"] };
 const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${prefix}Start`, `${prefix}End`]);
+const badgeChoices = { owner: "◈ Owner", verified: "✓ Verified", developer: "⌘ Developer", partner: "✦ Partner", supporter: "♥ Supporter" };
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["video-url", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
@@ -72,6 +73,7 @@ function fillForm(data = {}, clipLabel = "Saved clip") {
     form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   }
   for (const key of musicTrimKeys) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : 0;
+  for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).checked = Array.isArray(data.badges) && data.badges.includes(badge);
   for (const [key, fallback] of Object.entries(styleDefaults)) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   if (!data.name) form.elements.namedItem("name").value = "Your name";
   layout = structuredClone(defaultLayout);
@@ -97,6 +99,7 @@ function readForm() {
   data.discordUrl = "";
   for (const key of Object.keys(cropDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   for (const key of musicTrimKeys) data[key] = Number(form.elements.namedItem(key).value);
+  data.badges = Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked);
   for (const key of Object.keys(styleDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   data.showThemes = false;
   return data;
@@ -138,6 +141,7 @@ function updateMiniPreview() {
   $("nav-display-name").textContent = $("profile-name").value || "Your profile";
   $("mini-name").textContent = $("profile-name").value || "Your name";
   $("mini-bio").textContent = $("profile-bio").value || "Your space on the web";
+  $("mini-badges").textContent = Object.entries(badgeChoices).filter(([badge]) => $(`badge-${badge}`).checked).map(([, label]) => label).join(" · ");
   const avatar = $("avatar-url").value.trim();
   const avatarSource = avatar && validUrl(avatar) && avatar !== failedAvatarUrl ? avatar : "./assets/avatar.svg";
   if ($("mini-avatar").getAttribute("src") !== avatarSource) $("mini-avatar").src = avatarSource;
@@ -168,6 +172,7 @@ $("mini-avatar").addEventListener("error", event => {
   }
 });
 for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
+for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");

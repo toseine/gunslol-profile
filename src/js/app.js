@@ -101,7 +101,19 @@ function render(data) {
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
   $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
-  for (const [social, field] of [['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl']]) {
+  const badgeLabels = { owner: ["◈", "Owner"], verified: ["✓", "Verified"], developer: ["⌘", "Developer"], partner: ["✦", "Partner"], supporter: ["♥", "Supporter"] };
+  const badgeContainer = $('profile-badges');
+  badgeContainer.replaceChildren();
+  for (const badge of Array.isArray(data.badges) ? data.badges : []) {
+    if (!Object.hasOwn(badgeLabels, badge)) continue;
+    const chip = document.createElement('span');
+    chip.className = `profile-badge badge-${badge}`;
+    chip.title = badgeLabels[badge][1];
+    chip.textContent = `${badgeLabels[badge][0]} ${badgeLabels[badge][1]}`;
+    badgeContainer.append(chip);
+  }
+  badgeContainer.hidden = !badgeContainer.childElementCount;
+  for (const [social, field] of [['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl'], ['telegram', 'telegramUrl']]) {
     const link = $(`${social}-link`);
     const url = safeUrl(data[field]);
     link.hidden = !url;
