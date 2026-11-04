@@ -137,5 +137,18 @@ function connectLive() {
   });
   socket.addEventListener('error', () => socket.close());
 }
-if (isConfigured) { loadSettings(); connectLive(); }
+async function updateViews() {
+  const firstViewThisSession = !sessionStorage.getItem('profile_view_counted');
+  try {
+    const response = await fetch(`${apiUrl}/views`, { method: firstViewThisSession ? 'POST' : 'GET', cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { count } = await response.json();
+    if (firstViewThisSession) sessionStorage.setItem('profile_view_counted', '1');
+    $('visitor-count').textContent = Number(count).toLocaleString('en-US');
+  } catch (error) {
+    $('visitor-count').textContent = '—';
+    console.error('View count failed:', error);
+  }
+}
+if (isConfigured) { loadSettings(); connectLive(); updateViews(); }
 else $('api-status').textContent = 'Set the API URL in src/js/api-config.js.';
