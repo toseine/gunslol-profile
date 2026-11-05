@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=12">
-  <script type="module" src="./src/js/admin.js?v=16"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=13">
+  <script type="module" src="./src/js/admin.js?v=17"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -40,7 +40,7 @@
         <button type="button" class="nav-button" data-target="presets"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg><span>Presets</span></button>
         <div class="nav-spacer"></div><a href="./index.html" target="_blank" rel="noopener" class="nav-footer-link">↗ View profile</a>
       </nav>
-      <div class="editor-heading"><div><p class="kicker">PROFILE STUDIO</p><h1 id="editor-title">Customize profile</h1><p class="muted" id="section-description">Edit your identity and avatar. Changes appear on the live page when saved.</p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
+      <div class="editor-heading"><div><p class="kicker">PROFILE STUDIO</p><h1 id="editor-title">Customize profile</h1><p class="muted" id="section-description">Edit your identity and avatar. Changes appear on the live page when saved.</p><div class="profile-manager"><label for="profile-select">Managing profile</label><select id="profile-select" aria-label="Managing profile"><option value="main">Main profile</option></select><button id="new-profile" type="button" class="quiet-button">+ New profile</button><button id="delete-profile" type="button" class="quiet-button" disabled>Delete</button><a id="profile-public-link" href="./index.html" target="_blank" rel="noopener">Open this profile ↗</a></div><p id="profile-status" class="status" role="status" aria-live="polite"></p></div><button id="logout-button" type="button" class="quiet-button">Sign out</button></div>
       <form id="settings-form">
         <div class="panel section-panel" data-section="profile">
           <div class="section-heading"><span class="section-number">01</span><h2>Profile</h2></div>
@@ -182,6 +182,7 @@
       </form>
       <aside class="preview-aside" aria-label="Live editor preview"><div class="preview-heading"><div><span class="live-dot"></span> LIVE PREVIEW</div><a href="./index.html" target="_blank" rel="noopener">Open ↗</a></div><div class="mini-stage" id="mini-stage"><div class="mini-card" id="mini-card"><img id="mini-avatar" src="./assets/avatar.svg" alt="Avatar preview"><div><strong id="mini-name">Your name</strong><span id="mini-badges"></span><span id="mini-bio">Your space on the web</span><div class="mini-socials" aria-label="Social link preview"></div></div></div></div><p class="preview-note">Preview reflects unsaved appearance changes. Save to update your public page.</p></aside>
     </section>
+    <dialog id="new-profile-dialog" class="profile-dialog"><form id="new-profile-form"><h2>Create profile</h2><p class="muted">Each profile has its own public link, settings, presets and monthly views.</p><label for="new-profile-name">Profile name</label><input id="new-profile-name" name="name" maxlength="50" required placeholder="My second profile"><label for="new-profile-slug">URL name</label><input id="new-profile-slug" name="slug" minlength="3" maxlength="32" pattern="[a-z0-9][a-z0-9-]{2,31}" required placeholder="my-second-profile"><small>Letters, numbers and hyphens. This becomes part of the public link.</small><div class="profile-dialog-actions"><button id="cancel-new-profile" type="button" class="quiet-button">Cancel</button><button type="submit" class="primary-button">Create profile</button></div><p id="create-profile-status" class="status" role="status" aria-live="polite"></p></form></dialog>
   </main>
 </body>
 </html>
