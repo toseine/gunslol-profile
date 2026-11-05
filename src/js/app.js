@@ -1,4 +1,5 @@
 import { apiUrl, isConfigured } from './api-config.js';
+import { socialIcons } from './social-icons.js';
 
 const profileSlug = new URLSearchParams(location.search).get('profile') || 'main';
 const profileQuery = `?profile=${encodeURIComponent(profileSlug)}`;
@@ -23,6 +24,51 @@ const media = {
 };
 let activeTheme = 'home';
 let previousDefault = '';
+let widgetSignature = '';
+let clockTimer;
+function widgetCard(icon, label, value) {
+  const card = document.createElement('div'); card.className = 'profile-widget';
+  const symbol = document.createElement('span'); symbol.className = 'widget-icon'; symbol.textContent = icon;
+  const copy = document.createElement('span');
+  const heading = document.createElement('small'); heading.textContent = label;
+  const detail = document.createElement('strong'); detail.textContent = value;
+  copy.append(heading, detail); card.append(symbol, copy);
+  return detail;
+}
+async function renderWidgets(data) {
+  const key = JSON.stringify([data.clockEnabled, data.clockTimezone, data.weatherEnabled, data.weatherCity, data.discordPresenceEnabled, data.discordPresenceId, Math.floor(Date.now() / 300000)]);
+  if (key === widgetSignature) return;
+  widgetSignature = key;
+  clearInterval(clockTimer);
+  const root = $('profile-widgets'); root.replaceChildren();
+  if (data.clockEnabled) {
+    const detail = widgetCard('◷', 'LOCAL TIME', '—'); root.append(detail.parentElement.parentElement);
+    const updateClock = () => { try { detail.textContent = new Intl.DateTimeFormat('en', { timeZone: data.clockTimezone || 'Europe/Warsaw', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); } catch { detail.textContent = 'Invalid timezone'; } };
+    updateClock(); clockTimer = setInterval(updateClock, 30000);
+  }
+  root.hidden = !root.childElementCount && !(data.weatherEnabled && data.weatherCity) && !(data.discordPresenceEnabled && /^\d{17,20}$/.test(data.discordPresenceId || ''));
+  if (data.weatherEnabled && data.weatherCity) {
+    const detail = widgetCard('☁', data.weatherCity.toUpperCase(), 'Loading…'); root.append(detail.parentElement.parentElement);
+    try {
+      const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.weatherCity)}&count=1&language=en&format=json`).then(r => r.json());
+      if (!geo.results?.length) throw new Error('City not found');
+      const { latitude, longitude } = geo.results[0];
+      const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`).then(r => r.json());
+      if (widgetSignature === key) detail.textContent = `${Math.round(weather.current.temperature_2m)}°C`;
+    } catch { if (widgetSignature === key) detail.textContent = 'Unavailable'; }
+  }
+  if (data.discordPresenceEnabled && /^\d{17,20}$/.test(data.discordPresenceId || '')) {
+    const detail = widgetCard('◉', 'DISCORD', 'Loading…'); root.append(detail.parentElement.parentElement);
+    try {
+      const presence = await fetch(`https://api.lanyard.rest/v1/users/${data.discordPresenceId}`).then(r => r.json());
+      if (widgetSignature === key) detail.textContent = presence.success ? (presence.data.discord_status || 'offline') : 'Unavailable';
+    } catch { if (widgetSignature === key) detail.textContent = 'Unavailable'; }
+  }
+  if (widgetSignature === key) {
+    root.hidden = !root.childElementCount;
+    document.body.classList.toggle('has-profile-extras', root.childElementCount > 0 || !$('custom-links').hidden);
+  }
+}
 const layoutDefaults = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -100,6 +146,18 @@ function render(data) {
   const avatarUrl = safeUrl(data.avatarUrl);
   const avatarSource = avatarUrl && avatarUrl !== failedAvatarUrl ? avatarUrl : avatarFallback;
   if (avatarImage.getAttribute('src') !== avatarSource) avatarImage.src = avatarSource;
+  avatarImage.closest('.profile-container').hidden = data.avatarHidden === true;
+  const banner = $('profile-banner');
+  const bannerUrl = safeUrl(data.bannerUrl);
+  banner.replaceChildren();
+  banner.hidden = !bannerUrl;
+  if (bannerUrl) { const image = document.createElement('img'); image.src = bannerUrl; image.alt = ''; banner.append(image); }
+  const cursor = document.querySelector('.custom-cursor');
+  cursor.replaceChildren();
+  const cursorUrl = safeUrl(data.cursorUrl);
+  if (cursorUrl) { const image = document.createElement('img'); image.src = cursorUrl; image.alt = ''; cursor.append(image); }
+  document.body.classList.toggle('image-cursor', !!cursorUrl && data.cursorStyle !== 'system');
+  if (data.entryEnabled === false) { $('start-screen').classList.add('hidden'); $('profile-block').classList.remove('hidden'); }
   const discordName = typeof data.discordUsername === 'string' ? data.discordUsername.trim().replace(/^@/, '') : '';
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
@@ -136,9 +194,13 @@ function render(data) {
     badgeContainer.append(chip);
   }
   badgeContainer.hidden = !badgeContainer.childElementCount;
+  document.body.dataset.badgePlacement = data.badgePlacement === 'inline' ? 'inline' : 'below';
   const location = $('profile-location');
   location.textContent = typeof data.location === 'string' ? data.location.trim() : '';
   location.hidden = !location.textContent;
+  const occupation = $('profile-occupation');
+  occupation.textContent = typeof data.occupation === 'string' ? data.occupation.trim() : '';
+  occupation.hidden = !occupation.textContent;
   for (const [social, field] of [['roblox', 'robloxUrl'], ['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl'], ['telegram', 'telegramUrl']]) {
     const link = $(`${social}-link`);
     const url = safeUrl(data[field]);
@@ -146,6 +208,34 @@ function render(data) {
     if (url) link.href = url;
     else link.removeAttribute('href');
   }
+  const socials = document.querySelector('.social-links');
+  for (const id of Array.isArray(data.socialOrder) ? data.socialOrder : ['discord', 'roblox', 'github', 'youtube', 'tiktok', 'telegram']) {
+    const link = $(`${id}-link`);
+    if (link) socials.append(link);
+  }
+  socials.querySelectorAll('[data-extra-social]').forEach(link => link.remove());
+  for (const social of Array.isArray(data.extraSocials) ? data.extraSocials : []) {
+    const url = safeUrl(social.url);
+    if (!url) continue;
+    const link = document.createElement('a'); link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.dataset.extraSocial = '';
+    const label = social.label || social.platform || 'Social link'; link.setAttribute('aria-label', label); link.title = label;
+    const iconUrl = safeUrl(social.iconUrl);
+    if (iconUrl) { const image = document.createElement('img'); image.src = iconUrl; image.alt = ''; image.className = 'extra-social-icon'; link.append(image); }
+    else if (Object.hasOwn(socialIcons, social.platform === 'x' ? 'twitter' : social.platform)) { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', socialIcons[social.platform === 'x' ? 'twitter' : social.platform]); svg.append(path); link.append(svg); }
+    else { const letter = document.createElement('strong'); letter.textContent = label[0]?.toUpperCase() || '?'; link.append(letter); }
+    socials.append(link);
+  }
+  const customLinks = $('custom-links'); customLinks.replaceChildren();
+  for (const item of Array.isArray(data.customLinks) ? data.customLinks : []) {
+    const url = safeUrl(item.url); if (!url || !item.title) continue;
+    const link = document.createElement('a'); link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'custom-link';
+    const iconUrl = safeUrl(item.iconUrl); if (iconUrl) { const image = document.createElement('img'); image.src = iconUrl; image.alt = ''; link.append(image); }
+    const title = document.createElement('span'); title.textContent = item.title; link.append(title);
+    const arrow = document.createElement('span'); arrow.textContent = '↗'; link.append(arrow); customLinks.append(link);
+  }
+  customLinks.hidden = !customLinks.childElementCount;
+  document.body.classList.toggle('has-custom-links', customLinks.childElementCount > 0);
+  renderWidgets(data);
   for (const [, audioField, audioId] of Object.values(media)) {
     const audio = $(audioId);
     const url = safeUrl(data[audioField]);
@@ -172,10 +262,12 @@ function render(data) {
   document.body.dataset.socialIconSet = data.socialIconSet === 'minimal' ? 'minimal' : 'brand';
   document.body.dataset.cardStyle = ['floating', 'glass', 'solid', 'outline'].includes(data.cardStyle) ? data.cardStyle : 'glass';
   document.body.classList.toggle('profile-gradient', data.profileGradient === true);
+  document.body.dataset.profileAlignment = data.profileAlignment === 'center' ? 'center' : 'left';
   document.body.classList.toggle('monochrome-icons', data.monochromeIcons !== false);
-  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff'], ['borderColor', '#b99af7']]) {
+  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff'], ['borderColor', '#b99af7'], ['badgeColor', '#b99af7'], ['linkHoverColor', '#b99af7'], ['gradientPrimary', '#b99af7'], ['gradientSecondary', '#090b10']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }
+  document.body.style.setProperty('--borderOpacity', `${Number.isFinite(Number(data.borderOpacity)) ? Number(data.borderOpacity) : 100}%`);
   document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
   document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
   document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);

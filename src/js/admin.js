@@ -2,10 +2,10 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "showMoreSection", "scrollLabel", "moreEyebrow", "moreTitle", "moreText", "moreStyle", "moreLinkLabel", "moreLinkUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "particleStyle", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "cardStyle", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"];
-const toggleFields = new Set(["showMoreSection", "snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"]);
-const fieldDefaults = { defaultTheme: "home", scrollLabel: "Explore more", moreEyebrow: "BEYOND THE PROFILE", moreTitle: "A little more about me", moreStyle: "glass", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", borderColor: "#b99af7", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand", cardStyle: "glass", particleStyle: "snow" };
-const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42, borderWidth: 1, cardRadius: 22, cardPadding: 26, cardGlow: 18, badgeSize: 30, socialGap: 10, backgroundBrightness: 42, backgroundBlur: 3 };
+const fields = ["name", "bio", "location", "occupation", "avatarUrl", "bannerUrl", "cursorUrl", "avatarHidden", "profileAlignment", "badgePlacement", "entryEnabled", "clockEnabled", "clockTimezone", "weatherEnabled", "weatherCity", "discordPresenceEnabled", "discordPresenceId", "defaultTheme", "showMoreSection", "scrollLabel", "moreEyebrow", "moreTitle", "moreText", "moreStyle", "moreLinkLabel", "moreLinkUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "particleStyle", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "badgeColor", "linkHoverColor", "gradientPrimary", "gradientSecondary", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "cardStyle", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"];
+const toggleFields = new Set(["showMoreSection", "avatarHidden", "entryEnabled", "clockEnabled", "weatherEnabled", "discordPresenceEnabled", "snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"]);
+const fieldDefaults = { clockTimezone: "Europe/Warsaw", profileAlignment: "left", badgePlacement: "below", badgeColor: "#b99af7", linkHoverColor: "#b99af7", gradientPrimary: "#b99af7", gradientSecondary: "#090b10", defaultTheme: "home", scrollLabel: "Explore more", moreEyebrow: "BEYOND THE PROFILE", moreTitle: "A little more about me", moreStyle: "glass", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", borderColor: "#b99af7", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand", cardStyle: "glass", particleStyle: "snow" };
+const styleDefaults = { borderOpacity: 100, profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42, borderWidth: 1, cardRadius: 22, cardPadding: 26, cardGlow: 18, badgeSize: 30, socialGap: 10, backgroundBrightness: 42, backgroundBlur: 3 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -19,6 +19,8 @@ const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${pre
 const badgeChoices = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter", helper: "Helper", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend" };
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
+  ["banner-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
+  ["cursor-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["video-url", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
   ["hacker-video", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
   ["rain-video", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
@@ -40,8 +42,25 @@ let activePresetId = null;
 
 const dynamicFields = {
   project: { list: "project-list", keys: ["title", "description", "imageUrl", "url"], limit: 6 },
-  badge: { list: "custom-badge-list", keys: ["label", "imageUrl", "color"], limit: 6 }
+  badge: { list: "custom-badge-list", keys: ["label", "imageUrl", "color"], limit: 6 },
+  customLink: { list: "custom-link-list", keys: ["title", "url", "iconUrl"], limit: 12 },
+  extraSocial: { list: "extra-social-list", keys: ["platform", "label", "url", "iconUrl"], limit: 18 }
 };
+const socialIds = ["discord", "roblox", "github", "youtube", "tiktok", "telegram"];
+const extraPlatforms = ["instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
+let socialOrder = [...socialIds];
+function renderSocialOrder() {
+  const list = $("social-order-list"); list.replaceChildren();
+  socialOrder.forEach((id, index) => {
+    const row = document.createElement("div"); row.className = "social-order-row";
+    const name = document.createElement("strong"); name.textContent = id === "discord" ? "Discord (copy username)" : id[0].toUpperCase() + id.slice(1);
+    const up = document.createElement("button"); up.type = "button"; up.className = "quiet-button"; up.textContent = "↑"; up.setAttribute("aria-label", `Move ${id} up`); up.disabled = index === 0;
+    const down = document.createElement("button"); down.type = "button"; down.className = "quiet-button"; down.textContent = "↓"; down.setAttribute("aria-label", `Move ${id} down`); down.disabled = index === socialOrder.length - 1;
+    up.addEventListener("click", () => { [socialOrder[index - 1], socialOrder[index]] = [socialOrder[index], socialOrder[index - 1]]; renderSocialOrder(); dirty = true; });
+    down.addEventListener("click", () => { [socialOrder[index + 1], socialOrder[index]] = [socialOrder[index], socialOrder[index + 1]]; renderSocialOrder(); dirty = true; });
+    row.append(name, up, down); list.append(row);
+  });
+}
 function readItems(kind) {
   const { list, keys } = dynamicFields[kind];
   return [...$(list).children].map(card => Object.fromEntries([
@@ -57,20 +76,21 @@ function renderItems(kind, items = []) {
     card.className = "custom-item";
     if (kind === "project") card.dataset.id = item.id || crypto.randomUUID();
     const title = document.createElement("div"); title.className = "custom-item-heading";
-    const name = document.createElement("strong"); name.textContent = kind === "project" ? "Project" : "Badge";
+    const name = document.createElement("strong"); name.textContent = { project: "Project", badge: "Badge", customLink: "Link button", extraSocial: "Social icon" }[kind];
     const actions = document.createElement("span");
     for (const [action, label] of [["up", "↑"], ["down", "↓"], ["remove", "Remove"]]) {
       const button = document.createElement("button"); button.type = "button"; button.className = "quiet-button"; button.dataset.action = action; button.textContent = label; actions.append(button);
     }
     title.append(name, actions); card.append(title);
     const grid = document.createElement("div"); grid.className = "field-grid";
-    const labels = kind === "project" ? { title: "Project name", description: "Description", imageUrl: "Cover image URL", url: "Open URL" } : { label: "Badge label", imageUrl: "Icon URL", color: "Badge color" };
+    const labels = { title: "Name", description: "Description", imageUrl: "Image URL", iconUrl: "Icon URL", url: "Destination URL", label: "Label", color: "Badge color", platform: "Platform" };
     for (const key of dynamicFields[kind].keys) {
       const wrap = document.createElement("label");
       wrap.textContent = labels[key];
-      const input = document.createElement("input");
+      const input = document.createElement(key === "platform" ? "select" : "input");
       input.dataset.key = key;
-      input.type = key === "color" ? "color" : key.toLowerCase().includes("url") || key === "url" ? "url" : "text";
+      if (key === "platform") for (const platform of extraPlatforms) input.add(new Option(platform === "x" ? "X / Twitter" : platform[0].toUpperCase() + platform.slice(1), platform));
+      else input.type = key === "color" ? "color" : key.toLowerCase().includes("url") ? "url" : "text";
       input.maxLength = key === "title" ? 60 : key === "description" ? 180 : key === "label" ? 30 : 2000;
       input.value = item[key] || (key === "color" ? "#b99af7" : "");
       wrap.append(input); grid.append(wrap);
@@ -96,7 +116,7 @@ async function uploadItemImage(card) {
     const response = await fetch(`${apiUrl}/upload`, { method: "POST", cache: "no-store", headers: { Authorization: `Bearer ${token}`, "Content-Type": file.type, "X-Media-Kind": "avatar", "X-File-Size": String(file.size) }, body: base64 });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
-    card.querySelector('[data-key="imageUrl"]').value = result.url;
+    card.querySelector('[data-key="imageUrl"], [data-key="iconUrl"]').value = result.url;
     dirty = true;
     status.textContent = "Uploaded. Save changes to publish.";
     message("editor-status", "Image uploaded. Click Save changes to publish.");
@@ -104,12 +124,12 @@ async function uploadItemImage(card) {
 }
 for (const kind of Object.keys(dynamicFields)) {
   const { list, limit } = dynamicFields[kind];
-  $(`add-${kind === "project" ? "project" : "custom-badge"}`).addEventListener("click", () => {
+  $({ project: "add-project", badge: "add-custom-badge", customLink: "add-custom-link", extraSocial: "add-extra-social" }[kind]).addEventListener("click", () => {
     const items = readItems(kind);
     if (items.length >= limit) { message("editor-status", `Maximum ${limit} ${kind}s.`); return; }
-    items.push(kind === "project" ? { id: crypto.randomUUID(), title: "", description: "", imageUrl: "", url: "" } : { label: "", imageUrl: "", color: "#b99af7" });
+    items.push({ project: { id: crypto.randomUUID(), title: "", description: "", imageUrl: "", url: "" }, badge: { label: "", imageUrl: "", color: "#b99af7" }, customLink: { title: "", url: "", iconUrl: "" }, extraSocial: { platform: "instagram", label: "", url: "", iconUrl: "" } }[kind]);
     renderItems(kind, items); dirty = true;
-    $(list).lastElementChild.querySelector("input").focus();
+    $(list).lastElementChild.querySelector("input,select").focus();
   });
   $(list).addEventListener("click", event => {
     const button = event.target.closest("button[data-action]");
@@ -153,7 +173,7 @@ function showMusicRanges(data, label = "Saved clip") {
 function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
-    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient", "showMoreSection"].includes(key);
+    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient", "showMoreSection", "avatarHidden", "clockEnabled", "weatherEnabled", "discordPresenceEnabled"].includes(key);
     else el.value = typeof data[key] === "string" ? data[key] : (fieldDefaults[key] ?? "");
   }
   for (const [key, fallback] of Object.entries(cropDefaults)) {
@@ -163,7 +183,12 @@ function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).checked = Array.isArray(data.badges) && data.badges.includes(badge);
   renderItems("project", Array.isArray(data.projects) ? data.projects : []);
   renderItems("badge", Array.isArray(data.customBadges) ? data.customBadges : []);
+  renderItems("customLink", Array.isArray(data.customLinks) ? data.customLinks : []);
+  renderItems("extraSocial", Array.isArray(data.extraSocials) ? data.extraSocials : []);
+  socialOrder = Array.isArray(data.socialOrder) && data.socialOrder.length === socialIds.length ? [...data.socialOrder] : [...socialIds];
+  renderSocialOrder();
   for (const [key, fallback] of Object.entries(styleDefaults)) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
+  $("avatar-shape").value = ({ 0: "square", 10: "squircle", 22: "soft", 87: "circle" })[Number(data.avatarRadius)] || "custom";
   if (!data.name) form.elements.namedItem("name").value = "Your name";
   layout = structuredClone(defaultLayout);
   for (const device of ["desktop", "mobile"]) for (const item of Object.keys(defaultLayout[device])) {
@@ -191,6 +216,9 @@ function readForm() {
   data.badges = Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked);
   data.projects = readItems("project");
   data.customBadges = readItems("badge");
+  data.customLinks = readItems("customLink");
+  data.extraSocials = readItems("extraSocial");
+  data.socialOrder = [...socialOrder];
   for (const key of Object.keys(styleDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   data.showThemes = false;
   return data;
@@ -209,6 +237,8 @@ function showSelectedTheme() {
   });
 }
 $("default-theme").addEventListener("change", () => { showSelectedTheme(); updatePreview(); });
+$("avatar-shape").addEventListener("change", () => { const value = { square: 0, squircle: 10, soft: 22, circle: 87 }[$("avatar-shape").value]; if (value != null) { $("avatar-radius").value = value; updateMiniPreview(); dirty = true; } });
+$("avatar-radius").addEventListener("input", () => { $("avatar-shape").value = "custom"; });
 
 const sectionCopy = {
   profile: ["Profile", "Edit your identity and avatar. Changes appear on the live page when saved."],
@@ -247,6 +277,7 @@ function updateMiniPreview() {
     icon.alt = badgeChoices[badge];
     miniBadges.append(icon);
   }
+  for (const badge of readItems("badge")) if (badge.imageUrl && validUrl(badge.imageUrl)) { const icon = document.createElement("img"); icon.src = badge.imageUrl; icon.alt = badge.label; miniBadges.append(icon); }
   const miniSocials = document.querySelector(".mini-socials");
   miniSocials.dataset.iconSet = $("social-icon-set").value;
   miniSocials.replaceChildren();
@@ -262,6 +293,8 @@ function updateMiniPreview() {
   const avatar = $("avatar-url").value.trim();
   const avatarSource = avatar && validUrl(avatar) && avatar !== failedAvatarUrl ? avatar : "./assets/avatar.svg";
   if ($("mini-avatar").getAttribute("src") !== avatarSource) $("mini-avatar").src = avatarSource;
+  $("mini-avatar").hidden = $("avatar-hidden").checked;
+  $("mini-card").style.textAlign = $("profile-alignment").value === "center" ? "center" : "left";
   const stage = $("mini-stage");
   stage.style.setProperty("--mini-bg", $("background-color").value);
   stage.style.setProperty("--mini-accent", $("accent-color").value);
@@ -290,6 +323,7 @@ function updateMiniPreview() {
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
   $("blur-value").textContent = `${$("profile-blur").value}px`;
   $("radius-value").textContent = `${$("avatar-radius").value}px`;
+  $("border-opacity-value").textContent = `${$("border-opacity").value}%`;
   for (const key of ["card-width", "avatar-size", "name-size", "bio-size", "social-size", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(`${key}-value`).textContent = `${$(key).value}px`;
   document.querySelectorAll("[data-palette]").forEach(button => {
     const [accent, background] = palettes[button.dataset.palette];
@@ -303,7 +337,7 @@ $("mini-avatar").addEventListener("error", event => {
     event.target.src = "./assets/avatar.svg";
   }
 });
-for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size", "card-style", "border-color", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-name", "profile-bio", "avatar-url", "avatar-hidden", "profile-alignment", "badge-placement", "badge-color", "border-opacity", "gradient-primary", "gradient-secondary", "link-hover-color", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size", "card-style", "border-color", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(key).addEventListener("input", updateMiniPreview);
 for (const key of ["profile-gradient", "monochrome-icons"]) $(key).addEventListener("change", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 for (const id of ["discord-username", "roblox-url", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
@@ -697,6 +731,10 @@ function settingsError(data) {
   if (urls.some(key => !validUrl(data[key]))) return "URLs must start with https:// or http://.";
   if (data.projects.some(item => !item.title || !validUrl(item.imageUrl) || !validUrl(item.url))) return "Each project needs a name and valid image/link URLs.";
   if (data.customBadges.some(item => !item.label || !item.imageUrl || !validUrl(item.imageUrl))) return "Each custom badge needs a label and an icon URL.";
+  if (data.customLinks.some(item => !item.title || !item.url || !validUrl(item.url) || !validUrl(item.iconUrl))) return "Each custom button needs a name and a valid URL.";
+  if (data.extraSocials.some(item => !item.url || !validUrl(item.url) || !validUrl(item.iconUrl))) return "Each extra social icon needs a valid URL.";
+  try { new Intl.DateTimeFormat("en", { timeZone: data.clockTimezone }); } catch { return "Enter a valid timezone, such as Europe/Warsaw."; }
+  if (data.discordPresenceId && !/^\d{17,20}$/.test(data.discordPresenceId)) return "Discord user ID must contain 17–20 digits.";
   if (data.backgroundEnd && data.backgroundEnd <= data.backgroundStart) return "Video end must be after video start.";
   for (const [, prefix] of Object.values(musicFields)) {
     if (data[`${prefix}End`] && data[`${prefix}End`] <= data[`${prefix}Start`]) return "Music end must be after music start.";
