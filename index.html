@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="src/css/style.css?v=13">
+    <link rel="stylesheet" href="src/css/style.css?v=14">
     <link href="https://fonts.googleapis.com/css2?family=Retro+Gaming&display=swap" rel="stylesheet">
 </head>
 <body class="home-theme" onload="initMedia()">
@@ -177,8 +177,18 @@
     <canvas id="snow-canvas" aria-hidden="true" hidden></canvas>
     <button id="music-toggle" type="button" hidden>Play music</button>
     <button id="share-profile" type="button" class="share-profile" aria-label="Share this profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L8 7m4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Share</span></button>
+    <button id="scroll-more" class="scroll-more" type="button" hidden><span>Explore more</span><span aria-hidden="true">↓</span></button>
+    <section id="more-section" class="more-section" aria-labelledby="more-title" hidden>
+      <div class="more-content">
+        <p id="more-eyebrow" class="more-eyebrow"></p>
+        <h2 id="more-title"></h2>
+        <p id="more-text" class="more-text"></p>
+        <a id="more-link" class="more-link" target="_blank" rel="noopener noreferrer" hidden></a>
+        <button id="back-to-top" class="back-to-top" type="button">↑ Back to top</button>
+      </div>
+    </section>
     <p id="api-status" role="status"></p>
     <script src="src/js/source.js?v=4"></script>
-    <script type="module" src="src/js/app.js?v=20"></script>
+    <script type="module" src="src/js/app.js?v=21"></script>
 </body>
 </html>
