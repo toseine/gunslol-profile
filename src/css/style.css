@@ -971,6 +971,10 @@ body[data-social-style="outline"] .social-links a { background: transparent; bor
 .profile-badge:hover img { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 3px 9px #ab7dff99); }
 .profile-badge::after { content: attr(data-label); position: absolute; left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%); padding: 5px 8px; border: 1px solid #ffffff30; border-radius: 6px; background: #17121f; color: #fff; font: 11px Arial,sans-serif; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; }
 .profile-badge:hover::after { opacity: 1; }
+.profile-location { color: var(--textColor, #fff); opacity: .74; font: 12px Arial, sans-serif; letter-spacing: .05em; margin: 4px 0 8px; }
+.profile-location::before { content: '⌖'; display: inline-block; margin-right: 6px; color: var(--accentColor, #b99af7); font-size: 17px; vertical-align: -1px; }
+body.profile-gradient #profile-block { background-image: linear-gradient(145deg, color-mix(in srgb, var(--accentColor, #b99af7) 23%, transparent), transparent 55%); }
+body.monochrome-icons .social-links a img { filter: grayscale(1); }
 .social-links a { border-radius: 10px; background: rgba(16,14,24,.55); }
 .social-links a:hover { border-color: var(--accentColor, #b99af7); box-shadow: 0 0 15px color-mix(in srgb, var(--accentColor, #b99af7), transparent 65%); }
 .social-icon { object-fit: contain; }

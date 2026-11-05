@@ -224,3 +224,12 @@ form .badge-options label:has(input:checked) { background: #39253d; border-color
 .social-pick .icon-youtube { --icon-url: url('../../assets/youtube.svg'); --brand-color: #ff3131; }
 .social-pick .icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); --brand-color: #f5f5f5; }
 .social-pick .icon-telegram { --icon-url: url('../../assets/telegram.svg'); --brand-color: #30aae8; }
+.badge-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 20px; }
+form .badge-gallery label { min-height: 72px; border-radius: 11px; }
+.badge-gallery label span { display: grid; gap: 4px; }
+.badge-gallery strong { font-size: 13px; color: #f1eaf5; }
+.badge-gallery small { margin: 0; font-size: 10px; color: #a69aa9; }
+.badge-gallery img { width: 36px; height: 36px; }
+.badge-gallery input { width: 16px; height: 16px; }
+.mini-stage.gradient-card .mini-card { background-image: linear-gradient(145deg, color-mix(in srgb, var(--mini-accent) 33%, transparent), transparent 62%); }
+.mini-stage.monochrome-icons .mini-social-icon { filter: grayscale(1); }
