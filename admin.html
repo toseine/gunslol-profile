@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=10">
-  <script type="module" src="./src/js/admin.js?v=14"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=11">
+  <script type="module" src="./src/js/admin.js?v=15"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -31,6 +31,7 @@
         <div class="nav-user"><span class="nav-user-avatar">◈</span><span><strong id="nav-display-name">Your profile</strong><small>Owner dashboard</small></span></div>
         <div class="nav-caption">CUSTOMIZE</div>
         <button type="button" class="nav-button active" data-target="profile"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Profile</span></button>
+        <button type="button" class="nav-button" data-target="badges"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 4 5 1-1 5 2 4-5 2-4 4-4-4-5-2 2-4-1-5 5-1z"/></svg><span>Badges</span></button>
         <button type="button" class="nav-button" data-target="media"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg><span>Media & music</span></button>
         <button type="button" class="nav-button" data-target="socials"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 .5l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg><span>Social links</span></button>
         <button type="button" class="nav-button" data-target="appearance"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8zM19 18l.6 1.4L21 20l-1.4.6L19 22l-.6-1.4L17 20l1.4-.6z"/></svg><span>Appearance</span></button>
@@ -46,11 +47,28 @@
           <div class="field-grid">
             <div><label for="profile-name">Display name</label><input id="profile-name" name="name" type="text" maxlength="50" required placeholder="Your name"></div>
             <div><label for="profile-bio">Short bio</label><input id="profile-bio" name="bio" type="text" maxlength="140" placeholder="Your space on the web"></div>
+            <div><label for="profile-location">Location</label><input id="profile-location" name="location" type="text" maxlength="60" placeholder="City or country"></div>
             <div class="media-field"><label for="avatar-url">Avatar or GIF URL</label><input id="avatar-url" name="avatarUrl" type="url" maxlength="2000" placeholder="https://example.com/avatar.gif"></div>
             <div><label for="default-theme">Profile style</label><select id="default-theme" name="defaultTheme"><option value="home">1 · Home</option><option value="hacker">2 · Hacker</option><option value="rain">3 · Rain</option><option value="anime">4 · Anime</option><option value="car">5 · Car</option></select></div>
             <div><label for="enter-text">Entry screen text</label><input id="enter-text" name="enterText" type="text" maxlength="60" placeholder="Click to enter"></div>
           </div>
-          <div class="badge-editor"><h3>Profile badges</h3><p class="muted">Decorative labels shown beside your name on this site.</p><div class="badge-options"><label><input id="badge-owner" type="checkbox"><img src="./assets/badge-owner.svg" alt=""> ◈ Owner</label><label><input id="badge-verified" type="checkbox"><img src="./assets/badge-verified.svg" alt=""> ✓ Verified</label><label><input id="badge-developer" type="checkbox"><img src="./assets/badge-developer.svg" alt=""> ⌘ Developer</label><label><input id="badge-partner" type="checkbox"><img src="./assets/badge-partner.svg" alt=""> ✦ Partner</label><label><input id="badge-supporter" type="checkbox"><img src="./assets/badge-supporter.svg" alt=""> ♥ Supporter</label></div></div>
+          <div class="badge-editor"><h3>Profile badges</h3><p class="muted">Choose the decorative badges shown beside your name.</p><button type="button" class="quiet-button" id="open-badges">Browse badge gallery →</button></div>
+        </div>
+        <div class="panel section-panel" data-section="badges" hidden>
+          <div class="section-heading"><span class="section-number">✦</span><h2>Badges</h2></div>
+          <p class="muted">Choose badge designs for your own profile. These are decorative on this site and do not represent guns.lol awards or verification.</p>
+          <div class="badge-options badge-gallery">
+            <label><input id="badge-owner" type="checkbox"><img src="./assets/badge-owner.svg" alt=""><span><strong>Owner</strong><small>Profile owner</small></span></label>
+            <label><input id="badge-verified" type="checkbox"><img src="./assets/badge-verified.svg" alt=""><span><strong>Verified</strong><small>Decorative check</small></span></label>
+            <label><input id="badge-developer" type="checkbox"><img src="./assets/badge-developer.svg" alt=""><span><strong>Developer</strong><small>Code themed</small></span></label>
+            <label><input id="badge-partner" type="checkbox"><img src="./assets/badge-partner.svg" alt=""><span><strong>Partner</strong><small>Star themed</small></span></label>
+            <label><input id="badge-supporter" type="checkbox"><img src="./assets/badge-supporter.svg" alt=""><span><strong>Supporter</strong><small>Heart themed</small></span></label>
+            <label><input id="badge-premium" type="checkbox"><img src="./assets/badge-premium.svg" alt=""><span><strong>Premium</strong><small>Diamond themed</small></span></label>
+            <label><input id="badge-og" type="checkbox"><img src="./assets/badge-og.svg" alt=""><span><strong>OG</strong><small>Retro themed</small></span></label>
+            <label><input id="badge-donor" type="checkbox"><img src="./assets/badge-donor.svg" alt=""><span><strong>Donor</strong><small>Gift themed</small></span></label>
+            <label><input id="badge-booster" type="checkbox"><img src="./assets/badge-booster.svg" alt=""><span><strong>Booster</strong><small>Rocket themed</small></span></label>
+            <label><input id="badge-bughunter" type="checkbox"><img src="./assets/badge-bughunter.svg" alt=""><span><strong>Bug Hunter</strong><small>Bug themed</small></span></label>
+          </div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
           <div class="section-heading"><span class="section-number">02</span><h2>Media & music</h2></div>
@@ -111,6 +129,8 @@
               <div><label for="social-style">Social icon style</label><select id="social-style" name="socialStyle"><option value="glass">Glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div>
               <div><label for="social-icon-set">Social icons</label><select id="social-icon-set" name="socialIconSet"><option value="brand">Brand logos</option><option value="minimal">Minimal symbols</option></select><small>Preview updates as you choose.</small></div>
             </div>
+            <label class="toggle-row" for="profile-gradient"><span><strong>Profile gradient</strong><small>Add accent color to the profile card</small></span><span class="switch"><input id="profile-gradient" name="profileGradient" type="checkbox"><span class="slider"></span></span></label>
+            <label class="toggle-row" for="monochrome-icons"><span><strong>Monochrome icons</strong><small>Use one color for social icons</small></span><span class="switch"><input id="monochrome-icons" name="monochromeIcons" type="checkbox"><span class="slider"></span></span></label>
             <div class="slider-grid">
               <div><label for="profile-opacity">Profile opacity <output id="opacity-value">100%</output></label><input id="profile-opacity" name="profileOpacity" type="range" min="20" max="100" value="100"></div>
               <div><label for="profile-blur">Profile blur <output id="blur-value">0px</output></label><input id="profile-blur" name="profileBlur" type="range" min="0" max="24" value="0"></div>
