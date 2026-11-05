@@ -32,6 +32,8 @@ const uploadFields = [
 ];
 const tokenKey = "profile_admin_session";
 let token = sessionStorage.getItem(tokenKey) || "";
+const requestedProfile = new URLSearchParams(location.search).get("profile") || "main";
+let activeProfile = /^[a-z0-9][a-z0-9-]{2,31}$/.test(requestedProfile) || requestedProfile === "main" ? requestedProfile : "main";
 let dirty = false;
 let presets = [];
 let activePresetId = null;
@@ -270,7 +272,9 @@ for (const block of $("layout-canvas").querySelectorAll("[data-item]")) {
 
 async function api(path, options = {}) {
   const headers = { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) };
-  const response = await fetch(`${apiUrl}${path}`, { ...options, headers, cache: "no-store" });
+  const url = new URL(`${apiUrl}${path}`);
+  if (["/settings", "/presets", "/views", "/socket"].includes(url.pathname) || url.pathname.startsWith("/presets/")) url.searchParams.set("profile", activeProfile);
+  const response = await fetch(url, { ...options, headers, cache: "no-store" });
   if (!response.ok) {
     let detail = "";
     try { detail = (await response.json()).error || ""; } catch {}
@@ -442,15 +446,90 @@ for (const [theme, [fieldId, prefix]] of Object.entries(musicFields)) {
   audio.addEventListener("ended", () => { previewing = false; status.textContent = "Preview finished."; });
 }
 
+function updateProfileLink() {
+  const publicUrl = new URL('./index.html', location.href);
+  const adminUrl = new URL('./admin.html', location.href);
+  if (activeProfile !== 'main') {
+    publicUrl.searchParams.set('profile', activeProfile);
+    adminUrl.searchParams.set('profile', activeProfile);
+  }
+  $('profile-public-link').href = publicUrl.href;
+  history.replaceState(null, '', adminUrl);
+  $('delete-profile').disabled = activeProfile === 'main';
+}
+
+async function loadProfiles() {
+  const { profiles } = await api('/profiles');
+  const select = $('profile-select');
+  select.replaceChildren(...profiles.map(item => new Option(item.name, item.slug)));
+  if (!profiles.some(item => item.slug === activeProfile)) activeProfile = 'main';
+  select.value = activeProfile;
+  updateProfileLink();
+}
+
+$('profile-select').addEventListener('change', async event => {
+  const next = event.target.value;
+  if (next === activeProfile) return;
+  if (dirty && !confirm('Discard unsaved changes and switch profiles?')) {
+    event.target.value = activeProfile;
+    return;
+  }
+  activeProfile = next;
+  updateProfileLink();
+  message('profile-status', 'Switching profile…');
+  if (await openEditor()) message('profile-status', `Managing ${$('profile-select').selectedOptions[0]?.textContent || activeProfile}.`, 'success');
+});
+
+$('new-profile').addEventListener('click', () => {
+  $('new-profile-form').reset();
+  $('new-profile-slug').dataset.edited = 'false';
+  message('create-profile-status', '');
+  $('new-profile-dialog').showModal();
+  $('new-profile-name').focus();
+});
+$('cancel-new-profile').addEventListener('click', () => $('new-profile-dialog').close());
+$('new-profile-name').addEventListener('input', () => {
+  const slug = $('new-profile-slug');
+  if (slug.dataset.edited === 'true') return;
+  slug.value = $('new-profile-name').value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
+});
+$('new-profile-slug').addEventListener('input', () => { $('new-profile-slug').dataset.edited = 'true'; });
+$('new-profile-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (dirty && !confirm('Discard unsaved changes and create a new profile?')) return;
+  const name = $('new-profile-name').value.trim();
+  const slug = $('new-profile-slug').value.trim().toLowerCase();
+  try {
+    const result = await api('/profiles', { method: 'POST', body: JSON.stringify({ name, slug }) });
+    activeProfile = result.created;
+    $('new-profile-dialog').close();
+    if (await openEditor()) message('profile-status', `Created ${name}. Share its public link with visitors.`, 'success');
+  } catch (error) { message('create-profile-status', error.message, 'error'); }
+});
+$('delete-profile').addEventListener('click', async () => {
+  if (activeProfile === 'main') return;
+  const name = $('profile-select').selectedOptions[0]?.textContent || activeProfile;
+  if (!confirm(`Delete “${name}” and its settings, presets and views permanently?`)) return;
+  try {
+    await api(`/profiles/${activeProfile}`, { method: 'DELETE' });
+    activeProfile = 'main';
+    if (await openEditor()) message('profile-status', `Deleted ${name}.`, 'success');
+  } catch (error) { message('profile-status', `Could not delete profile: ${error.message}`, 'error'); }
+});
+
 async function openEditor() {
   try {
+    await loadProfiles();
     const settings = await api("/settings");
     fillForm(settings);
     showEditor(true);
     message("editor-status", "Settings are up to date.");
-    loadPresets();
+    await loadPresets();
+    return true;
   } catch (error) {
     message("login-status", `Could not load settings: ${error.message}`, "error");
+    message("profile-status", `Could not load profile: ${error.message}`, "error");
+    return false;
   }
 }
 
@@ -514,8 +593,10 @@ function renderPresetList(selectedId = $("preset-list").value) {
 }
 
 async function loadPresets() {
+  const profile = activeProfile;
   try {
     const data = await api("/presets");
+    if (profile !== activeProfile) return;
     presets = data.presets || [];
     activePresetId = data.activePresetId;
     renderPresetList();

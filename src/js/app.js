@@ -1,5 +1,8 @@
 import { apiUrl, isConfigured } from './api-config.js';
 
+const profileSlug = new URLSearchParams(location.search).get('profile') || 'main';
+const profileQuery = `?profile=${encodeURIComponent(profileSlug)}`;
+
 const $ = id => document.getElementById(id);
 const avatarImage = document.querySelector('.profile-picture');
 const avatarFallback = avatarImage.getAttribute('src');
@@ -228,17 +231,17 @@ addEventListener('resize', () => { if (snowEnabled) resizeSnow(); });
 
 async function loadSettings() {
   try {
-    const response = await fetch(`${apiUrl}/settings`, { cache: 'no-store' });
+    const response = await fetch(`${apiUrl}/settings${profileQuery}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     render(await response.json());
   } catch (error) {
-    $('api-status').textContent = 'Connecting to profile…';
+    $('api-status').textContent = error.message === 'HTTP 404' ? 'Profile not found.' : 'Connecting to profile…';
     console.error('Profile load failed:', error);
   }
 }
 let retryDelay = 1000;
 function connectLive() {
-  const socket = new WebSocket(`${apiUrl.replace(/^http/, 'ws')}/socket`);
+  const socket = new WebSocket(`${apiUrl.replace(/^http/, 'ws')}/socket${profileQuery}`);
   socket.addEventListener('open', () => { retryDelay = 1000; });
   socket.addEventListener('message', event => {
     try { const message = JSON.parse(event.data); if (message.type === 'settings') render(message.data); }
@@ -299,7 +302,7 @@ background.addEventListener('ended', () => {
 });
 async function updateViews() {
   try {
-    const response = await fetch(`${apiUrl}/views`, { method: 'POST', cache: 'no-store' });
+    const response = await fetch(`${apiUrl}/views${profileQuery}`, { method: 'POST', cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const { count } = await response.json();
     $('visitor-count').textContent = Number(count).toLocaleString('en-US');
