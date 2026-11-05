@@ -38,6 +38,92 @@ let dirty = false;
 let presets = [];
 let activePresetId = null;
 
+const dynamicFields = {
+  project: { list: "project-list", keys: ["title", "description", "imageUrl", "url"], limit: 6 },
+  badge: { list: "custom-badge-list", keys: ["label", "imageUrl", "color"], limit: 6 }
+};
+function readItems(kind) {
+  const { list, keys } = dynamicFields[kind];
+  return [...$(list).children].map(card => Object.fromEntries([
+    ...(kind === "project" ? [["id", card.dataset.id]] : []),
+    ...keys.map(key => [key, card.querySelector(`[data-key="${key}"]`).value.trim()])
+  ]));
+}
+function renderItems(kind, items = []) {
+  const list = $(dynamicFields[kind].list);
+  list.replaceChildren();
+  for (const item of items) {
+    const card = document.createElement("div");
+    card.className = "custom-item";
+    if (kind === "project") card.dataset.id = item.id || crypto.randomUUID();
+    const title = document.createElement("div"); title.className = "custom-item-heading";
+    const name = document.createElement("strong"); name.textContent = kind === "project" ? "Project" : "Badge";
+    const actions = document.createElement("span");
+    for (const [action, label] of [["up", "↑"], ["down", "↓"], ["remove", "Remove"]]) {
+      const button = document.createElement("button"); button.type = "button"; button.className = "quiet-button"; button.dataset.action = action; button.textContent = label; actions.append(button);
+    }
+    title.append(name, actions); card.append(title);
+    const grid = document.createElement("div"); grid.className = "field-grid";
+    const labels = kind === "project" ? { title: "Project name", description: "Description", imageUrl: "Cover image URL", url: "Open URL" } : { label: "Badge label", imageUrl: "Icon URL", color: "Badge color" };
+    for (const key of dynamicFields[kind].keys) {
+      const wrap = document.createElement("label");
+      wrap.textContent = labels[key];
+      const input = document.createElement("input");
+      input.dataset.key = key;
+      input.type = key === "color" ? "color" : key.toLowerCase().includes("url") || key === "url" ? "url" : "text";
+      input.maxLength = key === "title" ? 60 : key === "description" ? 180 : key === "label" ? 30 : 2000;
+      if (["title", "label", "imageUrl"].includes(key)) input.required = true;
+      input.value = item[key] || (key === "color" ? "#b99af7" : "");
+      wrap.append(input); grid.append(wrap);
+    }
+    card.append(grid);
+    const upload = document.createElement("div"); upload.className = "upload-control";
+    const picker = document.createElement("input"); picker.type = "file"; picker.accept = "image/gif,image/png,image/jpeg,image/webp"; picker.setAttribute("aria-label", `Choose ${kind} image`);
+    const button = document.createElement("button"); button.type = "button"; button.className = "quiet-button"; button.dataset.action = "upload"; button.textContent = "Upload image";
+    const status = document.createElement("small"); status.setAttribute("role", "status");
+    upload.append(picker, button, status); card.append(upload); list.append(card);
+  }
+}
+async function uploadItemImage(card) {
+  const picker = card.querySelector('input[type="file"]');
+  const file = picker.files?.[0];
+  const status = card.querySelector(".upload-control small");
+  if (!file) { status.textContent = "Choose a file first."; return; }
+  if (!token) { status.textContent = "Sign in first."; return; }
+  if (!["image/gif", "image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size < 1 || file.size > 5 * 1024 * 1024) { status.textContent = "Use GIF, PNG, JPG or WebP under 5 MB."; return; }
+  status.textContent = "Uploading…";
+  try {
+    const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(",")[1]); reader.onerror = () => reject(new Error("Could not read file")); reader.readAsDataURL(file); });
+    const response = await fetch(`${apiUrl}/upload`, { method: "POST", cache: "no-store", headers: { Authorization: `Bearer ${token}`, "Content-Type": file.type, "X-Media-Kind": "avatar", "X-File-Size": String(file.size) }, body: base64 });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+    card.querySelector('[data-key="imageUrl"]').value = result.url;
+    dirty = true;
+    status.textContent = "Uploaded. Save changes to publish.";
+    message("editor-status", "Image uploaded. Click Save changes to publish.");
+  } catch (error) { status.textContent = `Upload failed: ${error.message}`; }
+}
+for (const kind of Object.keys(dynamicFields)) {
+  const { list, limit } = dynamicFields[kind];
+  $(`add-${kind === "project" ? "project" : "custom-badge"}`).addEventListener("click", () => {
+    const items = readItems(kind);
+    if (items.length >= limit) { message("editor-status", `Maximum ${limit} ${kind}s.`); return; }
+    items.push(kind === "project" ? { id: crypto.randomUUID(), title: "", description: "", imageUrl: "", url: "" } : { label: "", imageUrl: "", color: "#b99af7" });
+    renderItems(kind, items); dirty = true;
+    $(list).lastElementChild.querySelector("input").focus();
+  });
+  $(list).addEventListener("click", event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    const card = button.closest(".custom-item");
+    if (button.dataset.action === "upload") { uploadItemImage(card); return; }
+    const items = readItems(kind), index = [...$(list).children].indexOf(card);
+    if (button.dataset.action === "remove") items.splice(index, 1);
+    else { const next = index + (button.dataset.action === "up" ? -1 : 1); if (next < 0 || next >= items.length) return; [items[index], items[next]] = [items[next], items[index]]; }
+    renderItems(kind, items); dirty = true;
+  });
+}
+
 function message(id, text, kind = "") {
   const el = $(id);
   el.textContent = text;
@@ -76,6 +162,8 @@ function fillForm(data = {}, clipLabel = "Saved clip") {
   }
   for (const key of musicTrimKeys) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : 0;
   for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).checked = Array.isArray(data.badges) && data.badges.includes(badge);
+  renderItems("project", Array.isArray(data.projects) ? data.projects : []);
+  renderItems("badge", Array.isArray(data.customBadges) ? data.customBadges : []);
   for (const [key, fallback] of Object.entries(styleDefaults)) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : fallback;
   if (!data.name) form.elements.namedItem("name").value = "Your name";
   layout = structuredClone(defaultLayout);
@@ -102,6 +190,8 @@ function readForm() {
   for (const key of Object.keys(cropDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   for (const key of musicTrimKeys) data[key] = Number(form.elements.namedItem(key).value);
   data.badges = Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked);
+  data.projects = readItems("project");
+  data.customBadges = readItems("badge");
   for (const key of Object.keys(styleDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   data.showThemes = false;
   return data;
@@ -606,6 +696,8 @@ form.addEventListener("input", event => {
 function settingsError(data) {
   const urls = fields.filter(key => key.endsWith("Url"));
   if (urls.some(key => !validUrl(data[key]))) return "URLs must start with https:// or http://.";
+  if (data.projects.some(item => !item.title || !validUrl(item.imageUrl) || !validUrl(item.url))) return "Each project needs a name and valid image/link URLs.";
+  if (data.customBadges.some(item => !item.label || !item.imageUrl || !validUrl(item.imageUrl))) return "Each custom badge needs a label and an icon URL.";
   if (data.backgroundEnd && data.backgroundEnd <= data.backgroundStart) return "Video end must be after video start.";
   for (const [, prefix] of Object.values(musicFields)) {
     if (data[`${prefix}End`] && data[`${prefix}End`] <= data[`${prefix}Start`]) return "Music end must be after music start.";

@@ -120,6 +120,21 @@ function render(data) {
     chip.append(icon);
     badgeContainer.append(chip);
   }
+  for (const badge of Array.isArray(data.customBadges) ? data.customBadges : []) {
+    const url = safeUrl(badge.imageUrl);
+    if (!url || !badge.label) continue;
+    const chip = document.createElement('span');
+    chip.className = 'profile-badge custom-profile-badge';
+    chip.setAttribute('role', 'img');
+    chip.setAttribute('aria-label', badge.label);
+    chip.dataset.label = badge.label;
+    if (/^#[0-9a-f]{6}$/i.test(badge.color)) chip.style.setProperty('--customBadgeColor', badge.color);
+    const icon = document.createElement('img');
+    icon.src = url;
+    icon.alt = '';
+    chip.append(icon);
+    badgeContainer.append(chip);
+  }
   badgeContainer.hidden = !badgeContainer.childElementCount;
   const location = $('profile-location');
   location.textContent = typeof data.location === 'string' ? data.location.trim() : '';
@@ -172,7 +187,8 @@ function render(data) {
   $('background').style.filter = `brightness(${brightness}%) blur(${blur}px)`;
   for (const [key, visible] of [['views', data.showViews !== false], ['themes', false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
   $('share-profile').hidden = data.showShare === false;
-  const showMore = data.showMoreSection === true;
+  const projects = Array.isArray(data.projects) ? data.projects : [];
+  const showMore = data.showMoreSection === true || projects.length > 0;
   document.body.classList.toggle('has-more-section', showMore);
   $('more-section').hidden = !showMore;
   $('scroll-more').hidden = !showMore;
@@ -187,6 +203,26 @@ function render(data) {
   if (moreUrl) $('more-link').href = moreUrl;
   else $('more-link').removeAttribute('href');
   $('more-link').textContent = data.moreLinkLabel || '';
+  const projectGrid = $('project-grid');
+  projectGrid.replaceChildren();
+  for (const project of projects) {
+    if (!project.title) continue;
+    const url = safeUrl(project.url);
+    const card = document.createElement(url ? 'a' : 'article');
+    card.className = 'project-card';
+    if (url) { card.href = url; card.target = '_blank'; card.rel = 'noopener noreferrer'; }
+    const imageUrl = safeUrl(project.imageUrl);
+    if (imageUrl) { const image = document.createElement('img'); image.src = imageUrl; image.alt = ''; image.loading = 'lazy'; card.append(image); }
+    const copy = document.createElement('span');
+    copy.className = 'project-copy';
+    const title = document.createElement('strong'); title.textContent = project.title;
+    const description = document.createElement('small'); description.textContent = project.description || '';
+    copy.append(title, description);
+    card.append(copy);
+    if (url) { const arrow = document.createElement('span'); arrow.className = 'project-arrow'; arrow.textContent = '↗'; card.append(arrow); }
+    projectGrid.append(card);
+  }
+  projectGrid.hidden = !projectGrid.childElementCount;
   const nextParticles = ['snow', 'rain', 'stars'].includes(data.particleStyle) ? data.particleStyle : 'snow';
   if (particleStyle !== nextParticles) { particleStyle = nextParticles; if (snowEnabled) resizeSnow(); }
   setSnow(data.snowEnabled === true);
