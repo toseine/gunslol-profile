@@ -31,6 +31,9 @@ const defaults = {
   backgroundZoom: 1,
   backgroundX: 50,
   backgroundY: 50,
+  backgroundBrightness: 42,
+  backgroundBlur: 3,
+  particleStyle: "snow",
   animateEntrance: true,
   animateText: true,
   animatedBackground: true,
@@ -46,6 +49,14 @@ const defaults = {
   nameEffect: "none",
   socialStyle: "glass",
   socialIconSet: "brand",
+  cardStyle: "glass",
+  borderColor: "#b99af7",
+  borderWidth: 1,
+  cardRadius: 22,
+  cardPadding: 26,
+  cardGlow: 18,
+  badgeSize: 30,
+  socialGap: 10,
   profileGradient: false,
   monochromeIcons: true,
   profileOpacity: 100,
@@ -59,6 +70,7 @@ const defaults = {
   showViews: true,
   showThemes: true,
   showVolume: true,
+  showShare: true,
   layout: {
     desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
     mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -196,22 +208,22 @@ function cleanSettings(input) {
   result.cursorStyle = input.cursorStyle || "orb";
   if (input.enterText != null && (typeof input.enterText !== "string" || input.enterText.length > 60)) return null;
   result.enterText = (input.enterText || defaults.enterText).trim();
-  for (const key of ["accentColor", "textColor", "backgroundColor", "socialIconColor"]) {
+  for (const key of ["accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor"]) {
     const value = input[key] ?? defaults[key];
     if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return null;
     result[key] = value;
   }
-  for (const [key, choices] of Object.entries({ fontStyle: ["serif", "sans", "mono"], nameEffect: ["none", "glow", "gradient"], socialStyle: ["glass", "solid", "outline"], socialIconSet: ["brand", "minimal"] })) {
+  for (const [key, choices] of Object.entries({ fontStyle: ["serif", "sans", "mono"], nameEffect: ["none", "glow", "gradient"], socialStyle: ["glass", "solid", "outline"], socialIconSet: ["brand", "minimal"], cardStyle: ["floating", "glass", "solid", "outline"], particleStyle: ["snow", "rain", "stars"] })) {
     const value = input[key] ?? defaults[key];
     if (!choices.includes(value)) return null;
     result[key] = value;
   }
-  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87], ["cardWidth", 300, 900], ["avatarSize", 60, 220], ["nameSize", 22, 80], ["bioSize", 11, 30], ["socialSize", 28, 72]]) {
+  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87], ["cardWidth", 300, 900], ["avatarSize", 60, 220], ["nameSize", 22, 80], ["bioSize", 11, 30], ["socialSize", 28, 72], ["borderWidth", 0, 6], ["cardRadius", 0, 48], ["cardPadding", 0, 48], ["cardGlow", 0, 60], ["badgeSize", 18, 50], ["socialGap", 0, 28], ["backgroundBrightness", 10, 100], ["backgroundBlur", 0, 20]]) {
     const value = input[key] ?? defaults[key];
     if (!Number.isInteger(value) || value < min || value > max) return null;
     result[key] = value;
   }
-  for (const key of ["showViews", "showThemes", "showVolume"]) {
+  for (const key of ["showViews", "showThemes", "showVolume", "showShare"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? true;
   }
