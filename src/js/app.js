@@ -36,7 +36,7 @@ function widgetCard(icon, label, value) {
   return detail;
 }
 async function renderWidgets(data) {
-  const key = JSON.stringify([data.clockEnabled, data.clockTimezone, data.weatherEnabled, data.weatherCity, data.discordPresenceEnabled, data.discordPresenceId, Math.floor(Date.now() / 300000)]);
+  const key = JSON.stringify([data.clockEnabled, data.clockTimezone, data.weatherEnabled, data.weatherCity, data.discordPresenceEnabled, data.discordPresenceId, data.valorantEnabled, data.valorantRiotId, Math.floor(Date.now() / 300000)]);
   if (key === widgetSignature) return;
   widgetSignature = key;
   clearInterval(clockTimer);
@@ -46,7 +46,7 @@ async function renderWidgets(data) {
     const updateClock = () => { try { detail.textContent = new Intl.DateTimeFormat('en', { timeZone: data.clockTimezone || 'Europe/Warsaw', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); } catch { detail.textContent = 'Invalid timezone'; } };
     updateClock(); clockTimer = setInterval(updateClock, 30000);
   }
-  root.hidden = !root.childElementCount && !(data.weatherEnabled && data.weatherCity) && !(data.discordPresenceEnabled && /^\d{17,20}$/.test(data.discordPresenceId || ''));
+  root.hidden = !root.childElementCount && !(data.weatherEnabled && data.weatherCity) && !(data.discordPresenceEnabled && /^\d{17,20}$/.test(data.discordPresenceId || '')) && !(data.valorantEnabled && data.valorantRiotId);
   if (data.weatherEnabled && data.weatherCity) {
     const detail = widgetCard('☁', data.weatherCity.toUpperCase(), 'Loading…'); root.append(detail.parentElement.parentElement);
     try {
@@ -62,6 +62,15 @@ async function renderWidgets(data) {
     try {
       const presence = await fetch(`https://api.lanyard.rest/v1/users/${data.discordPresenceId}`).then(r => r.json());
       if (widgetSignature === key) detail.textContent = presence.success ? (presence.data.discord_status || 'offline') : 'Unavailable';
+    } catch { if (widgetSignature === key) detail.textContent = 'Unavailable'; }
+  }
+  if (data.valorantEnabled && data.valorantRiotId) {
+    const detail = widgetCard('◇', 'VALORANT', 'Loading…'); root.append(detail.parentElement.parentElement);
+    try {
+      const response = await fetch(`${apiUrl}/valorant${profileQuery}`);
+      if (!response.ok) throw new Error('Unavailable');
+      const account = await response.json();
+      if (widgetSignature === key) detail.textContent = `${account.name}#${account.tag}${account.level == null ? '' : ` · L${account.level}`}`;
     } catch { if (widgetSignature === key) detail.textContent = 'Unavailable'; }
   }
   if (widgetSignature === key) {
