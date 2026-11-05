@@ -153,7 +153,7 @@ function render(data) {
   document.body.dataset.socialStyle = ['glass', 'solid', 'outline'].includes(data.socialStyle) ? data.socialStyle : 'glass';
   document.body.dataset.socialIconSet = data.socialIconSet === 'minimal' ? 'minimal' : 'brand';
   document.body.classList.toggle('profile-gradient', data.profileGradient === true);
-  document.body.classList.toggle('monochrome-icons', data.monochromeIcons === true);
+  document.body.classList.toggle('monochrome-icons', data.monochromeIcons !== false);
   for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }

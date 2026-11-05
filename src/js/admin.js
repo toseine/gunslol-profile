@@ -66,7 +66,7 @@ function showMusicRanges(data, label = "Saved clip") {
 function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
-    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient", "monochromeIcons"].includes(key);
+    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient"].includes(key);
     else el.value = typeof data[key] === "string" ? data[key] : (fieldDefaults[key] ?? "");
   }
   for (const [key, fallback] of Object.entries(cropDefaults)) {
