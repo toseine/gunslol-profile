@@ -974,7 +974,12 @@ body[data-social-style="outline"] .social-links a { background: transparent; bor
 .profile-location { color: var(--textColor, #fff); opacity: .74; font: 12px Arial, sans-serif; letter-spacing: .05em; margin: 4px 0 8px; }
 .profile-location::before { content: '⌖'; display: inline-block; margin-right: 6px; color: var(--accentColor, #b99af7); font-size: 17px; vertical-align: -1px; }
 body.profile-gradient #profile-block { background-image: linear-gradient(145deg, color-mix(in srgb, var(--accentColor, #b99af7) 23%, transparent), transparent 55%); }
-body.monochrome-icons .social-links a img { filter: grayscale(1); }
+body:not(.monochrome-icons) .social-links .icon-discord { background: #7289da; }
+body:not(.monochrome-icons) .social-links .icon-roblox { background: #e8e8e8; }
+body:not(.monochrome-icons) .social-links .icon-github { background: #eee; }
+body:not(.monochrome-icons) .social-links .icon-youtube { background: #ff4545; }
+body:not(.monochrome-icons) .social-links .icon-tiktok { background: #eee; }
+body:not(.monochrome-icons) .social-links .icon-telegram { background: #34a8e6; }
 .social-links a { border-radius: 10px; background: rgba(16,14,24,.55); }
 .social-links a:hover { border-color: var(--accentColor, #b99af7); box-shadow: 0 0 15px color-mix(in srgb, var(--accentColor, #b99af7), transparent 65%); }
 .social-icon { object-fit: contain; }

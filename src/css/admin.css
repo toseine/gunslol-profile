@@ -232,4 +232,9 @@ form .badge-gallery label { min-height: 72px; border-radius: 11px; }
 .badge-gallery img { width: 36px; height: 36px; }
 .badge-gallery input { width: 16px; height: 16px; }
 .mini-stage.gradient-card .mini-card { background-image: linear-gradient(145deg, color-mix(in srgb, var(--mini-accent) 33%, transparent), transparent 62%); }
-.mini-stage.monochrome-icons .mini-social-icon { filter: grayscale(1); }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-discord { background: #7289da; }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-roblox { background: #e8e8e8; }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-github { background: #eee; }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-youtube { background: #ff4545; }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-tiktok { background: #eee; }
+.mini-stage:not(.monochrome-icons) .mini-social-icon.icon-telegram { background: #34a8e6; }
