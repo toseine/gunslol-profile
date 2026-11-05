@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=9">
-  <script type="module" src="./src/js/admin.js?v=13"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=10">
+  <script type="module" src="./src/js/admin.js?v=14"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -79,8 +79,18 @@
         </div>
         <div class="panel section-panel" data-section="socials" hidden>
           <div class="section-heading"><span class="section-number">03</span><h2>Social media</h2></div>
+          <p class="muted">Pick an icon to jump to its link. Only filled links appear on your profile.</p>
+          <div class="social-picker" aria-label="Social platforms">
+            <button type="button" class="social-pick" data-social-focus="discord-username" aria-label="Edit Discord"><span class="social-pick-icon icon-discord"></span><span>Discord</span></button>
+            <button type="button" class="social-pick" data-social-focus="roblox-url" aria-label="Edit Roblox"><span class="social-pick-icon icon-roblox"></span><span>Roblox</span></button>
+            <button type="button" class="social-pick" data-social-focus="github-url" aria-label="Edit GitHub"><span class="social-pick-icon icon-github"></span><span>GitHub</span></button>
+            <button type="button" class="social-pick" data-social-focus="youtube-url" aria-label="Edit YouTube"><span class="social-pick-icon icon-youtube"></span><span>YouTube</span></button>
+            <button type="button" class="social-pick" data-social-focus="tiktok-url" aria-label="Edit TikTok"><span class="social-pick-icon icon-tiktok"></span><span>TikTok</span></button>
+            <button type="button" class="social-pick" data-social-focus="telegram-url" aria-label="Edit Telegram"><span class="social-pick-icon icon-telegram"></span><span>Telegram</span></button>
+          </div>
           <div class="field-stack">
             <div><label for="discord-username"><img class="field-icon" src="./assets/discord.svg" alt=""> Discord username</label><input id="discord-username" name="discordUsername" type="text" maxlength="64" placeholder="yourname"><small>Visitors click the icon to copy your username.</small></div>
+            <div><label for="roblox-url"><img class="field-icon" src="./assets/roblox.svg" alt=""> Roblox</label><input id="roblox-url" name="robloxUrl" type="url" maxlength="2000" placeholder="https://www.roblox.com/users/.../profile"></div>
             <div><label for="github-url"><img class="field-icon" src="./assets/github.svg" alt=""> GitHub</label><input id="github-url" name="githubUrl" type="url" maxlength="2000" placeholder="https://github.com/..."></div>
             <div><label for="youtube-url"><img class="field-icon" src="./assets/youtube.svg" alt=""> YouTube</label><input id="youtube-url" name="youtubeUrl" type="url" maxlength="2000" placeholder="https://youtube.com/@..."></div>
             <div><label for="tiktok-url"><img class="field-icon" src="./assets/tiktok.svg" alt=""> TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
