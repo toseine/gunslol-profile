@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=15">
-  <script type="module" src="./src/js/admin.js?v=19"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=16">
+  <script type="module" src="./src/js/admin.js?v=20"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -65,6 +65,7 @@
               <div><label for="more-link-url">Featured button URL</label><input id="more-link-url" name="moreLinkUrl" type="url" maxlength="2000" placeholder="https://example.com"></div>
             </div>
           </div>
+          <div class="customization-group"><h3>Project cards</h3><p class="muted">Add up to six projects. They appear on the second screen; drag order with the arrow buttons.</p><div id="project-list" class="custom-list"></div><button id="add-project" type="button" class="quiet-button">+ Add project</button></div>
         </div>
         <div class="panel section-panel" data-section="badges" hidden>
           <div class="section-heading"><span class="section-number">✦</span><h2>Badges</h2></div>
@@ -85,6 +86,7 @@
             <label><input id="badge-imagehost" type="checkbox"><img src="./assets/badge-imagehost.svg" alt=""><span><strong>Image Host</strong><small>Star themed</small></span></label>
             <label><input id="badge-domainlegend" type="checkbox"><img src="./assets/badge-domainlegend.svg" alt=""><span><strong>Domain Legend</strong><small>Rocket themed</small></span></label>
           </div>
+          <div class="customization-group"><h3>Your badges</h3><p class="muted">Upload your own icon and choose its label and color. Up to six badges.</p><div id="custom-badge-list" class="custom-list"></div><button id="add-custom-badge" type="button" class="quiet-button">+ Add badge</button></div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
           <div class="section-heading"><span class="section-number">02</span><h2>Media & music</h2></div>

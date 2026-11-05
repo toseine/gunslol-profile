@@ -31,6 +31,7 @@ Publiczna strona `index.html` działa na GitHub Pages. Ustawienia profilu są za
 - Suwaki w zakładce Appearance zmieniają szerokość profilu, rozmiar avatara, nazwy, opisu i przycisków społecznościowych. Podgląd pokazuje te zmiany przed zapisem. Na telefonie rozmiary są ograniczone do szerokości ekranu.
 - W Appearance dostępne są szybkie palety kolorów, cztery style karty, kolor i grubość obramowania, odstępy, poświata oraz rozmiar odznak i odstępy ikon. W Media & music możesz ustawić jasność i rozmycie tła oraz wybrać śnieg, deszcz lub gwiazdy. Publiczny przycisk Share można wyłączyć w panelu. Te wartości są osobne dla każdego profilu i zapisują się również w presetach.
 - W Profile można włączyć drugą sekcję strony z przyciskiem przewijania, własnym nagłówkiem, opisem, linkiem i stylem karty. Galeria zawiera też cztery dodatkowe dekoracyjne odznaki inspirowane stylem guns.lol; nie oznaczają one odznak przyznanych przez guns.lol.
+- W Profile można dodać do sześciu kart projektów z nazwą, opisem, obrazem i opcjonalnym linkiem. Karty automatycznie udostępniają drugą sekcję. W Badges można dodać do sześciu własnych odznak z ikoną, podpisem i kolorem. Obrazy można przesłać do Cloudflare. Kolejność zmieniają przyciski strzałek; ustawienia są osobne dla profili i presetów.
 - Discord przyjmuje nazwę użytkownika; przycisk na profilu kopiuje ją do schowka. Nie wymaga kont odwiedzających.
 - Darmowy plan Workers i Durable Objects ma limity użycia. Przy przekroczeniu limitów API może przestać odpowiadać do ich odnowienia.
 
