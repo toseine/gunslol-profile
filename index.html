@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="src/css/style.css?v=16">
+    <link rel="stylesheet" href="src/css/style.css?v=17">
     <link href="https://fonts.googleapis.com/css2?family=Retro+Gaming&display=swap" rel="stylesheet">
 </head>
 <body class="home-theme" onload="initMedia()">
@@ -33,6 +33,7 @@
 
 
         <div id="profile-block">
+            <div id="profile-banner" class="profile-banner" hidden></div>
             <div class="profile-header">
                 <div class="profile-container">
                     <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%3E%3Cstop%20stop-color%3D%22%237afcff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%239b5cff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22%23101126%22%20stroke%3D%22url%28%23g%29%22%20stroke-width%3D%225%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2259%22%20text-anchor%3D%22middle%22%20fill%3D%22%237afcff%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%3E%3F%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Profile" class="profile-picture">
@@ -42,6 +43,7 @@
                         <div id="profile-name">Your name</div>
                         <div id="profile-badges" class="profile-badges" hidden></div>
                         <div id="profile-location" class="profile-location" hidden></div>
+                        <div id="profile-occupation" class="profile-occupation" hidden></div>
                     </div>
                     <div id="profile-bio"></div>
                 </div>
@@ -83,6 +85,8 @@
                     <span class="tooltip">Views</span>
                 </div>
             </div>
+            <div id="custom-links" class="custom-links" hidden></div>
+            <div id="profile-widgets" class="profile-widgets" hidden></div>
         </div>
 
 
@@ -190,6 +194,6 @@
     </section>
     <p id="api-status" role="status"></p>
     <script src="src/js/source.js?v=4"></script>
-    <script type="module" src="src/js/app.js?v=22"></script>
+    <script type="module" src="src/js/app.js?v=23"></script>
 </body>
 </html>
