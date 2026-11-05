@@ -118,7 +118,7 @@ function render(data) {
     badgeContainer.append(chip);
   }
   badgeContainer.hidden = !badgeContainer.childElementCount;
-  for (const [social, field] of [['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl'], ['telegram', 'telegramUrl']]) {
+  for (const [social, field] of [['roblox', 'robloxUrl'], ['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl'], ['telegram', 'telegramUrl']]) {
     const link = $(`${social}-link`);
     const url = safeUrl(data[field]);
     link.hidden = !url;

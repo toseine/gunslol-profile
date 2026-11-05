@@ -2,7 +2,7 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "showViews", "showThemes", "showVolume"];
+const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "showViews", "showThemes", "showVolume"];
 const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
 const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
@@ -137,6 +137,9 @@ for (const button of document.querySelectorAll(".nav-button")) button.addEventLi
   document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 $("edit-icon-style").addEventListener("click", () => document.querySelector('.nav-button[data-target="appearance"]').click());
+for (const button of document.querySelectorAll("[data-social-focus]")) button.addEventListener("click", () => {
+  $(button.dataset.socialFocus).focus();
+});
 
 let failedAvatarUrl = "";
 function updateMiniPreview() {
@@ -154,7 +157,7 @@ function updateMiniPreview() {
   const miniSocials = document.querySelector(".mini-socials");
   miniSocials.dataset.iconSet = $("social-icon-set").value;
   miniSocials.replaceChildren();
-  for (const [name, id] of [["discord", "discord-username"], ["github", "github-url"], ["youtube", "youtube-url"], ["tiktok", "tiktok-url"], ["telegram", "telegram-url"]]) {
+  for (const [name, id] of [["discord", "discord-username"], ["roblox", "roblox-url"], ["github", "github-url"], ["youtube", "youtube-url"], ["tiktok", "tiktok-url"], ["telegram", "telegram-url"]]) {
     const value = $(id).value.trim();
     if (!value || (name !== "discord" && !validUrl(value))) continue;
     const icon = document.createElement("span");
@@ -195,7 +198,7 @@ $("mini-avatar").addEventListener("error", event => {
 });
 for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
-for (const id of ["discord-username", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
+for (const id of ["discord-username", "roblox-url", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");
