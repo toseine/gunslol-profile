@@ -11,6 +11,10 @@ const defaults = {
   moreStyle: "glass",
   moreLinkLabel: "",
   moreLinkUrl: "",
+  nowLabel: "NOW",
+  nowText: "",
+  projects: [],
+  customBadges: [],
   location: "",
   avatarUrl: "",
   defaultTheme: "home",
@@ -184,6 +188,20 @@ function cleanSettings(input) {
   const badges = input.badges ?? [];
   if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
   result.badges = badges;
+  if (!Array.isArray(input.projects ?? []) || input.projects?.length > 6 || !Array.isArray(input.customBadges ?? []) || input.customBadges?.length > 6) return null;
+  result.projects = [];
+  for (const item of input.projects ?? []) {
+    if (!item || typeof item !== "object" || !/^[0-9a-f-]{36}$/.test(item.id) || typeof item.title !== "string" || !item.title.trim() || item.title.length > 60 || typeof item.description !== "string" || item.description.length > 180 || typeof item.imageUrl !== "string" || item.imageUrl.length > 2000 || typeof item.url !== "string" || item.url.length > 2000) return null;
+    for (const url of [item.imageUrl, item.url]) if (url) { try { if (!["http:", "https:"].includes(new URL(url).protocol)) return null; } catch { return null; } }
+    result.projects.push({ id: item.id, title: item.title.trim(), description: item.description.trim(), imageUrl: item.imageUrl.trim(), url: item.url.trim() });
+  }
+  if (new Set(result.projects.map(item => item.id)).size !== result.projects.length) return null;
+  result.customBadges = [];
+  for (const item of input.customBadges ?? []) {
+    if (!item || typeof item !== "object" || typeof item.label !== "string" || !item.label.trim() || item.label.length > 30 || typeof item.imageUrl !== "string" || item.imageUrl.length > 2000 || !/^#[0-9a-f]{6}$/i.test(item.color)) return null;
+    try { if (!["http:", "https:"].includes(new URL(item.imageUrl).protocol)) return null; } catch { return null; }
+    result.customBadges.push({ label: item.label.trim(), imageUrl: item.imageUrl.trim(), color: item.color });
+  }
   for (const [key, max] of Object.entries({ scrollLabel: 30, moreEyebrow: 40, moreTitle: 80, moreText: 1000, moreLinkLabel: 40, moreLinkUrl: 2000 })) {
     const value = input[key] ?? defaults[key];
     if (typeof value !== "string" || value.length > max) return null;
