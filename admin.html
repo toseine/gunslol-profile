@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=13">
-  <script type="module" src="./src/js/admin.js?v=17"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=14">
+  <script type="module" src="./src/js/admin.js?v=18"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -92,7 +92,9 @@
                 <div><label for="background-y">Vertical focus <output id="y-value">50%</output></label><input id="background-y" name="backgroundY" type="range" min="0" max="100" step="1" value="50"></div>
               </div>
             </div>
-            <label class="toggle-row" for="snow-enabled"><span><strong>Snow effect</strong><small>Animated snow on the profile page</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
+            <div class="customization-group"><h3>Background atmosphere</h3><p class="muted">Control how clear the video is behind your profile.</p><div class="slider-grid"><div><label for="background-brightness">Video brightness <output id="background-brightness-value">42%</output></label><input id="background-brightness" name="backgroundBrightness" type="range" min="10" max="100" value="42"></div><div><label for="background-blur">Video blur <output id="background-blur-value">3px</output></label><input id="background-blur" name="backgroundBlur" type="range" min="0" max="20" value="3"></div></div></div>
+            <label class="toggle-row" for="snow-enabled"><span><strong>Particle effect</strong><small>Animated particles over the profile page</small></span><span class="switch"><input id="snow-enabled" name="snowEnabled" type="checkbox"><span class="slider"></span></span></label>
+            <div><label for="particle-style">Particle style</label><select id="particle-style" name="particleStyle"><option value="snow">Snow</option><option value="rain">Rain</option><option value="stars">Twinkling stars</option></select></div>
           </div>
         </div>
         <div class="panel section-panel" data-section="socials" hidden>
@@ -119,6 +121,7 @@
         <div class="panel section-panel" data-section="appearance" hidden>
           <div class="section-heading"><span class="section-number">04</span><h2>Appearance and layout</h2></div>
           <div class="field-stack">
+            <div class="customization-group"><h3>Quick color palettes</h3><p class="muted">Pick a starting point, then adjust every color below. Save to publish.</p><div class="palette-options" aria-label="Color palettes"><button type="button" class="palette-option" data-palette="violet" style="--palette:#b99af7" aria-label="Violet palette"><span></span>Violet</button><button type="button" class="palette-option" data-palette="rose" style="--palette:#f28dbe" aria-label="Rose palette"><span></span>Rose</button><button type="button" class="palette-option" data-palette="cyan" style="--palette:#6fd8e8" aria-label="Cyan palette"><span></span>Cyan</button><button type="button" class="palette-option" data-palette="emerald" style="--palette:#75dab4" aria-label="Emerald palette"><span></span>Emerald</button><button type="button" class="palette-option" data-palette="gold" style="--palette:#e9c780" aria-label="Gold palette"><span></span>Gold</button></div></div>
             <div class="field-grid custom-grid">
               <div><label for="accent-color">Accent color</label><input id="accent-color" name="accentColor" type="color" value="#b99af7"></div>
               <div><label for="text-color">Text color</label><input id="text-color" name="textColor" type="color" value="#ffffff"></div>
@@ -129,6 +132,7 @@
               <div><label for="social-style">Social icon style</label><select id="social-style" name="socialStyle"><option value="glass">Glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div>
               <div><label for="social-icon-set">Social icons</label><select id="social-icon-set" name="socialIconSet"><option value="brand">Brand logos</option><option value="minimal">Minimal symbols</option></select><small>Preview updates as you choose.</small></div>
             </div>
+            <div class="customization-group"><h3>Profile card</h3><p class="muted">Choose the surface, border and spacing around your identity.</p><div class="field-grid custom-grid"><div><label for="card-style">Card style</label><select id="card-style" name="cardStyle"><option value="floating">Floating</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div><div><label for="border-color">Border color</label><input id="border-color" name="borderColor" type="color" value="#b99af7"></div></div><div class="slider-grid"><div><label for="border-width">Border thickness <output id="border-width-value">1px</output></label><input id="border-width" name="borderWidth" type="range" min="0" max="6" value="1"></div><div><label for="card-radius">Card corners <output id="card-radius-value">22px</output></label><input id="card-radius" name="cardRadius" type="range" min="0" max="48" value="22"></div><div><label for="card-padding">Card spacing <output id="card-padding-value">26px</output></label><input id="card-padding" name="cardPadding" type="range" min="0" max="48" value="26"></div><div><label for="card-glow">Card glow <output id="card-glow-value">18px</output></label><input id="card-glow" name="cardGlow" type="range" min="0" max="60" value="18"></div></div></div>
             <label class="toggle-row" for="profile-gradient"><span><strong>Profile gradient</strong><small>Add accent color to the profile card</small></span><span class="switch"><input id="profile-gradient" name="profileGradient" type="checkbox"><span class="slider"></span></span></label>
             <label class="toggle-row" for="monochrome-icons"><span><strong>Monochrome icons</strong><small>One chosen color or each platform's color</small></span><span class="switch"><input id="monochrome-icons" name="monochromeIcons" type="checkbox" checked><span class="slider"></span></span></label>
             <div class="slider-grid">
@@ -140,11 +144,14 @@
               <div><label for="name-size">Name size <output id="name-size-value">59px</output></label><input id="name-size" name="nameSize" type="range" min="22" max="80" value="59"></div>
               <div><label for="bio-size">Bio size <output id="bio-size-value">19px</output></label><input id="bio-size" name="bioSize" type="range" min="11" max="30" value="19"></div>
               <div><label for="social-size">Social button size <output id="social-size-value">42px</output></label><input id="social-size" name="socialSize" type="range" min="28" max="72" step="2" value="42"></div>
+              <div><label for="badge-size">Badge size <output id="badge-size-value">30px</output></label><input id="badge-size" name="badgeSize" type="range" min="18" max="50" value="30"></div>
+              <div><label for="social-gap">Social spacing <output id="social-gap-value">10px</output></label><input id="social-gap" name="socialGap" type="range" min="0" max="28" value="10"></div>
             </div>
             <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
             <label class="toggle-row" for="show-views"><span><strong>Show view counter</strong><small>Monthly unique visitors</small></span><span class="switch"><input id="show-views" name="showViews" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-themes" hidden><span><strong>Show theme switcher</strong><small>Let visitors choose one of five themes</small></span><span class="switch"><input id="show-themes" name="showThemes" type="checkbox"><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-volume"><span><strong>Show music control</strong><small>Volume slider on the public page</small></span><span class="switch"><input id="show-volume" name="showVolume" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="show-share"><span><strong>Show share button</strong><small>Visitors can share or copy this profile's URL</small></span><span class="switch"><input id="show-share" name="showShare" type="checkbox" checked><span class="slider"></span></span></label>
           </div>
         </div>
         <div class="panel section-panel" data-section="animations" hidden>

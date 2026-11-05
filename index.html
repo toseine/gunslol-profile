@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="src/css/style.css?v=12">
+    <link rel="stylesheet" href="src/css/style.css?v=13">
     <link href="https://fonts.googleapis.com/css2?family=Retro+Gaming&display=swap" rel="stylesheet">
 </head>
 <body class="home-theme" onload="initMedia()">
@@ -80,7 +80,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     <span id="visitor-count">0</span>
-                    <span class="tooltip">Unique IPs this month</span>
+                    <span class="tooltip">Views</span>
                 </div>
             </div>
         </div>
@@ -176,8 +176,9 @@
 
     <canvas id="snow-canvas" aria-hidden="true" hidden></canvas>
     <button id="music-toggle" type="button" hidden>Play music</button>
+    <button id="share-profile" type="button" class="share-profile" aria-label="Share this profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L8 7m4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Share</span></button>
     <p id="api-status" role="status"></p>
     <script src="src/js/source.js?v=4"></script>
-    <script type="module" src="src/js/app.js?v=19"></script>
+    <script type="module" src="src/js/app.js?v=20"></script>
 </body>
 </html>
