@@ -47,7 +47,7 @@ const defaults = {
   socialStyle: "glass",
   socialIconSet: "brand",
   profileGradient: false,
-  monochromeIcons: false,
+  monochromeIcons: true,
   profileOpacity: 100,
   profileBlur: 0,
   avatarRadius: 28,
@@ -163,7 +163,7 @@ function cleanSettings(input) {
   result.badges = badges;
   for (const key of ["profileGradient", "monochromeIcons"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
-    result[key] = input[key] ?? false;
+    result[key] = input[key] ?? defaults[key];
   }
   result.snowEnabled = input.snowEnabled;
   for (const [key, min, max, fallback] of [
