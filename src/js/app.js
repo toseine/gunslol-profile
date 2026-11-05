@@ -112,8 +112,8 @@ function render(data) {
     const chip = document.createElement('span');
     chip.className = `profile-badge badge-${badge}`;
     chip.setAttribute('role', 'img');
-    chip.setAttribute('aria-label', `${badgeLabels[badge]} decorative badge`);
-    chip.dataset.label = `${badgeLabels[badge]} · decorative`;
+    chip.setAttribute('aria-label', badgeLabels[badge]);
+    chip.dataset.label = badgeLabels[badge];
     const icon = document.createElement('img');
     icon.src = `./assets/badge-${badge}.svg`;
     icon.alt = '';
@@ -155,18 +155,25 @@ function render(data) {
   document.body.dataset.nameEffect = ['none', 'glow', 'gradient'].includes(data.nameEffect) ? data.nameEffect : 'none';
   document.body.dataset.socialStyle = ['glass', 'solid', 'outline'].includes(data.socialStyle) ? data.socialStyle : 'glass';
   document.body.dataset.socialIconSet = data.socialIconSet === 'minimal' ? 'minimal' : 'brand';
+  document.body.dataset.cardStyle = ['floating', 'glass', 'solid', 'outline'].includes(data.cardStyle) ? data.cardStyle : 'glass';
   document.body.classList.toggle('profile-gradient', data.profileGradient === true);
   document.body.classList.toggle('monochrome-icons', data.monochromeIcons !== false);
-  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff']]) {
+  for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff'], ['borderColor', '#b99af7']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }
   document.body.style.setProperty('--profileOpacity', String((Number.isFinite(Number(data.profileOpacity)) ? Number(data.profileOpacity) : 100) / 100));
   document.body.style.setProperty('--profileBlur', `${Number(data.profileBlur) || 0}px`);
   document.body.style.setProperty('--avatarRadius', `${Number.isFinite(Number(data.avatarRadius)) ? Number(data.avatarRadius) : 28}px`);
-  for (const [key, fallback] of [['cardWidth', 760], ['avatarSize', 174], ['nameSize', 59], ['bioSize', 19], ['socialSize', 42]]) {
+  for (const [key, fallback] of [['cardWidth', 760], ['avatarSize', 174], ['nameSize', 59], ['bioSize', 19], ['socialSize', 42], ['borderWidth', 1], ['cardRadius', 22], ['cardPadding', 26], ['cardGlow', 18], ['badgeSize', 30], ['socialGap', 10]]) {
     document.body.style.setProperty(`--${key}`, `${Number.isFinite(Number(data[key])) ? Number(data[key]) : fallback}px`);
   }
+  const brightness = Number.isFinite(Number(data.backgroundBrightness)) ? Number(data.backgroundBrightness) : 42;
+  const blur = Number.isFinite(Number(data.backgroundBlur)) ? Number(data.backgroundBlur) : 3;
+  $('background').style.filter = `brightness(${brightness}%) blur(${blur}px)`;
   for (const [key, visible] of [['views', data.showViews !== false], ['themes', false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
+  $('share-profile').hidden = data.showShare === false;
+  const nextParticles = ['snow', 'rain', 'stars'].includes(data.particleStyle) ? data.particleStyle : 'snow';
+  if (particleStyle !== nextParticles) { particleStyle = nextParticles; if (snowEnabled) resizeSnow(); }
   setSnow(data.snowEnabled === true);
   $('api-status').textContent = '';
   updateMusicToggle();
@@ -194,6 +201,7 @@ for (const [, , audioId] of Object.values(media)) {
 const canvas = $('snow-canvas');
 const ctx = canvas.getContext('2d');
 let snowEnabled = false;
+let particleStyle = 'snow';
 let flakes = [];
 let frame = 0;
 function resizeSnow() {
@@ -203,19 +211,28 @@ function resizeSnow() {
   canvas.style.width = `${innerWidth}px`;
   canvas.style.height = `${innerHeight}px`;
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
-  flakes = Array.from({ length: Math.min(110, Math.floor(innerWidth / 12)) }, () => ({
+  flakes = Array.from({ length: Math.min(particleStyle === 'rain' ? 155 : 110, Math.floor(innerWidth / (particleStyle === 'rain' ? 8 : 12))) }, () => ({
     x: Math.random() * innerWidth, y: Math.random() * innerHeight,
-    r: Math.random() * 1.9 + 0.7, speed: Math.random() * 1.2 + 0.35,
-    drift: Math.random() * 0.8 - 0.4
+    r: Math.random() * 1.9 + 0.7, speed: particleStyle === 'rain' ? Math.random() * 5 + 8 : Math.random() * 1.2 + 0.35,
+    drift: Math.random() * 0.8 - 0.4, phase: Math.random() * Math.PI * 2
   }));
 }
 function drawSnow() {
   if (!snowEnabled) return;
   ctx.clearRect(0, 0, innerWidth, innerHeight);
-  ctx.fillStyle = 'rgba(218, 235, 255, .72)';
+  ctx.fillStyle = particleStyle === 'rain' ? 'rgba(174, 197, 242, .34)' : 'rgba(218, 235, 255, .72)';
+  ctx.strokeStyle = 'rgba(174, 197, 242, .34)';
+  ctx.lineWidth = 1;
   for (const flake of flakes) {
-    ctx.beginPath(); ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2); ctx.fill();
-    flake.y += flake.speed; flake.x += flake.drift;
+    ctx.beginPath();
+    if (particleStyle === 'rain') { ctx.moveTo(flake.x, flake.y); ctx.lineTo(flake.x - 3, flake.y + 16); ctx.stroke(); }
+    else {
+      ctx.globalAlpha = particleStyle === 'stars' ? .45 + .45 * Math.sin(performance.now() / 850 + flake.phase) : 1;
+      ctx.arc(flake.x, flake.y, particleStyle === 'stars' ? Math.max(.7, flake.r * .75) : flake.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (particleStyle !== 'stars') { flake.y += flake.speed; flake.x += flake.drift; }
     if (flake.y > innerHeight + 4) { flake.y = -4; flake.x = Math.random() * innerWidth; }
   }
   frame = requestAnimationFrame(drawSnow);
@@ -272,6 +289,18 @@ $('discord-link').addEventListener('click', async event => {
     $('discord-tooltip').textContent = `@${username}`;
     $('discord-link').classList.add('copied');
   }
+});
+
+$('share-profile').addEventListener('click', async () => {
+  const button = $('share-profile');
+  try {
+    if (navigator.share) await navigator.share({ title: document.title, url: location.href });
+    else {
+      await navigator.clipboard.writeText(location.href);
+      button.querySelector('span').textContent = 'Copied';
+      setTimeout(() => { button.querySelector('span').textContent = 'Share'; }, 2200);
+    }
+  } catch { /* Visitor cancelled sharing or clipboard access was unavailable. */ }
 });
 
 const background = $('background');

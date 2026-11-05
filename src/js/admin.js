@@ -2,10 +2,10 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume"];
-const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume"]);
-const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand" };
-const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
+const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "particleStyle", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "cardStyle", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"];
+const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"]);
+const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", borderColor: "#b99af7", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand", cardStyle: "glass", particleStyle: "snow" };
+const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42, borderWidth: 1, cardRadius: 22, cardPadding: 26, cardGlow: 18, badgeSize: 30, socialGap: 10, backgroundBrightness: 42, backgroundBlur: 3 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
   mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -181,6 +181,12 @@ function updateMiniPreview() {
   stage.style.setProperty("--mini-blur", `${$("profile-blur").value}px`);
   stage.classList.toggle("gradient-card", $("profile-gradient").checked);
   stage.classList.toggle("monochrome-icons", $("monochrome-icons").checked);
+  stage.dataset.cardStyle = $("card-style").value;
+  stage.style.setProperty("--mini-border", $("border-color").value);
+  stage.style.setProperty("--mini-border-width", `${$("border-width").value}px`);
+  stage.style.setProperty("--mini-card-radius", `${$("card-radius").value}px`);
+  stage.style.setProperty("--mini-card-padding", `${Math.round(Number($("card-padding").value) * .55)}px`);
+  stage.style.setProperty("--mini-card-glow", `${Math.round(Number($("card-glow").value) * .55)}px`);
   stage.style.setProperty("--mini-radius", `${$("avatar-radius").value}px`);
   $("mini-card").style.width = `${Math.min(93, Number($("card-width").value) / 760 * 93)}%`;
   $("mini-avatar").style.width = `${Math.round(Number($("avatar-size").value) / 174 * 58)}px`;
@@ -188,12 +194,18 @@ function updateMiniPreview() {
   $("mini-name").style.fontSize = `${Math.round(Number($("name-size").value) / 59 * 25)}px`;
   $("mini-bio").style.fontSize = `${Math.round(Number($("bio-size").value) / 19 * 11)}px`;
   miniSocials.style.setProperty("--mini-social-size", `${Math.round(Number($("social-size").value) / 42 * 18)}px`);
+  miniSocials.style.gap = `${Math.round(Number($("social-gap").value) * .7)}px`;
+  miniBadges.querySelectorAll("img").forEach(icon => { icon.style.width = `${Math.round(Number($("badge-size").value) * .6)}px`; icon.style.height = icon.style.width; });
   miniSocials.style.setProperty("--mini-icon-color", $("social-icon-color").value);
   $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
   $("blur-value").textContent = `${$("profile-blur").value}px`;
   $("radius-value").textContent = `${$("avatar-radius").value}px`;
-  for (const key of ["card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(`${key}-value`).textContent = `${$(key).value}px`;
+  for (const key of ["card-width", "avatar-size", "name-size", "bio-size", "social-size", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(`${key}-value`).textContent = `${$(key).value}px`;
+  document.querySelectorAll("[data-palette]").forEach(button => {
+    const [accent, background] = palettes[button.dataset.palette];
+    button.classList.toggle("selected", $("accent-color").value === accent && $("background-color").value === background && $("border-color").value === accent);
+  });
 }
 $("mini-avatar").addEventListener("error", event => {
   const source = event.target.getAttribute("src");
@@ -202,10 +214,23 @@ $("mini-avatar").addEventListener("error", event => {
     event.target.src = "./assets/avatar.svg";
   }
 });
-for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size", "card-style", "border-color", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(key).addEventListener("input", updateMiniPreview);
 for (const key of ["profile-gradient", "monochrome-icons"]) $(key).addEventListener("change", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 for (const id of ["discord-username", "roblox-url", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
+const palettes = {
+  violet: ["#b99af7", "#090b10"], rose: ["#f28dbe", "#150d19"],
+  cyan: ["#6fd8e8", "#08151c"], emerald: ["#75dab4", "#081512"],
+  gold: ["#e9c780", "#19140c"]
+};
+for (const button of document.querySelectorAll("[data-palette]")) button.addEventListener("click", () => {
+  const [accent, background] = palettes[button.dataset.palette];
+  for (const [id, value] of [["accent-color", accent], ["border-color", accent], ["social-icon-color", accent], ["background-color", background]]) {
+    $(id).value = value;
+    $(id).dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  document.querySelectorAll("[data-palette]").forEach(item => item.classList.toggle("selected", item === button));
+});
 
 function updateLayoutPreview() {
   const canvas = $("layout-canvas");
@@ -304,7 +329,10 @@ function updatePreview() {
     media.style.transform = `scale(${zoom})`;
     media.style.transformOrigin = `${x}% ${y}%`;
     media.style.objectPosition = `${x}% ${y}%`;
+    media.style.filter = `brightness(${$("background-brightness").value}%) blur(${$("background-blur").value}px)`;
   }
+  $("background-brightness-value").textContent = `${$("background-brightness").value}%`;
+  $("background-blur-value").textContent = `${$("background-blur").value}px`;
   $("background-preview-empty").hidden = !!url;
   previewImage.hidden = !url || !image;
   previewVideo.hidden = !url || image;
@@ -326,7 +354,7 @@ previewVideo.addEventListener("timeupdate", () => {
   const end = Number($("background-end").value) || 0;
   if (end > start && previewVideo.currentTime >= end) previewVideo.currentTime = start;
 });
-for (const id of [...Object.values(backgroundFields), "default-theme", "background-start", "background-end", "background-zoom", "background-x", "background-y"]) {
+for (const id of [...Object.values(backgroundFields), "default-theme", "background-start", "background-end", "background-zoom", "background-x", "background-y", "background-brightness", "background-blur"]) {
   $(id).addEventListener("input", updatePreview);
 }
 
