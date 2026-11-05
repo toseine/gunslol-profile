@@ -63,6 +63,7 @@ const defaults = {
   snowEnabled: false,
   discordUsername: "",
   discordUrl: "",
+  robloxUrl: "",
   githubUrl: "",
   youtubeUrl: "",
   tiktokUrl: "",
@@ -147,6 +148,8 @@ function cleanSettings(input) {
   if (!result.name || typeof input.snowEnabled !== "boolean") return null;
   if (input.discordUsername != null && (typeof input.discordUsername !== "string" || input.discordUsername.length > 64)) return null;
   result.discordUsername = (input.discordUsername || "").trim().replace(/^@/, "");
+  if (input.robloxUrl != null && (typeof input.robloxUrl !== "string" || input.robloxUrl.length > 2000)) return null;
+  result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
   result.telegramUrl = (input.telegramUrl || "").trim();
   const allowedBadges = ["owner", "verified", "developer", "partner", "supporter"];
@@ -211,7 +214,7 @@ function cleanSettings(input) {
   }
   if (!["home", "hacker", "rain", "anime", "car"].includes(input.defaultTheme)) return null;
   result.defaultTheme = input.defaultTheme;
-  for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl"]) {
+  for (const key of ["avatarUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "discordUrl", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl"]) {
     if (!result[key]) continue;
     try {
       if (!["https:", "http:"].includes(new URL(result[key]).protocol)) return null;
