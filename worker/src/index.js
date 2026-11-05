@@ -3,6 +3,14 @@ import { DurableObject } from "cloudflare:workers";
 const defaults = {
   name: "Your name",
   bio: "Your space on the web.",
+  showMoreSection: false,
+  scrollLabel: "Explore more",
+  moreEyebrow: "BEYOND THE PROFILE",
+  moreTitle: "A little more about me",
+  moreText: "",
+  moreStyle: "glass",
+  moreLinkLabel: "",
+  moreLinkUrl: "",
   location: "",
   avatarUrl: "",
   defaultTheme: "home",
@@ -172,10 +180,23 @@ function cleanSettings(input) {
   result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
   result.telegramUrl = (input.telegramUrl || "").trim();
-  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter", "premium", "og", "donor", "booster", "bughunter"];
+  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter", "premium", "og", "donor", "booster", "bughunter", "helper", "gifter", "imagehost", "domainlegend"];
   const badges = input.badges ?? [];
   if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
   result.badges = badges;
+  for (const [key, max] of Object.entries({ scrollLabel: 30, moreEyebrow: 40, moreTitle: 80, moreText: 1000, moreLinkLabel: 40, moreLinkUrl: 2000 })) {
+    const value = input[key] ?? defaults[key];
+    if (typeof value !== "string" || value.length > max) return null;
+    result[key] = value.trim();
+  }
+  if (result.moreLinkUrl) {
+    try { if (!["https:", "http:"].includes(new URL(result.moreLinkUrl).protocol)) return null; }
+    catch { return null; }
+  }
+  if (input.showMoreSection != null && typeof input.showMoreSection !== "boolean") return null;
+  result.showMoreSection = input.showMoreSection ?? false;
+  if (input.moreStyle != null && !["glass", "solid", "outline"].includes(input.moreStyle)) return null;
+  result.moreStyle = input.moreStyle ?? "glass";
   for (const key of ["profileGradient", "monochromeIcons"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? defaults[key];
