@@ -37,6 +37,8 @@ const defaults = {
   weatherCity: "",
   discordPresenceEnabled: false,
   discordPresenceId: "",
+  valorantEnabled: false,
+  valorantRiotId: "",
   avatarUrl: "",
   defaultTheme: "home",
   videoUrl: "",
@@ -236,7 +238,7 @@ function cleanSettings(input) {
     for (const value of [item.url, item.iconUrl]) { try { if (value && !["http:", "https:"].includes(new URL(value).protocol)) return null; } catch { return null; } }
     result.extraSocials.push({ platform: item.platform, url: item.url.trim(), iconUrl: item.iconUrl.trim(), label: item.label.trim() });
   }
-  for (const key of ["clockEnabled", "weatherEnabled", "discordPresenceEnabled"]) {
+  for (const key of ["clockEnabled", "weatherEnabled", "discordPresenceEnabled", "valorantEnabled"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? false;
   }
@@ -250,6 +252,9 @@ function cleanSettings(input) {
   const discordPresenceId = input.discordPresenceId ?? "";
   if (typeof discordPresenceId !== "string" || (discordPresenceId && !/^\d{17,20}$/.test(discordPresenceId))) return null;
   result.discordPresenceId = discordPresenceId;
+  const valorantRiotId = input.valorantRiotId ?? "";
+  if (typeof valorantRiotId !== "string" || valorantRiotId.length > 80 || (valorantRiotId && !/^[^#\s][^#]{0,59}#[A-Za-z0-9]{2,12}$/.test(valorantRiotId))) return null;
+  result.valorantRiotId = valorantRiotId.trim();
   if (input.robloxUrl != null && (typeof input.robloxUrl !== "string" || input.robloxUrl.length > 2000)) return null;
   result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
@@ -481,6 +486,23 @@ export class ProfileStore extends DurableObject {
     if (path === "/settings" && request.method === "GET") {
       return json((await this.ctx.storage.get(profileKey(profile, "settings"))) || defaults);
     }
+    if (path === "/valorant" && request.method === "GET") {
+      const settings = (await this.ctx.storage.get(profileKey(profile, "settings"))) || defaults;
+      const riotId = settings.valorantEnabled && settings.valorantRiotId;
+      if (!riotId) return json({ error: "Widget disabled" }, 404);
+      const cached = await this.ctx.storage.get(profileKey(profile, "valorantCache"));
+      if (cached?.riotId === riotId && Date.now() - cached.at < 10 * 60 * 1000) return json(cached.data);
+      const [name, tag] = riotId.split("#");
+      try {
+        const upstream = await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(10000) });
+        if (!upstream.ok) return json({ error: "Valorant unavailable" }, 502);
+        const body = await upstream.json();
+        if (!body.data?.puuid) return json({ error: "Riot ID not found" }, 404);
+        const data = { name: String(body.data.name || name).slice(0, 60), tag: String(body.data.tag || tag).slice(0, 20), level: Number.isInteger(body.data.account_level) ? body.data.account_level : null };
+        await this.ctx.storage.put(profileKey(profile, "valorantCache"), { riotId, at: Date.now(), data });
+        return json(data);
+      } catch { return json({ error: "Valorant unavailable" }, 502); }
+    }
 
     if (path === "/views" && request.method === "GET") {
       const month = currentMonth();
@@ -640,7 +662,7 @@ export default {
       }
       return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
-    if (!["/settings", "/views", "/login", "/session", "/socket", "/presets", "/profiles"].includes(path) && !/^\/profiles\/[a-z0-9-]{3,32}$/.test(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/valorant", "/views", "/login", "/session", "/socket", "/presets", "/profiles"].includes(path) && !/^\/profiles\/[a-z0-9-]{3,32}$/.test(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
