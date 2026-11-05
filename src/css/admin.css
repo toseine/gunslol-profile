@@ -170,6 +170,7 @@ form .badge-options label:has(input:checked) { border-color: #b492f6; background
 }
 .mini-social-icon { display: block; width: var(--mini-social-size, 18px); height: var(--mini-social-size, 18px); background: var(--mini-icon-color, #fff); mask: var(--icon-url) center / contain no-repeat; -webkit-mask: var(--icon-url) center / contain no-repeat; }
 .mini-social-icon.icon-discord { --icon-url: url('../../assets/discord.svg'); }
+.mini-social-icon.icon-roblox { --icon-url: url('../../assets/roblox.svg'); }
 .mini-social-icon.icon-github { --icon-url: url('../../assets/github.svg'); }
 .mini-social-icon.icon-youtube { --icon-url: url('../../assets/youtube.svg'); }
 .mini-social-icon.icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); }
@@ -183,3 +184,43 @@ form .badge-options label:has(input:checked) { border-color: #b492f6; background
 .layout-item:hover .layout-edit, .layout-item:focus-visible .layout-edit { display: inline-block; }
 @media (hover: none) { .layout-edit { display: inline-block; } }
 #edit-icon-style { justify-self: start; color: #d5bfff; }
+
+/* Charcoal dashboard, inspired by the owner's reference panel. */
+body { background: #090909; }
+.topbar { border-color: #202020; }
+.dashboard-nav { background: #0e0e0e; border-color: #222; }
+.nav-user { background: #171217; border-color: #332136; }
+.nav-button { border-radius: 11px; color: #c8c3ca; }
+.nav-button:hover, .nav-button.active { background: #371f39; color: #fff; }
+.nav-button.active { box-shadow: none; }
+.panel, .section-panel, .preview-aside { background: #121212; border-color: #232323; }
+.section-heading { border-color: #292929; }
+.section-number { background: #321f36; border-color: #704578; }
+.theme-fields, .background-editor, .layout-editor, .music-trim, .badge-editor { background: #0e0e0e; border-color: #272727; }
+input:not([type="checkbox"]), select { background: #0b0b0b; border-color: #303030; }
+input:not([type="checkbox"]):focus, select:focus { border-color: #a56ab4; box-shadow: 0 0 0 3px #a56ab426; }
+.upload-control { padding: 14px; border: 1px dashed #3b3140; border-radius: 11px; background: #101010; }
+.upload-control:focus-within { border-color: #b78bc5; }
+.primary-button { background: #a779b4; color: #100b12; }
+.primary-button:hover { background: #c799d4; }
+.quiet-button { border-color: #353035; }
+.quiet-button:hover { border-color: #a779b4; }
+.preview-aside, .savebar { border-color: #272727; background: #121212; }
+.savebar { background: #121212ed; }
+form .badge-options label { background: #171317; border-color: #392d3b; }
+form .badge-options label:has(input:checked) { background: #39253d; border-color: #b58bc0; }
+@media (max-width: 700px) { .dashboard-nav { background: #101010; } }
+@media (min-width: 701px) and (max-width: 1400px) {
+  .editor { grid-template-columns: 230px minmax(0, 1fr); }
+  .preview-aside { grid-column: 2; grid-row: 3; position: static; margin-top: 18px; }
+}
+.social-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)); gap: 10px; margin: 18px 0 26px; }
+.social-pick { display: grid; place-items: center; gap: 8px; min-height: 79px; padding: 9px; border: 1px solid #272727; border-radius: 12px; background: #191919; color: #bcb7bd; font-size: 11px; }
+.social-pick:hover, .social-pick:focus-visible { border-color: #aa79b7; background: #281b2b; color: #fff; }
+.social-pick-icon { display: block; width: 28px; height: 28px; background: var(--brand-color); mask: var(--icon-url) center / contain no-repeat; -webkit-mask: var(--icon-url) center / contain no-repeat; }
+.social-pick .icon-discord { --icon-url: url('../../assets/discord.svg'); --brand-color: #7587f8; }
+.social-pick .icon-roblox { --icon-url: url('../../assets/roblox.svg'); --brand-color: #d8d8de; }
+.social-pick .icon-github { --icon-url: url('../../assets/github.svg'); --brand-color: #f5f5f5; }
+.social-pick .icon-youtube { --icon-url: url('../../assets/youtube.svg'); --brand-color: #ff3131; }
+.social-pick .icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); --brand-color: #f5f5f5; }
+.social-pick .icon-telegram { --icon-url: url('../../assets/telegram.svg'); --brand-color: #30aae8; }

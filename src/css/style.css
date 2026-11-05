@@ -992,6 +992,7 @@ body[data-social-style="outline"] .social-links a { background: transparent; bor
 }
 .social-icon { display: block; background: var(--socialIconColor, #fff); mask: var(--icon-url) center / contain no-repeat; -webkit-mask: var(--icon-url) center / contain no-repeat; }
 .icon-discord { --icon-url: url('../../assets/discord.svg'); width: 66%; height: 66%; }
+.icon-roblox { --icon-url: url('../../assets/roblox.svg'); }
 .icon-github { --icon-url: url('../../assets/github.svg'); }
 .icon-youtube { --icon-url: url('../../assets/youtube.svg'); }
 .icon-tiktok { --icon-url: url('../../assets/tiktok.svg'); }
