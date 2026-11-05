@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
   <link rel="stylesheet" href="./src/css/admin.css?v=17">
-  <script type="module" src="./src/js/admin.js?v=22"></script>
+  <script type="module" src="./src/js/admin.js?v=23"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -154,6 +154,8 @@
             <div><label for="weather-city">City</label><input id="weather-city" name="weatherCity" type="text" maxlength="80" placeholder="Warsaw"></div>
             <label class="toggle-row" for="discord-presence-enabled"><span><strong>Discord presence</strong><small>Show your Discord status using Lanyard</small></span><span class="switch"><input id="discord-presence-enabled" name="discordPresenceEnabled" type="checkbox"><span class="slider"></span></span></label>
             <div><label for="discord-presence-id">Discord user ID</label><input id="discord-presence-id" name="discordPresenceId" type="text" inputmode="numeric" maxlength="20" placeholder="123456789012345678"><small>Join Lanyard's Discord server once to make your presence visible.</small></div>
+            <label class="toggle-row" for="valorant-enabled"><span><strong>Valorant</strong><small>Show your Riot ID and account level</small></span><span class="switch"><input id="valorant-enabled" name="valorantEnabled" type="checkbox"><span class="slider"></span></span></label>
+            <div><label for="valorant-riot-id">Riot ID</label><input id="valorant-riot-id" name="valorantRiotId" type="text" maxlength="80" placeholder="Player#EUW"><small>Uses the community HenrikDev Valorant API. It may be unavailable when its free limit is reached.</small></div>
           </div>
         </div>
         <div class="panel section-panel" data-section="appearance" hidden>
