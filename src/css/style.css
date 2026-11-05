@@ -1053,7 +1053,7 @@ body[data-card-style="solid"] .position-social .social-links { padding: 7px 10px
 /* Optional second screen keeps the original one-screen profile intact by default. */
 html { scroll-behavior: smooth; }
 body.has-more-section { overflow-x: hidden; overflow-y: auto; }
-.scroll-more { position: fixed; left: 50%; bottom: 23px; z-index: 31; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; min-width: 132px; padding: 9px 18px; border: 1px solid #ffffff38; border-radius: 99px; background: #100d18b8; color: #fff; font: 12px Arial,sans-serif; letter-spacing: .03em; cursor: pointer; backdrop-filter: blur(12px); transition: opacity .2s, border-color .2s, transform .2s; }
+.scroll-more { position: fixed; left: 50%; bottom: 23px; z-index: 29; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; min-width: 132px; padding: 9px 18px; border: 1px solid #ffffff38; border-radius: 99px; background: #100d18b8; color: #fff; font: 12px Arial,sans-serif; letter-spacing: .03em; cursor: pointer; backdrop-filter: blur(12px); transition: opacity .2s, border-color .2s, transform .2s; }
 .scroll-more:hover, .scroll-more:focus-visible { border-color: var(--accentColor, #b99af7); transform: translateX(-50%) translateY(-3px); }
 .scroll-more span:last-child { color: var(--accentColor, #b99af7); font-size: 19px; line-height: 1; }
 .scroll-more[hidden], .scrolled-more .scroll-more, .more-section[hidden], .more-link[hidden] { display: none !important; }
