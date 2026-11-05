@@ -251,3 +251,22 @@ form .badge-gallery label { min-height: 72px; border-radius: 11px; }
 .profile-dialog small { display: block; color: #a89fab; font-size: 11px; }
 .profile-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 @media (max-width: 700px) { .profile-manager { align-items: stretch; }.profile-manager select { width: 100%; }.profile-manager a { align-self: center; } }
+.customization-group { padding: 18px; border: 1px solid #2c2930; border-radius: 12px; background: #0f0d11; }
+.customization-group h3 { margin: 0 0 5px; color: #e7d4ed; font-size: 14px; }
+.customization-group .muted { margin: 0 0 16px; }
+.customization-group .slider-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; }
+.customization-group .field-grid { margin-bottom: 17px; }
+.palette-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.palette-option { display: inline-flex; align-items: center; gap: 8px; min-height: 37px; padding: 6px 11px; border: 1px solid #3b333e; border-radius: 9px; background: #17131a; color: #eee7f0; font-size: 11px; cursor: pointer; }
+.palette-option span { width: 16px; height: 16px; border-radius: 50%; background: var(--palette); box-shadow: 0 0 12px color-mix(in srgb, var(--palette) 60%, transparent); }
+.palette-option:hover, .palette-option:focus-visible { border-color: var(--palette); background: #251c29; }
+.palette-option.selected { border-color: var(--palette); box-shadow: 0 0 0 2px color-mix(in srgb, var(--palette) 24%, transparent); }
+.mini-stage[data-card-style="floating"] .mini-card { padding: 0; border-color: transparent; background: transparent; box-shadow: none; }
+.mini-stage[data-card-style="glass"] .mini-card,
+.mini-stage[data-card-style="solid"] .mini-card,
+.mini-stage[data-card-style="outline"] .mini-card { padding: var(--mini-card-padding, 14px); border: var(--mini-border-width, 1px) solid var(--mini-border, #b99af7); border-radius: var(--mini-card-radius, 22px); box-shadow: 0 12px 28px #0007, 0 0 var(--mini-card-glow, 10px) color-mix(in srgb, var(--mini-border, #b99af7) 45%, transparent); }
+.mini-stage[data-card-style="glass"] .mini-card { background: #15101dcc; }
+.mini-stage[data-card-style="solid"] .mini-card { background: #15101d; }
+.mini-stage[data-card-style="outline"] .mini-card { background: transparent; }
+.mini-stage.gradient-card .mini-card { background-image: linear-gradient(145deg, color-mix(in srgb, var(--mini-accent, #b99af7) 33%, transparent), transparent 62%); }
+@media (max-width: 700px) { .customization-group .slider-grid { grid-template-columns: 1fr; } }

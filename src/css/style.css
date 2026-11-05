@@ -1016,3 +1016,36 @@ body[data-social-icon-set="minimal"] .icon-github { --icon-url: url('../../asset
 body[data-social-icon-set="minimal"] .icon-youtube { --icon-url: url('../../assets/minimal-youtube.svg'); }
 body[data-social-icon-set="minimal"] .icon-tiktok { --icon-url: url('../../assets/minimal-tiktok.svg'); }
 body[data-social-icon-set="minimal"] .icon-telegram { --icon-url: url('../../assets/minimal-telegram.svg'); }
+
+/* Editable profile surface and spacing. Floating keeps the original layout. */
+body[data-card-style="glass"] .position-profile #profile-block,
+body[data-card-style="solid"] .position-profile #profile-block,
+body[data-card-style="outline"] .position-profile #profile-block {
+  padding: var(--cardPadding, 26px) !important;
+  border: var(--borderWidth, 1px) solid var(--borderColor, #b99af7) !important;
+  border-radius: var(--cardRadius, 22px) !important;
+  box-shadow: 0 22px 70px #0009, 0 0 var(--cardGlow, 18px) color-mix(in srgb, var(--borderColor, #b99af7) 45%, transparent) !important;
+}
+body[data-card-style="glass"] .position-profile #profile-block {
+  background-color: color-mix(in srgb, var(--backgroundColor, #090b10) 66%, transparent) !important;
+  backdrop-filter: blur(18px) !important;
+}
+body[data-card-style="solid"] .position-profile #profile-block {
+  background-color: color-mix(in srgb, var(--backgroundColor, #090b10) 92%, #17101f) !important;
+}
+body[data-card-style="outline"] .position-profile #profile-block { background-color: transparent !important; }
+body.profile-gradient .position-profile #profile-block {
+  background-image: linear-gradient(145deg, color-mix(in srgb, var(--accentColor, #b99af7) 25%, transparent), transparent 62%) !important;
+}
+body.profile-gradient[data-card-style="floating"] .position-profile #profile-block {
+  padding: var(--cardPadding, 26px) !important;
+  border-radius: var(--cardRadius, 22px) !important;
+}
+.profile-badge img { width: var(--badgeSize, 30px); height: var(--badgeSize, 30px); }
+.position-social .social-links { gap: var(--socialGap, 10px); }
+body[data-card-style="glass"] .position-social .social-links,
+body[data-card-style="solid"] .position-social .social-links { padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--borderColor, #b99af7) 35%, transparent); border-radius: 14px; background: #100e18a8; backdrop-filter: blur(14px); box-shadow: 0 12px 32px #0008; }
+.share-profile { position: fixed; top: 25px; right: 27px; z-index: 26; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 12px; border: 1px solid #ffffff38; border-radius: 10px; background: #100d18b8; color: #fff; font: 12px Arial,sans-serif; cursor: pointer; backdrop-filter: blur(12px); transition: transform .2s, border-color .2s, background .2s; }
+.share-profile svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.share-profile:hover, .share-profile:focus-visible { transform: translateY(-2px); border-color: var(--accentColor, #b99af7); background: #231a31d9; }
+@media (max-width: 640px) { .share-profile { top: 18px; right: 18px; padding: 8px; }.share-profile span { display: none; } }
