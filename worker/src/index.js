@@ -134,12 +134,15 @@ function currentMonth() {
   }).format(new Date());
 }
 
-async function monthlyVisitorKey(month, ip, secret) {
+async function monthlyVisitorKey(month, ip, secret, profile = "main") {
   const signature = await crypto.subtle.sign(
-    "HMAC", await hmacKey(secret), encoder.encode(`${month}:${ip}`)
+    "HMAC", await hmacKey(secret), encoder.encode(profile === "main" ? `${month}:${ip}` : `${profile}:${month}:${ip}`)
   );
-  return `views:${month}:ip:${base64url(new Uint8Array(signature))}`;
+  return `${profile === "main" ? "" : `profile:${profile}:`}views:${month}:ip:${base64url(new Uint8Array(signature))}`;
 }
+
+const validProfile = slug => slug === "main" || /^[a-z0-9][a-z0-9-]{2,31}$/.test(slug);
+const profileKey = (slug, key) => slug === "main" ? key : `profile:${slug}:${key}`;
 
 function cleanSettings(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
@@ -233,15 +236,54 @@ function cleanSettings(input) {
 }
 
 export class ProfileStore extends DurableObject {
-  broadcastSettings(data) {
+  broadcastSettings(data, profile = "main") {
     const update = JSON.stringify({ type: "settings", data });
     for (const socket of this.ctx.getWebSockets()) {
+      if ((socket.deserializeAttachment?.()?.profile || "main") !== profile) continue;
       try { socket.send(update); } catch { /* Disconnected client. */ }
     }
   }
 
   async fetch(request) {
-    const path = new URL(request.url).pathname;
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const profile = url.searchParams.get("profile") || "main";
+    if (!validProfile(profile)) return json({ error: "Invalid profile" }, 400);
+    if (path === "/profiles" || /^\/profiles\/[a-z0-9-]{3,32}$/.test(path)) {
+      const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+      if (!(await validToken(token, this.env.ADMIN_PASSWORD))) return json({ error: "Unauthorized" }, 401);
+      const profiles = (await this.ctx.storage.get("profiles")) || [];
+      if (path === "/profiles" && request.method === "GET") return json({ profiles: [{ slug: "main", name: "Main profile" }, ...profiles] });
+      if (path === "/profiles" && request.method === "POST") {
+        let input;
+        try { input = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+        const slug = typeof input.slug === "string" ? input.slug.trim().toLowerCase() : "";
+        const name = typeof input.name === "string" ? input.name.trim() : "";
+        if (!validProfile(slug) || slug === "main" || !name || name.length > 50) return json({ error: "Choose a name and a 3–32 character URL slug" }, 400);
+        if (profiles.some(item => item.slug === slug)) return json({ error: "That profile URL is already used" }, 409);
+        if (profiles.length >= 10) return json({ error: "Maximum 10 additional profiles" }, 400);
+        const next = [...profiles, { slug, name }];
+        await this.ctx.storage.transaction(async transaction => {
+          await transaction.put("profiles", next);
+          await transaction.put(profileKey(slug, "settings"), { ...defaults, name });
+        });
+        return json({ profiles: [{ slug: "main", name: "Main profile" }, ...next], created: slug }, 201);
+      }
+      const slug = path.split("/")[2];
+      if (request.method === "DELETE" && slug && slug !== "main") {
+        if (!profiles.some(item => item.slug === slug)) return json({ error: "Profile not found" }, 404);
+        await this.ctx.storage.put("profiles", profiles.filter(item => item.slug !== slug));
+        const prefix = `profile:${slug}:`;
+        for (;;) {
+          const keys = await this.ctx.storage.list({ prefix, limit: 128 });
+          if (!keys.size) break;
+          await Promise.all([...keys.keys()].map(key => this.ctx.storage.delete(key)));
+        }
+        return json({ profiles: [{ slug: "main", name: "Main profile" }, ...profiles.filter(item => item.slug !== slug)] });
+      }
+      return json({ error: "Not found" }, 404);
+    }
+    if (profile !== "main" && !((await this.ctx.storage.get("profiles")) || []).some(item => item.slug === profile)) return json({ error: "Profile not found" }, 404);
     if (path === "/upload" && request.method === "POST") {
       const filename = request.headers.get("X-Media-Id");
       const mime = request.headers.get("Content-Type")?.split(";")[0]?.toLowerCase();
@@ -310,24 +352,25 @@ export class ProfileStore extends DurableObject {
     if (path === "/socket" && request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
       const [client, server] = Object.values(new WebSocketPair());
       this.ctx.acceptWebSocket(server);
-      server.send(JSON.stringify({ type: "settings", data: (await this.ctx.storage.get("settings")) || defaults }));
+      server.serializeAttachment({ profile });
+      server.send(JSON.stringify({ type: "settings", data: (await this.ctx.storage.get(profileKey(profile, "settings"))) || defaults }));
       return new Response(null, { status: 101, webSocket: client });
     }
 
     if (path === "/settings" && request.method === "GET") {
-      return json((await this.ctx.storage.get("settings")) || defaults);
+      return json((await this.ctx.storage.get(profileKey(profile, "settings"))) || defaults);
     }
 
     if (path === "/views" && request.method === "GET") {
       const month = currentMonth();
-      return json({ month, count: (await this.ctx.storage.get(`views:${month}:count`)) || 0 });
+      return json({ month, count: (await this.ctx.storage.get(profileKey(profile, `views:${month}:count`))) || 0 });
     }
     if (path === "/views" && request.method === "POST") {
       const ip = request.headers.get("CF-Connecting-IP");
       if (!ip || !this.env.ADMIN_PASSWORD) return json({ error: "View counter unavailable" }, 503);
       const month = currentMonth();
-      const visitorKey = await monthlyVisitorKey(month, ip, this.env.ADMIN_PASSWORD);
-      const countKey = `views:${month}:count`;
+      const visitorKey = await monthlyVisitorKey(month, ip, this.env.ADMIN_PASSWORD, profile);
+      const countKey = profileKey(profile, `views:${month}:count`);
       const count = await this.ctx.storage.transaction(async transaction => {
         const current = (await transaction.get(countKey)) || 0;
         if (await transaction.get(visitorKey)) return current;
@@ -363,8 +406,8 @@ export class ProfileStore extends DurableObject {
     if (path === "/presets" || /^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path)) {
       const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!(await validToken(token, this.env.ADMIN_PASSWORD))) return json({ error: "Unauthorized" }, 401);
-      const presets = (await this.ctx.storage.get("presets")) || [];
-      if (path === "/presets" && request.method === "GET") return json({ presets, activePresetId: (await this.ctx.storage.get("activePresetId")) || null });
+      const presets = (await this.ctx.storage.get(profileKey(profile, "presets"))) || [];
+      if (path === "/presets" && request.method === "GET") return json({ presets, activePresetId: (await this.ctx.storage.get(profileKey(profile, "activePresetId"))) || null });
       if (path === "/presets" && request.method === "POST") {
         let input;
         try { input = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
@@ -375,22 +418,22 @@ export class ProfileStore extends DurableObject {
         if (!existing && presets.length >= 20) return json({ error: "Maximum 20 presets" }, 400);
         const preset = { id: existing?.id || crypto.randomUUID(), name, settings, updatedAt: Date.now() };
         const next = existing ? presets.map(item => item.id === existing.id ? preset : item) : [...presets, preset];
-        await this.ctx.storage.put("presets", next);
-        return json({ presets: next, activePresetId: (await this.ctx.storage.get("activePresetId")) || null }, existing ? 200 : 201);
+        await this.ctx.storage.put(profileKey(profile, "presets"), next);
+        return json({ presets: next, activePresetId: (await this.ctx.storage.get(profileKey(profile, "activePresetId"))) || null }, existing ? 200 : 201);
       }
       const id = path.split("/")[2];
       const selected = presets.find(item => item.id === id);
       if (!selected) return json({ error: "Preset not found" }, 404);
       if (path.endsWith("/activate") && request.method === "POST") {
-        await this.ctx.storage.put("settings", selected.settings);
-        await this.ctx.storage.put("activePresetId", id);
-        this.broadcastSettings(selected.settings);
+        await this.ctx.storage.put(profileKey(profile, "settings"), selected.settings);
+        await this.ctx.storage.put(profileKey(profile, "activePresetId"), id);
+        this.broadcastSettings(selected.settings, profile);
         return json({ settings: selected.settings, activePresetId: id });
       }
       if (request.method === "DELETE" && path === `/presets/${id}`) {
-        await this.ctx.storage.put("presets", presets.filter(item => item.id !== id));
-        if ((await this.ctx.storage.get("activePresetId")) === id) await this.ctx.storage.delete("activePresetId");
-        return json({ presets: presets.filter(item => item.id !== id), activePresetId: (await this.ctx.storage.get("activePresetId")) || null });
+        await this.ctx.storage.put(profileKey(profile, "presets"), presets.filter(item => item.id !== id));
+        if ((await this.ctx.storage.get(profileKey(profile, "activePresetId"))) === id) await this.ctx.storage.delete(profileKey(profile, "activePresetId"));
+        return json({ presets: presets.filter(item => item.id !== id), activePresetId: (await this.ctx.storage.get(profileKey(profile, "activePresetId"))) || null });
       }
       return json({ error: "Not found" }, 404);
     }
@@ -402,9 +445,9 @@ export class ProfileStore extends DurableObject {
       try { input = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
       const data = cleanSettings(input);
       if (!data) return json({ error: "Invalid settings" }, 400);
-      await this.ctx.storage.put("settings", data);
-      await this.ctx.storage.delete("activePresetId");
-      this.broadcastSettings(data);
+      await this.ctx.storage.put(profileKey(profile, "settings"), data);
+      await this.ctx.storage.delete(profileKey(profile, "activePresetId"));
+      this.broadcastSettings(data, profile);
       return json(data);
     }
     return json({ error: "Not found" }, 404);
@@ -476,7 +519,7 @@ export default {
       }
       return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
-    if (!["/settings", "/views", "/login", "/session", "/socket", "/presets"].includes(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/views", "/login", "/session", "/socket", "/presets", "/profiles"].includes(path) && !/^\/profiles\/[a-z0-9-]{3,32}$/.test(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
