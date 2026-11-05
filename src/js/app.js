@@ -104,7 +104,7 @@ function render(data) {
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
   $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
-  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter" };
+  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter", helper: "Helper", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend" };
   const badgeContainer = $('profile-badges');
   badgeContainer.replaceChildren();
   for (const badge of Array.isArray(data.badges) ? data.badges : []) {
@@ -172,6 +172,21 @@ function render(data) {
   $('background').style.filter = `brightness(${brightness}%) blur(${blur}px)`;
   for (const [key, visible] of [['views', data.showViews !== false], ['themes', false], ['audio', data.showVolume !== false]]) positionWrappers[key].hidden = !visible;
   $('share-profile').hidden = data.showShare === false;
+  const showMore = data.showMoreSection === true;
+  document.body.classList.toggle('has-more-section', showMore);
+  $('more-section').hidden = !showMore;
+  $('scroll-more').hidden = !showMore;
+  if (!showMore && scrollY) scrollTo(0, 0);
+  $('scroll-more').firstElementChild.textContent = data.scrollLabel || 'Explore more';
+  $('more-eyebrow').textContent = data.moreEyebrow || 'BEYOND THE PROFILE';
+  $('more-title').textContent = data.moreTitle || 'A little more about me';
+  $('more-text').textContent = data.moreText || '';
+  $('more-section').dataset.style = ['glass', 'solid', 'outline'].includes(data.moreStyle) ? data.moreStyle : 'glass';
+  const moreUrl = safeUrl(data.moreLinkUrl);
+  $('more-link').hidden = !moreUrl || !data.moreLinkLabel;
+  if (moreUrl) $('more-link').href = moreUrl;
+  else $('more-link').removeAttribute('href');
+  $('more-link').textContent = data.moreLinkLabel || '';
   const nextParticles = ['snow', 'rain', 'stars'].includes(data.particleStyle) ? data.particleStyle : 'snow';
   if (particleStyle !== nextParticles) { particleStyle = nextParticles; if (snowEnabled) resizeSnow(); }
   setSnow(data.snowEnabled === true);
@@ -302,6 +317,10 @@ $('share-profile').addEventListener('click', async () => {
     }
   } catch { /* Visitor cancelled sharing or clipboard access was unavailable. */ }
 });
+
+$('scroll-more').addEventListener('click', () => $('more-section').scrollIntoView({ behavior: 'smooth' }));
+$('back-to-top').addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+addEventListener('scroll', () => document.body.classList.toggle('scrolled-more', scrollY > innerHeight * .3), { passive: true });
 
 const background = $('background');
 function backgroundStart() {

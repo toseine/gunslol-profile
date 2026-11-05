@@ -2,9 +2,9 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "particleStyle", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "cardStyle", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"];
-const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"]);
-const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", borderColor: "#b99af7", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand", cardStyle: "glass", particleStyle: "snow" };
+const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "showMoreSection", "scrollLabel", "moreEyebrow", "moreTitle", "moreText", "moreStyle", "moreLinkLabel", "moreLinkUrl", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "particleStyle", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "cardStyle", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"];
+const toggleFields = new Set(["showMoreSection", "snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume", "showShare"]);
+const fieldDefaults = { defaultTheme: "home", scrollLabel: "Explore more", moreEyebrow: "BEYOND THE PROFILE", moreTitle: "A little more about me", moreStyle: "glass", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", borderColor: "#b99af7", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand", cardStyle: "glass", particleStyle: "snow" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42, borderWidth: 1, cardRadius: 22, cardPadding: 26, cardGlow: 18, badgeSize: 30, socialGap: 10, backgroundBrightness: 42, backgroundBlur: 3 };
 const defaultLayout = {
   desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
@@ -16,7 +16,7 @@ const cropDefaults = { backgroundStart: 0, backgroundEnd: 0, backgroundZoom: 1, 
 const backgroundFields = { home: "video-url", hacker: "hacker-video", rain: "rain-video", anime: "anime-video", car: "car-video" };
 const musicFields = { home: ["music-url", "music"], hacker: ["hacker-music", "hackerMusic"], rain: ["rain-music", "rainMusic"], anime: ["anime-music", "animeMusic"], car: ["car-music", "carMusic"] };
 const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${prefix}Start`, `${prefix}End`]);
-const badgeChoices = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter" };
+const badgeChoices = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter", helper: "Helper", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend" };
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["video-url", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
@@ -68,7 +68,7 @@ function showMusicRanges(data, label = "Saved clip") {
 function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
-    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient"].includes(key);
+    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient", "showMoreSection"].includes(key);
     else el.value = typeof data[key] === "string" ? data[key] : (fieldDefaults[key] ?? "");
   }
   for (const [key, fallback] of Object.entries(cropDefaults)) {
