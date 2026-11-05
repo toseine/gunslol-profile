@@ -101,7 +101,7 @@ function render(data) {
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
   $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
-  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter" };
+  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter" };
   const badgeContainer = $('profile-badges');
   badgeContainer.replaceChildren();
   for (const badge of Array.isArray(data.badges) ? data.badges : []) {
@@ -109,8 +109,8 @@ function render(data) {
     const chip = document.createElement('span');
     chip.className = `profile-badge badge-${badge}`;
     chip.setAttribute('role', 'img');
-    chip.setAttribute('aria-label', badgeLabels[badge]);
-    chip.dataset.label = badgeLabels[badge];
+    chip.setAttribute('aria-label', `${badgeLabels[badge]} decorative badge`);
+    chip.dataset.label = `${badgeLabels[badge]} · decorative`;
     const icon = document.createElement('img');
     icon.src = `./assets/badge-${badge}.svg`;
     icon.alt = '';
@@ -118,6 +118,9 @@ function render(data) {
     badgeContainer.append(chip);
   }
   badgeContainer.hidden = !badgeContainer.childElementCount;
+  const location = $('profile-location');
+  location.textContent = typeof data.location === 'string' ? data.location.trim() : '';
+  location.hidden = !location.textContent;
   for (const [social, field] of [['roblox', 'robloxUrl'], ['github', 'githubUrl'], ['youtube', 'youtubeUrl'], ['tiktok', 'tiktokUrl'], ['telegram', 'telegramUrl']]) {
     const link = $(`${social}-link`);
     const url = safeUrl(data[field]);
@@ -149,6 +152,8 @@ function render(data) {
   document.body.dataset.nameEffect = ['none', 'glow', 'gradient'].includes(data.nameEffect) ? data.nameEffect : 'none';
   document.body.dataset.socialStyle = ['glass', 'solid', 'outline'].includes(data.socialStyle) ? data.socialStyle : 'glass';
   document.body.dataset.socialIconSet = data.socialIconSet === 'minimal' ? 'minimal' : 'brand';
+  document.body.classList.toggle('profile-gradient', data.profileGradient === true);
+  document.body.classList.toggle('monochrome-icons', data.monochromeIcons === true);
   for (const [key, fallback] of [['accentColor', '#b99af7'], ['textColor', '#ffffff'], ['backgroundColor', '#090b10'], ['socialIconColor', '#ffffff']]) {
     document.body.style.setProperty(`--${key}`, /^#[0-9a-f]{6}$/i.test(data[key]) ? data[key] : fallback);
   }

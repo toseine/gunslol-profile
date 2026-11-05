@@ -2,8 +2,8 @@ import { apiUrl, isConfigured } from "./api-config.js";
 
 const $ = id => document.getElementById(id);
 const form = $("settings-form");
-const fields = ["name", "bio", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "showViews", "showThemes", "showVolume"];
-const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "showViews", "showThemes", "showVolume"]);
+const fields = ["name", "bio", "location", "avatarUrl", "defaultTheme", "videoUrl", "musicUrl", "hackerVideoUrl", "hackerMusicUrl", "rainVideoUrl", "rainMusicUrl", "animeVideoUrl", "animeMusicUrl", "carVideoUrl", "carMusicUrl", "snowEnabled", "discordUsername", "robloxUrl", "githubUrl", "youtubeUrl", "tiktokUrl", "telegramUrl", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "cursorStyle", "enterText", "accentColor", "textColor", "backgroundColor", "socialIconColor", "fontStyle", "nameEffect", "socialStyle", "socialIconSet", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume"];
+const toggleFields = new Set(["snowEnabled", "animateEntrance", "animateText", "animatedBackground", "profileFloat", "hoverTilt", "profileGradient", "monochromeIcons", "showViews", "showThemes", "showVolume"]);
 const fieldDefaults = { defaultTheme: "home", cursorStyle: "orb", enterText: "Click to enter", accentColor: "#b99af7", textColor: "#ffffff", backgroundColor: "#090b10", socialIconColor: "#ffffff", fontStyle: "serif", nameEffect: "none", socialStyle: "glass", socialIconSet: "brand" };
 const styleDefaults = { profileOpacity: 100, profileBlur: 0, avatarRadius: 28, cardWidth: 760, avatarSize: 174, nameSize: 59, bioSize: 19, socialSize: 42 };
 const defaultLayout = {
@@ -16,7 +16,7 @@ const cropDefaults = { backgroundStart: 0, backgroundEnd: 0, backgroundZoom: 1, 
 const backgroundFields = { home: "video-url", hacker: "hacker-video", rain: "rain-video", anime: "anime-video", car: "car-video" };
 const musicFields = { home: ["music-url", "music"], hacker: ["hacker-music", "hackerMusic"], rain: ["rain-music", "rainMusic"], anime: ["anime-music", "animeMusic"], car: ["car-music", "carMusic"] };
 const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${prefix}Start`, `${prefix}End`]);
-const badgeChoices = { owner: "◈ Owner", verified: "✓ Verified", developer: "⌘ Developer", partner: "✦ Partner", supporter: "♥ Supporter" };
+const badgeChoices = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter" };
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["video-url", "background", "image/gif,image/png,image/jpeg,image/webp,video/mp4,video/webm"],
@@ -66,7 +66,7 @@ function showMusicRanges(data, label = "Saved clip") {
 function fillForm(data = {}, clipLabel = "Saved clip") {
   for (const key of fields) {
     const el = form.elements.namedItem(key);
-    if (toggleFields.has(key)) el.checked = data[key] ?? (key !== "snowEnabled");
+    if (toggleFields.has(key)) el.checked = data[key] ?? !["snowEnabled", "profileGradient", "monochromeIcons"].includes(key);
     else el.value = typeof data[key] === "string" ? data[key] : (fieldDefaults[key] ?? "");
   }
   for (const [key, fallback] of Object.entries(cropDefaults)) {
@@ -121,6 +121,7 @@ $("default-theme").addEventListener("change", () => { showSelectedTheme(); updat
 
 const sectionCopy = {
   profile: ["Profile", "Edit your identity and avatar. Changes appear on the live page when saved."],
+  badges: ["Badges", "Choose decorative badges for your profile. Save to publish your selection."],
   media: ["Media & music", "Edit the one theme visitors see, then trim and preview its music."],
   socials: ["Social links", "Add the links visitors can open and a Discord username they can copy."],
   appearance: ["Appearance", "Tune colors, icons, typography and what visitors can see."],
@@ -137,6 +138,7 @@ for (const button of document.querySelectorAll(".nav-button")) button.addEventLi
   document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 $("edit-icon-style").addEventListener("click", () => document.querySelector('.nav-button[data-target="appearance"]').click());
+$("open-badges").addEventListener("click", () => document.querySelector('.nav-button[data-target="badges"]').click());
 for (const button of document.querySelectorAll("[data-social-focus]")) button.addEventListener("click", () => {
   $(button.dataset.socialFocus).focus();
 });
@@ -151,7 +153,7 @@ function updateMiniPreview() {
   for (const badge of Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked)) {
     const icon = document.createElement("img");
     icon.src = `./assets/badge-${badge}.svg`;
-    icon.alt = badgeChoices[badge].replace(/^[^ ]+ /, "");
+    icon.alt = badgeChoices[badge];
     miniBadges.append(icon);
   }
   const miniSocials = document.querySelector(".mini-socials");
@@ -175,6 +177,8 @@ function updateMiniPreview() {
   stage.style.setProperty("--mini-text", $("text-color").value);
   stage.style.setProperty("--mini-opacity", String(Number($("profile-opacity").value) / 100));
   stage.style.setProperty("--mini-blur", `${$("profile-blur").value}px`);
+  stage.classList.toggle("gradient-card", $("profile-gradient").checked);
+  stage.classList.toggle("monochrome-icons", $("monochrome-icons").checked);
   stage.style.setProperty("--mini-radius", `${$("avatar-radius").value}px`);
   $("mini-card").style.width = `${Math.min(93, Number($("card-width").value) / 760 * 93)}%`;
   $("mini-avatar").style.width = `${Math.round(Number($("avatar-size").value) / 174 * 58)}px`;
@@ -197,6 +201,7 @@ $("mini-avatar").addEventListener("error", event => {
   }
 });
 for (const key of ["profile-name", "profile-bio", "avatar-url", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size"]) $(key).addEventListener("input", updateMiniPreview);
+for (const key of ["profile-gradient", "monochrome-icons"]) $(key).addEventListener("change", updateMiniPreview);
 for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
 for (const id of ["discord-username", "roblox-url", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 
