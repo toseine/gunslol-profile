@@ -72,7 +72,6 @@ function renderItems(kind, items = []) {
       input.dataset.key = key;
       input.type = key === "color" ? "color" : key.toLowerCase().includes("url") || key === "url" ? "url" : "text";
       input.maxLength = key === "title" ? 60 : key === "description" ? 180 : key === "label" ? 30 : 2000;
-      if (["title", "label", "imageUrl"].includes(key)) input.required = true;
       input.value = item[key] || (key === "color" ? "#b99af7" : "");
       wrap.append(input); grid.append(wrap);
     }
