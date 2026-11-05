@@ -3,6 +3,7 @@ import { DurableObject } from "cloudflare:workers";
 const defaults = {
   name: "Your name",
   bio: "Your space on the web.",
+  location: "",
   avatarUrl: "",
   defaultTheme: "home",
   videoUrl: "",
@@ -45,6 +46,8 @@ const defaults = {
   nameEffect: "none",
   socialStyle: "glass",
   socialIconSet: "brand",
+  profileGradient: false,
+  monochromeIcons: false,
   profileOpacity: 100,
   profileBlur: 0,
   avatarRadius: 28,
@@ -148,14 +151,20 @@ function cleanSettings(input) {
   if (!result.name || typeof input.snowEnabled !== "boolean") return null;
   if (input.discordUsername != null && (typeof input.discordUsername !== "string" || input.discordUsername.length > 64)) return null;
   result.discordUsername = (input.discordUsername || "").trim().replace(/^@/, "");
+  if (input.location != null && (typeof input.location !== "string" || input.location.length > 60)) return null;
+  result.location = (input.location || "").trim();
   if (input.robloxUrl != null && (typeof input.robloxUrl !== "string" || input.robloxUrl.length > 2000)) return null;
   result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
   result.telegramUrl = (input.telegramUrl || "").trim();
-  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter"];
+  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter", "premium", "og", "donor", "booster", "bughunter"];
   const badges = input.badges ?? [];
   if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
   result.badges = badges;
+  for (const key of ["profileGradient", "monochromeIcons"]) {
+    if (input[key] != null && typeof input[key] !== "boolean") return null;
+    result[key] = input[key] ?? false;
+  }
   result.snowEnabled = input.snowEnabled;
   for (const [key, min, max, fallback] of [
     ["backgroundStart", 0, 3600, 0], ["backgroundEnd", 0, 3600, 0],
