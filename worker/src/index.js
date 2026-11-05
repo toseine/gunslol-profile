@@ -16,6 +16,27 @@ const defaults = {
   projects: [],
   customBadges: [],
   location: "",
+  occupation: "",
+  bannerUrl: "",
+  cursorUrl: "",
+  avatarHidden: false,
+  profileAlignment: "left",
+  badgePlacement: "below",
+  entryEnabled: true,
+  borderOpacity: 100,
+  badgeColor: "#b99af7",
+  linkHoverColor: "#b99af7",
+  gradientPrimary: "#b99af7",
+  gradientSecondary: "#090b10",
+  socialOrder: ["discord", "roblox", "github", "youtube", "tiktok", "telegram"],
+  customLinks: [],
+  extraSocials: [],
+  clockEnabled: false,
+  clockTimezone: "Europe/Warsaw",
+  weatherEnabled: false,
+  weatherCity: "",
+  discordPresenceEnabled: false,
+  discordPresenceId: "",
   avatarUrl: "",
   defaultTheme: "home",
   videoUrl: "",
@@ -180,6 +201,55 @@ function cleanSettings(input) {
   result.discordUsername = (input.discordUsername || "").trim().replace(/^@/, "");
   if (input.location != null && (typeof input.location !== "string" || input.location.length > 60)) return null;
   result.location = (input.location || "").trim();
+  if (input.occupation != null && (typeof input.occupation !== "string" || input.occupation.length > 60)) return null;
+  result.occupation = (input.occupation || "").trim();
+  for (const key of ["bannerUrl", "cursorUrl"]) {
+    const value = input[key] ?? "";
+    if (typeof value !== "string" || value.length > 2000) return null;
+    try { if (value && !["http:", "https:"].includes(new URL(value).protocol)) return null; } catch { return null; }
+    result[key] = value.trim();
+  }
+  for (const key of ["avatarHidden", "entryEnabled"]) {
+    if (input[key] != null && typeof input[key] !== "boolean") return null;
+    result[key] = input[key] ?? defaults[key];
+  }
+  for (const [key, choices] of Object.entries({ profileAlignment: ["left", "center"], badgePlacement: ["below", "inline"] })) {
+    const value = input[key] ?? defaults[key];
+    if (!choices.includes(value)) return null;
+    result[key] = value;
+  }
+  const socialIds = defaults.socialOrder;
+  const socialOrder = input.socialOrder ?? socialIds;
+  if (!Array.isArray(socialOrder) || socialOrder.length !== socialIds.length || new Set(socialOrder).size !== socialIds.length || socialOrder.some(id => !socialIds.includes(id))) return null;
+  result.socialOrder = socialOrder;
+  if (!Array.isArray(input.customLinks ?? []) || input.customLinks?.length > 12 || !Array.isArray(input.extraSocials ?? []) || input.extraSocials?.length > 18) return null;
+  result.customLinks = [];
+  for (const item of input.customLinks ?? []) {
+    if (!item || typeof item !== "object" || typeof item.title !== "string" || !item.title.trim() || item.title.length > 60 || typeof item.url !== "string" || !item.url || item.url.length > 2000 || typeof item.iconUrl !== "string" || item.iconUrl.length > 2000) return null;
+    for (const value of [item.url, item.iconUrl]) { try { if (value && !["http:", "https:"].includes(new URL(value).protocol)) return null; } catch { return null; } }
+    result.customLinks.push({ title: item.title.trim(), url: item.url.trim(), iconUrl: item.iconUrl.trim() });
+  }
+  result.extraSocials = [];
+  const extraPlatforms = ["instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
+  for (const item of input.extraSocials ?? []) {
+    if (!item || typeof item !== "object" || !extraPlatforms.includes(item.platform) || typeof item.url !== "string" || !item.url || item.url.length > 2000 || typeof item.iconUrl !== "string" || item.iconUrl.length > 2000 || typeof item.label !== "string" || item.label.length > 40) return null;
+    for (const value of [item.url, item.iconUrl]) { try { if (value && !["http:", "https:"].includes(new URL(value).protocol)) return null; } catch { return null; } }
+    result.extraSocials.push({ platform: item.platform, url: item.url.trim(), iconUrl: item.iconUrl.trim(), label: item.label.trim() });
+  }
+  for (const key of ["clockEnabled", "weatherEnabled", "discordPresenceEnabled"]) {
+    if (input[key] != null && typeof input[key] !== "boolean") return null;
+    result[key] = input[key] ?? false;
+  }
+  const clockTimezone = input.clockTimezone ?? defaults.clockTimezone;
+  if (typeof clockTimezone !== "string" || clockTimezone.length > 80) return null;
+  try { new Intl.DateTimeFormat("en", { timeZone: clockTimezone }); } catch { return null; }
+  result.clockTimezone = clockTimezone;
+  const weatherCity = input.weatherCity ?? "";
+  if (typeof weatherCity !== "string" || weatherCity.length > 80) return null;
+  result.weatherCity = weatherCity.trim();
+  const discordPresenceId = input.discordPresenceId ?? "";
+  if (typeof discordPresenceId !== "string" || (discordPresenceId && !/^\d{17,20}$/.test(discordPresenceId))) return null;
+  result.discordPresenceId = discordPresenceId;
   if (input.robloxUrl != null && (typeof input.robloxUrl !== "string" || input.robloxUrl.length > 2000)) return null;
   result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
@@ -247,7 +317,7 @@ function cleanSettings(input) {
   result.cursorStyle = input.cursorStyle || "orb";
   if (input.enterText != null && (typeof input.enterText !== "string" || input.enterText.length > 60)) return null;
   result.enterText = (input.enterText || defaults.enterText).trim();
-  for (const key of ["accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor"]) {
+  for (const key of ["accentColor", "textColor", "backgroundColor", "socialIconColor", "borderColor", "badgeColor", "linkHoverColor", "gradientPrimary", "gradientSecondary"]) {
     const value = input[key] ?? defaults[key];
     if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) return null;
     result[key] = value;
@@ -257,7 +327,7 @@ function cleanSettings(input) {
     if (!choices.includes(value)) return null;
     result[key] = value;
   }
-  for (const [key, min, max] of [["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87], ["cardWidth", 300, 900], ["avatarSize", 60, 220], ["nameSize", 22, 80], ["bioSize", 11, 30], ["socialSize", 28, 72], ["borderWidth", 0, 6], ["cardRadius", 0, 48], ["cardPadding", 0, 48], ["cardGlow", 0, 60], ["badgeSize", 18, 50], ["socialGap", 0, 28], ["backgroundBrightness", 10, 100], ["backgroundBlur", 0, 20]]) {
+  for (const [key, min, max] of [["borderOpacity", 0, 100], ["profileOpacity", 20, 100], ["profileBlur", 0, 24], ["avatarRadius", 0, 87], ["cardWidth", 300, 900], ["avatarSize", 60, 220], ["nameSize", 22, 80], ["bioSize", 11, 30], ["socialSize", 28, 72], ["borderWidth", 0, 6], ["cardRadius", 0, 48], ["cardPadding", 0, 48], ["cardGlow", 0, 60], ["badgeSize", 18, 50], ["socialGap", 0, 28], ["backgroundBrightness", 10, 100], ["backgroundBlur", 0, 20]]) {
     const value = input[key] ?? defaults[key];
     if (!Number.isInteger(value) || value < min || value > max) return null;
     result[key] = value;
