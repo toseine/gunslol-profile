@@ -238,3 +238,16 @@ form .badge-gallery label { min-height: 72px; border-radius: 11px; }
 .mini-stage:not(.monochrome-icons) .mini-social-icon.icon-youtube { background: #ff4545; }
 .mini-stage:not(.monochrome-icons) .mini-social-icon.icon-tiktok { background: #eee; }
 .mini-stage:not(.monochrome-icons) .mini-social-icon.icon-telegram { background: #34a8e6; }
+.profile-manager { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.profile-manager label { width: 100%; margin: 0; color: #c9b2ce; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.profile-manager select { width: min(220px, 100%); min-height: 39px; }
+.profile-manager button { min-height: 39px; }
+.profile-manager a { color: #cf9cdb; font-size: 12px; }
+.profile-manager + .status { margin: 8px 0 0; }
+.profile-dialog { width: min(420px, calc(100vw - 24px)); padding: 24px; border: 1px solid #504055; border-radius: 16px; background: #171317; color: #fff; box-shadow: 0 25px 75px #000b; }
+.profile-dialog::backdrop { background: #000b; }
+.profile-dialog h2 { margin: 0 0 8px; }
+.profile-dialog input { width: 100%; margin-bottom: 14px; }
+.profile-dialog small { display: block; color: #a89fab; font-size: 11px; }
+.profile-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+@media (max-width: 700px) { .profile-manager { align-items: stretch; }.profile-manager select { width: 100%; }.profile-manager a { align-self: center; } }
