@@ -273,7 +273,7 @@ function updateMiniPreview() {
   miniBadges.replaceChildren();
   for (const badge of Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked)) {
     const icon = document.createElement("img");
-    icon.src = `./assets/badge-${badge}.svg`;
+    icon.src = `./assets/badge-${badge}.svg?v=2`;
     icon.alt = badgeChoices[badge];
     miniBadges.append(icon);
   }

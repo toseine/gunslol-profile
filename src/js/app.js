@@ -217,7 +217,7 @@ function render(data) {
     chip.setAttribute('aria-label', badgeLabels[badge]);
     chip.dataset.label = badgeLabels[badge];
     const icon = document.createElement('img');
-    icon.src = `./assets/badge-${badge}.svg`;
+    icon.src = `./assets/badge-${badge}.svg?v=2`;
     icon.alt = '';
     chip.append(icon);
     badgeContainer.append(chip);
