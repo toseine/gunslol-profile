@@ -1048,7 +1048,15 @@ body[data-card-style="solid"] .position-social .social-links { padding: 7px 10px
 .share-profile { position: fixed; top: 25px; right: 27px; z-index: 26; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 12px; border: 1px solid #ffffff38; border-radius: 10px; background: #100d18b8; color: #fff; font: 12px Arial,sans-serif; cursor: pointer; backdrop-filter: blur(12px); transition: transform .2s, border-color .2s, background .2s; }
 .share-profile svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .share-profile:hover, .share-profile:focus-visible { transform: translateY(-2px); border-color: var(--accentColor, #b99af7); background: #231a31d9; }
+.profile-switcher { position: fixed; top: 68px; right: 27px; z-index: 45; font: 12px Arial,sans-serif; }
+.profile-switcher[hidden], .profile-switcher-list[hidden] { display: none !important; }
+.profile-switcher button { min-height: 36px; padding: 7px 12px; border: 1px solid #ffffff38; border-radius: 10px; background: #100d18d9; color: #fff; font: 700 12px Arial,sans-serif; cursor: pointer; backdrop-filter: blur(12px); }
+.profile-switcher button:hover, .profile-switcher button:focus-visible { border-color: var(--accentColor, #b99af7); }
+.profile-switcher-list { display: grid; gap: 3px; min-width: 175px; max-height: min(60vh, 350px); overflow-y: auto; margin-top: 8px; padding: 7px; border: 1px solid #ffffff38; border-radius: 12px; background: #100d18ed; box-shadow: 0 16px 45px #0009; backdrop-filter: blur(15px); }
+.profile-switcher-list a { padding: 9px 10px; border-radius: 7px; color: #fff; text-decoration: none; overflow-wrap: anywhere; }
+.profile-switcher-list a:hover, .profile-switcher-list a:focus-visible, .profile-switcher-list a.current { background: color-mix(in srgb, var(--accentColor, #b99af7) 25%, transparent); }
 @media (max-width: 640px) { .share-profile { top: 18px; right: 18px; padding: 8px; }.share-profile span { display: none; } }
+@media (max-width: 640px) { .profile-switcher { top: 61px; right: 18px; } }
 
 /* Optional second screen keeps the original one-screen profile intact by default. */
 html { scroll-behavior: smooth; }
