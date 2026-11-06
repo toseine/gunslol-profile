@@ -15,6 +15,7 @@ const defaults = {
   nowText: "",
   projects: [],
   customBadges: [],
+  badgeColors: {},
   location: "",
   occupation: "",
   bannerUrl: "",
@@ -233,11 +234,13 @@ function cleanSettings(input) {
     result.customLinks.push({ title: item.title.trim(), url: item.url.trim(), iconUrl: item.iconUrl.trim() });
   }
   result.extraSocials = [];
-  const extraPlatforms = ["instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
+  const extraPlatforms = ["discord", "telegram", "instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
   for (const item of input.extraSocials ?? []) {
     if (!item || typeof item !== "object" || !extraPlatforms.includes(item.platform) || typeof item.url !== "string" || !item.url || item.url.length > 2000 || typeof item.iconUrl !== "string" || item.iconUrl.length > 2000 || typeof item.label !== "string" || item.label.length > 40) return null;
-    for (const value of [item.url, item.iconUrl]) { try { if (value && !["http:", "https:"].includes(new URL(value).protocol)) return null; } catch { return null; } }
-    result.extraSocials.push({ platform: item.platform, url: item.url.trim(), iconUrl: item.iconUrl.trim(), label: item.label.trim() });
+    if (item.platform === "discord") { if (!/^[A-Za-z0-9_.]{2,32}$/.test(item.url.trim().replace(/^@/, ""))) return null; }
+    else { try { if (!["http:", "https:"].includes(new URL(item.url).protocol)) return null; } catch { return null; } }
+    try { if (item.iconUrl && !["http:", "https:"].includes(new URL(item.iconUrl).protocol)) return null; } catch { return null; }
+    result.extraSocials.push({ platform: item.platform, url: item.platform === "discord" ? item.url.trim().replace(/^@/, "") : item.url.trim(), iconUrl: item.iconUrl.trim(), label: item.label.trim() });
   }
   for (const key of ["clockEnabled", "weatherEnabled", "discordPresenceEnabled", "valorantEnabled"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
@@ -264,6 +267,13 @@ function cleanSettings(input) {
   const badges = input.badges ?? [];
   if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
   result.badges = badges;
+  const badgeColors = input.badgeColors ?? {};
+  if (!badgeColors || typeof badgeColors !== "object" || Array.isArray(badgeColors) || Object.keys(badgeColors).length > allowedBadges.length) return null;
+  result.badgeColors = {};
+  for (const [badge, colors] of Object.entries(badgeColors)) {
+    if (!allowedBadges.includes(badge) || !colors || typeof colors !== "object" || Array.isArray(colors) || !/^#[0-9a-f]{6}$/i.test(colors.primary) || !/^#[0-9a-f]{6}$/i.test(colors.secondary)) return null;
+    result.badgeColors[badge] = { primary: colors.primary, secondary: colors.secondary };
+  }
   if (!Array.isArray(input.projects ?? []) || input.projects?.length > 6 || !Array.isArray(input.customBadges ?? []) || input.customBadges?.length > 6) return null;
   result.projects = [];
   for (const item of input.projects ?? []) {
