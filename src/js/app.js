@@ -3,6 +3,7 @@ import { socialIcons } from './social-icons.js';
 
 const profileSlug = new URLSearchParams(location.search).get('profile') || 'main';
 const profileQuery = `?profile=${encodeURIComponent(profileSlug)}`;
+let profileListLoaded = false;
 
 const $ = id => document.getElementById(id);
 const avatarImage = document.querySelector('.profile-picture');
@@ -148,10 +149,44 @@ function updateMusicToggle() {
   $('music-toggle').hidden = !audio.src || !audio.paused;
 }
 
+async function loadPublicProfiles() {
+  const switcher = $('profile-switcher');
+  if (window.profileSettings?.showProfileSwitcher !== true) { switcher.hidden = true; return; }
+  try {
+    const response = await fetch(`${apiUrl}/public-profiles`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { profiles } = await response.json();
+    const list = $('profile-switcher-list');
+    list.replaceChildren();
+    for (const item of profiles) {
+      if (!/^(main|[a-z0-9-]{3,32})$/.test(item.slug)) continue;
+      const link = document.createElement('a');
+      link.href = item.slug === 'main' ? './' : `./?profile=${encodeURIComponent(item.slug)}`;
+      link.textContent = item.name || item.slug;
+      if (item.slug === profileSlug) { link.setAttribute('aria-current', 'page'); link.classList.add('current'); }
+      list.append(link);
+    }
+    switcher.hidden = list.childElementCount < 2;
+    profileListLoaded = true;
+  } catch (error) { switcher.hidden = true; console.error('Profile list failed:', error); }
+}
+$('profile-switcher-toggle').addEventListener('click', () => {
+  const list = $('profile-switcher-list');
+  list.hidden = !list.hidden;
+  $('profile-switcher-toggle').setAttribute('aria-expanded', String(!list.hidden));
+  if (!profileListLoaded || !list.hidden) loadPublicProfiles();
+});
+document.addEventListener('click', event => {
+  if ($('profile-switcher').contains(event.target)) return;
+  $('profile-switcher-list').hidden = true;
+  $('profile-switcher-toggle').setAttribute('aria-expanded', 'false');
+});
+
 function render(data) {
   window.profileSettings = data;
   document.title = `${data.name || 'Profile'} · profile`;
   window.dispatchEvent(new CustomEvent('profile:settings', { detail: data }));
+  loadPublicProfiles();
   const avatarUrl = safeUrl(data.avatarUrl);
   const avatarSource = avatarUrl && avatarUrl !== failedAvatarUrl ? avatarUrl : avatarFallback;
   if (avatarImage.getAttribute('src') !== avatarSource) avatarImage.src = avatarSource;
@@ -171,7 +206,7 @@ function render(data) {
   $('discord-link').hidden = !discordName;
   $('discord-link').dataset.username = discordName;
   $('discord-tooltip').textContent = discordName ? `Copy @${discordName}` : 'Copy Discord username';
-  const badgeLabels = { owner: "Owner", verified: "Verified", developer: "Developer", partner: "Partner", supporter: "Supporter", premium: "Premium", og: "OG", donor: "Donor", booster: "Booster", bughunter: "Bug Hunter", helper: "Helper", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend" };
+  const badgeLabels = { staff: "Staff", helper: "Helper", premium: "Premium", verified: "Verified", donor: "Donor", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend", og: "OG", booster: "Server Booster", hone: "Hone.gg", bughunter: "Bug Hunter", summer2026: "Summer 2026", easter2026: "Easter 2026", christmas2025: "Christmas 2025", easter2025: "Easter 2025", christmas2024: "Christmas 2024", million: "The Million", winner: "Winner", secondplace: "Second Place", thirdplace: "Third Place", owner: "Owner", developer: "Developer", partner: "Partner", supporter: "Supporter" };
   const badgeContainer = $('profile-badges');
   badgeContainer.replaceChildren();
   for (const badge of Array.isArray(data.badges) ? data.badges : []) {
