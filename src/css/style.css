@@ -1097,9 +1097,16 @@ body[data-badge-placement="inline"] .name-and-badges { display: flex; flex-wrap:
 body[data-badge-placement="inline"] .profile-badges { margin: 0; }
 body[data-badge-placement="inline"] .profile-location, body[data-badge-placement="inline"] .profile-occupation { flex-basis: 100%; }
 .profile-badge:not(.custom-profile-badge) { filter: drop-shadow(0 0 5px var(--badgeColor, #b99af7)); }
+.profile-badge .tinted-badge-icon { display: block; width: var(--badgeSize, 30px); height: var(--badgeSize, 30px); mask-size: contain; mask-repeat: no-repeat; mask-position: center; filter: drop-shadow(0 2px 5px #0009); transition: transform .2s; }
+.profile-badge:hover .tinted-badge-icon { transform: translateY(-3px) scale(1.08); }
 .social-links a:hover { border-color: var(--linkHoverColor, #b99af7); }
 .social-links [data-extra-social] { color: var(--socialIconColor, #fff); }
 .social-links [data-extra-social] svg, .social-links [data-extra-social] img { width: 65%; height: 65%; object-fit: contain; fill: currentColor; }
+.social-links button[data-extra-social] { display: inline-flex; align-items: center; justify-content: center; width: var(--socialSize, 42px); height: var(--socialSize, 42px); padding: 0; border: 1px solid rgba(255,255,255,.28); border-radius: 10px; background: rgba(16,14,24,.55); color: var(--socialIconColor, #fff); cursor: pointer; backdrop-filter: blur(10px); transition: transform .18s, filter .18s; }
+.social-links button[data-extra-social]:hover { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 0 8px var(--socialIconColor, #fff)); }
+body[data-social-style="glass"] .social-links button[data-extra-social] { border-color: transparent; border-radius: 50%; background: transparent; backdrop-filter: none; }
+body[data-social-style="solid"] .social-links button[data-extra-social] { background: var(--accentColor, #b99af7); border-color: var(--accentColor, #b99af7); }
+body[data-social-style="outline"] .social-links button[data-extra-social] { background: transparent; border-color: var(--accentColor, #b99af7); backdrop-filter: none; }
 .custom-links { display: grid; gap: 8px; width: min(100%, 420px); margin: 18px 0 0 202px; }
 body.has-custom-links .position-profile #profile-block { max-height: calc(100svh - 72px); overflow-y: auto; scrollbar-width: thin; }
 body.has-profile-extras .position-profile #profile-block { max-height: calc(100svh - 72px); overflow-y: auto; scrollbar-width: thin; }
