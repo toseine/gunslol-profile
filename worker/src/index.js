@@ -106,6 +106,7 @@ const defaults = {
   showThemes: true,
   showVolume: true,
   showShare: true,
+  showProfileSwitcher: false,
   layout: {
     desktop: { profile: { x: 50, y: 50 }, social: { x: 50, y: 68 }, views: { x: 6, y: 94 }, themes: { x: 96, y: 50 }, audio: { x: 8, y: 6 } },
     mobile: { profile: { x: 50, y: 47 }, social: { x: 50, y: 65 }, views: { x: 11, y: 94 }, themes: { x: 94, y: 49 }, audio: { x: 15, y: 5 } }
@@ -259,7 +260,7 @@ function cleanSettings(input) {
   result.robloxUrl = (input.robloxUrl || "").trim();
   if (input.telegramUrl != null && (typeof input.telegramUrl !== "string" || input.telegramUrl.length > 2000)) return null;
   result.telegramUrl = (input.telegramUrl || "").trim();
-  const allowedBadges = ["owner", "verified", "developer", "partner", "supporter", "premium", "og", "donor", "booster", "bughunter", "helper", "gifter", "imagehost", "domainlegend"];
+  const allowedBadges = ["staff", "helper", "premium", "verified", "donor", "gifter", "imagehost", "domainlegend", "og", "booster", "hone", "bughunter", "summer2026", "easter2026", "christmas2025", "easter2025", "christmas2024", "million", "winner", "secondplace", "thirdplace", "owner", "developer", "partner", "supporter"];
   const badges = input.badges ?? [];
   if (!Array.isArray(badges) || badges.length > allowedBadges.length || new Set(badges).size !== badges.length || badges.some(badge => !allowedBadges.includes(badge))) return null;
   result.badges = badges;
@@ -337,7 +338,7 @@ function cleanSettings(input) {
     if (!Number.isInteger(value) || value < min || value > max) return null;
     result[key] = value;
   }
-  for (const key of ["showViews", "showThemes", "showVolume", "showShare"]) {
+  for (const key of ["showViews", "showThemes", "showVolume", "showShare", "showProfileSwitcher"]) {
     if (input[key] != null && typeof input[key] !== "boolean") return null;
     result[key] = input[key] ?? true;
   }
@@ -375,6 +376,14 @@ export class ProfileStore extends DurableObject {
     const path = url.pathname;
     const profile = url.searchParams.get("profile") || "main";
     if (!validProfile(profile)) return json({ error: "Invalid profile" }, 400);
+    if (path === "/public-profiles" && request.method === "GET") {
+      const profiles = [{ slug: "main", name: "Main profile" }, ...((await this.ctx.storage.get("profiles")) || [])];
+      const publicProfiles = await Promise.all(profiles.map(async item => ({
+        slug: item.slug,
+        name: ((await this.ctx.storage.get(profileKey(item.slug, "settings"))) || {}).name || item.name
+      })));
+      return json({ profiles: publicProfiles });
+    }
     if (path === "/profiles" || /^\/profiles\/[a-z0-9-]{3,32}$/.test(path)) {
       const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       if (!(await validToken(token, this.env.ADMIN_PASSWORD))) return json({ error: "Unauthorized" }, 401);
@@ -662,7 +671,7 @@ export default {
       }
       return new Response(JSON.stringify({ url: `https://toseine.github.io/gunslol-profile/media/${filename}` }), { status: 201, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
-    if (!["/settings", "/valorant", "/views", "/login", "/session", "/socket", "/presets", "/profiles"].includes(path) && !/^\/profiles\/[a-z0-9-]{3,32}$/.test(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
+    if (!["/settings", "/valorant", "/views", "/login", "/session", "/socket", "/presets", "/profiles", "/public-profiles"].includes(path) && !/^\/profiles\/[a-z0-9-]{3,32}$/.test(path) && !/^\/presets\/[0-9a-f-]{36}(?:\/activate)?$/.test(path) && !/^\/media\/[0-9a-f-]{36}\.(gif|png|jpg|webp|mp4|webm|mp3|ogg|wav)$/.test(path)) return json({ error: "Not found" }, 404);
     const stub = env.PROFILE.get(env.PROFILE.idFromName("main"));
     const response = await stub.fetch(request);
     if (response.status === 101) return response;
