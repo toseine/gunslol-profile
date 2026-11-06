@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#090b10">
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
-  <link rel="stylesheet" href="./src/css/admin.css?v=17">
-  <script type="module" src="./src/js/admin.js?v=25"></script>
+  <link rel="stylesheet" href="./src/css/admin.css?v=18">
+  <script type="module" src="./src/js/admin.js?v=26"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -102,6 +102,7 @@
             <label><input id="badge-secondplace" type="checkbox"><img src="./assets/badge-secondplace.svg" alt=""><span><strong>Second Place</strong><small>Silver medal</small></span></label>
             <label><input id="badge-thirdplace" type="checkbox"><img src="./assets/badge-thirdplace.svg" alt=""><span><strong>Third Place</strong><small>Bronze medal</small></span></label>
           </div>
+          <div class="customization-group badge-color-editor"><h3>Badge colors</h3><p class="muted">Pick a badge, then choose its own gradient colors. Save to show them on your profile.</p><div class="badge-color-fields"><div><label for="badge-color-target">Badge to edit</label><select id="badge-color-target"></select></div><div><label for="badge-primary-color">First color</label><input id="badge-primary-color" type="color" value="#b99af7"></div><div><label for="badge-secondary-color">Second color</label><input id="badge-secondary-color" type="color" value="#ffffff"></div><div class="badge-color-preview"><span id="badge-color-sample" aria-hidden="true"></span><span id="badge-color-state">Original colors</span></div></div><button id="badge-color-reset" type="button" class="quiet-button">Restore original colors</button></div>
           <div class="customization-group"><h3>Your badges</h3><p class="muted">Upload your own icon and choose its label and color. Up to six badges.</p><div id="custom-badge-list" class="custom-list"></div><button id="add-custom-badge" type="button" class="quiet-button">+ Add badge</button></div>
         </div>
         <div class="panel section-panel" data-section="media" hidden>
@@ -150,7 +151,7 @@
             <div><label for="tiktok-url"><img class="field-icon" src="./assets/tiktok.svg" alt=""> TikTok</label><input id="tiktok-url" name="tiktokUrl" type="url" maxlength="2000" placeholder="https://tiktok.com/@..."></div>
             <div><label for="telegram-url"><img class="field-icon" src="./assets/telegram.svg" alt=""> Telegram</label><input id="telegram-url" name="telegramUrl" type="url" maxlength="2000" placeholder="https://t.me/yourname"></div>
             <div class="customization-group"><h3>Icon order</h3><p class="muted">Use the arrows to arrange your social icons.</p><div id="social-order-list" class="social-order-list"></div></div>
-            <div class="customization-group"><h3>More platforms</h3><p class="muted">Add another social account with its platform icon or your own uploaded icon.</p><div id="extra-social-list" class="custom-list"></div><button id="add-extra-social" type="button" class="quiet-button">+ Add platform</button></div>
+            <div class="customization-group"><h3>More accounts</h3><p class="muted">Add more Discord usernames or Telegram links, plus other platforms. Each account gets its own icon; clicking a Discord icon copies that username.</p><div id="extra-social-list" class="custom-list"></div><button id="add-extra-social" type="button" class="quiet-button">+ Add account</button></div>
             <div class="customization-group"><h3>Custom buttons</h3><p class="muted">Links shown below your social icons. Add up to twelve.</p><div id="custom-link-list" class="custom-list"></div><button id="add-custom-link" type="button" class="quiet-button">+ Add button</button></div>
             <button id="edit-icon-style" type="button" class="quiet-button">Customize icon color and style →</button>
           </div>
@@ -170,8 +171,11 @@
           </div>
         </div>
         <div class="panel section-panel" data-section="appearance" hidden>
-          <div class="section-heading"><span class="section-number">04</span><h2>Appearance and layout</h2></div>
+          <div class="section-heading"><span class="section-number">04</span><h2>Appearance</h2></div>
+          <p class="muted">Choose a section, adjust it and watch the preview. Save changes when you are happy with the result.</p>
+          <nav class="appearance-jumps" aria-label="Appearance sections"><button type="button" data-appearance-jump="appearance-colors"><span>◉</span><strong>Colors & icons</strong><small>Palette, text, logos</small></button><button type="button" data-appearance-jump="appearance-card"><span>▣</span><strong>Card & sizes</strong><small>Shape, spacing, scale</small></button><button type="button" data-appearance-jump="appearance-controls"><span>◈</span><strong>Visitor controls</strong><small>Cursor and visibility</small></button></nav>
           <div class="field-stack">
+            <details class="appearance-detail" id="appearance-colors" open><summary><strong>Colors & icons</strong><span>Choose a palette or adjust individual colors, fonts and social icons.</span></summary><div class="appearance-detail-body">
             <div class="customization-group"><h3>Quick color palettes</h3><p class="muted">Pick a starting point, then adjust every color below. Save to publish.</p><div class="palette-options" aria-label="Color palettes"><button type="button" class="palette-option" data-palette="violet" style="--palette:#b99af7" aria-label="Violet palette"><span></span>Violet</button><button type="button" class="palette-option" data-palette="rose" style="--palette:#f28dbe" aria-label="Rose palette"><span></span>Rose</button><button type="button" class="palette-option" data-palette="cyan" style="--palette:#6fd8e8" aria-label="Cyan palette"><span></span>Cyan</button><button type="button" class="palette-option" data-palette="emerald" style="--palette:#75dab4" aria-label="Emerald palette"><span></span>Emerald</button><button type="button" class="palette-option" data-palette="gold" style="--palette:#e9c780" aria-label="Gold palette"><span></span>Gold</button></div></div>
             <div class="field-grid custom-grid">
               <div><label for="accent-color">Accent color</label><input id="accent-color" name="accentColor" type="color" value="#b99af7"></div>
@@ -187,6 +191,8 @@
               <div><label for="social-style">Social icon style</label><select id="social-style" name="socialStyle"><option value="glass">Glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div>
               <div><label for="social-icon-set">Social icons</label><select id="social-icon-set" name="socialIconSet"><option value="brand">Brand logos</option><option value="minimal">Minimal symbols</option></select><small>Preview updates as you choose.</small></div>
             </div>
+            </div></details>
+            <details class="appearance-detail" id="appearance-card"><summary><strong>Card & sizes</strong><span>Set the card, avatar, name, badges and spacing.</span></summary><div class="appearance-detail-body">
             <div class="customization-group"><h3>Profile card</h3><p class="muted">Choose the surface, border and spacing around your identity.</p><div class="field-grid custom-grid"><div><label for="card-style">Card style</label><select id="card-style" name="cardStyle"><option value="floating">Floating</option><option value="glass">Frosted glass</option><option value="solid">Solid</option><option value="outline">Outline</option></select></div><div><label for="border-color">Border color</label><input id="border-color" name="borderColor" type="color" value="#b99af7"></div><div><label for="profile-alignment">Profile alignment</label><select id="profile-alignment" name="profileAlignment"><option value="left">Left</option><option value="center">Centered</option></select></div><div><label for="badge-placement">Badge placement</label><select id="badge-placement" name="badgePlacement"><option value="below">Below name</option><option value="inline">Next to name</option></select></div><div><label for="avatar-shape">Avatar shape preset</label><select id="avatar-shape"><option value="custom">Custom corners</option><option value="square">Square</option><option value="squircle">Squircle</option><option value="soft">Soft</option><option value="circle">Circle</option></select></div></div><div class="slider-grid"><div><label for="border-width">Border thickness <output id="border-width-value">1px</output></label><input id="border-width" name="borderWidth" type="range" min="0" max="6" value="1"></div><div><label for="border-opacity">Border opacity <output id="border-opacity-value">100%</output></label><input id="border-opacity" name="borderOpacity" type="range" min="0" max="100" value="100"></div><div><label for="card-radius">Card corners <output id="card-radius-value">22px</output></label><input id="card-radius" name="cardRadius" type="range" min="0" max="48" value="22"></div><div><label for="card-padding">Card spacing <output id="card-padding-value">26px</output></label><input id="card-padding" name="cardPadding" type="range" min="0" max="48" value="26"></div><div><label for="card-glow">Card glow <output id="card-glow-value">18px</output></label><input id="card-glow" name="cardGlow" type="range" min="0" max="60" value="18"></div></div></div>
             <label class="toggle-row" for="profile-gradient"><span><strong>Profile gradient</strong><small>Add accent color to the profile card</small></span><span class="switch"><input id="profile-gradient" name="profileGradient" type="checkbox"><span class="slider"></span></span></label>
             <label class="toggle-row" for="monochrome-icons"><span><strong>Monochrome icons</strong><small>One chosen color or each platform's color</small></span><span class="switch"><input id="monochrome-icons" name="monochromeIcons" type="checkbox" checked><span class="slider"></span></span></label>
@@ -202,6 +208,8 @@
               <div><label for="badge-size">Badge size <output id="badge-size-value">30px</output></label><input id="badge-size" name="badgeSize" type="range" min="18" max="50" value="30"></div>
               <div><label for="social-gap">Social spacing <output id="social-gap-value">10px</output></label><input id="social-gap" name="socialGap" type="range" min="0" max="28" value="10"></div>
             </div>
+            </div></details>
+            <details class="appearance-detail" id="appearance-controls"><summary><strong>Visitor controls</strong><span>Choose the cursor and what visitors can see.</span></summary><div class="appearance-detail-body">
             <div><label for="cursor-style">Custom cursor</label><select id="cursor-style" name="cursorStyle"><option value="orb">Glowing orb</option><option value="dot">Minimal dot</option><option value="crosshair">Crosshair</option><option value="system">System cursor</option></select></div>
             <label class="toggle-row" for="entry-enabled"><span><strong>Entry screen</strong><small>Ask visitors to click before showing your profile and music</small></span><span class="switch"><input id="entry-enabled" name="entryEnabled" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-views"><span><strong>Show view counter</strong><small>Monthly unique visitors</small></span><span class="switch"><input id="show-views" name="showViews" type="checkbox" checked><span class="slider"></span></span></label>
@@ -209,6 +217,7 @@
             <label class="toggle-row" for="show-volume"><span><strong>Show music control</strong><small>Volume slider on the public page</small></span><span class="switch"><input id="show-volume" name="showVolume" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-share"><span><strong>Show share button</strong><small>Visitors can share or copy this profile's URL</small></span><span class="switch"><input id="show-share" name="showShare" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-profile-switcher"><span><strong>Show other profiles</strong><small>Add profiles above, then let visitors open them from a corner menu</small></span><span class="switch"><input id="show-profile-switcher" name="showProfileSwitcher" type="checkbox"><span class="slider"></span></span></label>
+            </div></details>
           </div>
         </div>
         <div class="panel section-panel" data-section="animations" hidden>
