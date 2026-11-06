@@ -216,9 +216,11 @@ function render(data) {
     chip.setAttribute('role', 'img');
     chip.setAttribute('aria-label', badgeLabels[badge]);
     chip.dataset.label = badgeLabels[badge];
-    const icon = document.createElement('img');
-    icon.src = `./assets/badge-${badge}.svg?v=2`;
-    icon.alt = '';
+    const colors = data.badgeColors?.[badge];
+    const tinted = /^#[0-9a-f]{6}$/i.test(colors?.primary) && /^#[0-9a-f]{6}$/i.test(colors?.secondary);
+    const icon = document.createElement(tinted ? 'span' : 'img');
+    if (tinted) { icon.className = 'tinted-badge-icon'; icon.style.maskImage = `url("./assets/badge-${badge}.svg?v=2")`; icon.style.background = `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`; }
+    else { icon.src = `./assets/badge-${badge}.svg?v=2`; icon.alt = ''; }
     chip.append(icon);
     badgeContainer.append(chip);
   }
@@ -259,10 +261,15 @@ function render(data) {
   }
   socials.querySelectorAll('[data-extra-social]').forEach(link => link.remove());
   for (const social of Array.isArray(data.extraSocials) ? data.extraSocials : []) {
-    const url = safeUrl(social.url);
-    if (!url) continue;
-    const link = document.createElement('a'); link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.dataset.extraSocial = '';
-    const label = social.label || social.platform || 'Social link'; link.setAttribute('aria-label', label); link.title = label;
+    const discord = social.platform === 'discord';
+    const url = discord ? '' : safeUrl(social.url);
+    const username = discord && typeof social.url === 'string' ? social.url.replace(/^@/, '') : '';
+    if (!url && !username) continue;
+    const link = document.createElement(discord ? 'button' : 'a');
+    if (discord) { link.type = 'button'; link.dataset.copyUsername = username; }
+    else { link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+    link.dataset.extraSocial = '';
+    const label = social.label || social.platform || 'Social link'; link.setAttribute('aria-label', discord ? `Copy ${label}: @${username}` : label); link.title = discord ? `Copy @${username}` : label;
     const iconUrl = safeUrl(social.iconUrl);
     if (iconUrl) { const image = document.createElement('img'); image.src = iconUrl; image.alt = ''; image.className = 'extra-social-icon'; link.append(image); }
     else if (Object.hasOwn(socialIcons, social.platform === 'x' ? 'twitter' : social.platform)) { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', socialIcons[social.platform === 'x' ? 'twitter' : social.platform]); svg.append(path); link.append(svg); }
@@ -476,6 +483,16 @@ $('discord-link').addEventListener('click', async event => {
     $('discord-tooltip').textContent = `@${username}`;
     $('discord-link').classList.add('copied');
   }
+});
+
+document.querySelector('.social-links').addEventListener('click', async event => {
+  const button = event.target.closest('[data-copy-username]');
+  if (!button) return;
+  const username = button.dataset.copyUsername;
+  try { await navigator.clipboard.writeText(username); button.title = `Copied @${username}`; }
+  catch { button.title = `@${username}`; }
+  button.setAttribute('aria-label', button.title);
+  setTimeout(() => { if (button.isConnected) { button.title = `Copy @${username}`; button.setAttribute('aria-label', button.title); } }, 2400);
 });
 
 $('share-profile').addEventListener('click', async () => {

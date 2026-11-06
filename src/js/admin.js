@@ -17,6 +17,9 @@ const backgroundFields = { home: "video-url", hacker: "hacker-video", rain: "rai
 const musicFields = { home: ["music-url", "music"], hacker: ["hacker-music", "hackerMusic"], rain: ["rain-music", "rainMusic"], anime: ["anime-music", "animeMusic"], car: ["car-music", "carMusic"] };
 const musicTrimKeys = Object.values(musicFields).flatMap(([, prefix]) => [`${prefix}Start`, `${prefix}End`]);
 const badgeChoices = { staff: "Staff", helper: "Helper", premium: "Premium", verified: "Verified", donor: "Donor", gifter: "Gifter", imagehost: "Image Host", domainlegend: "Domain Legend", og: "OG", booster: "Server Booster", hone: "Hone.gg", bughunter: "Bug Hunter", summer2026: "Summer 2026", easter2026: "Easter 2026", christmas2025: "Christmas 2025", easter2025: "Easter 2025", christmas2024: "Christmas 2024", million: "The Million", winner: "Winner", secondplace: "Second Place", thirdplace: "Third Place", owner: "Owner", developer: "Developer", partner: "Partner", supporter: "Supporter" };
+const badgeAsset = badge => `./assets/badge-${badge}.svg?v=2`;
+const validColor = color => /^#[0-9a-f]{6}$/i.test(color || "");
+let badgeColors = {};
 const uploadFields = [
   ["avatar-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
   ["banner-url", "avatar", "image/gif,image/png,image/jpeg,image/webp"],
@@ -47,7 +50,7 @@ const dynamicFields = {
   extraSocial: { list: "extra-social-list", keys: ["platform", "label", "url", "iconUrl"], limit: 18 }
 };
 const socialIds = ["discord", "roblox", "github", "youtube", "tiktok", "telegram"];
-const extraPlatforms = ["instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
+const extraPlatforms = ["discord", "telegram", "instagram", "x", "snapchat", "reddit", "twitch", "lastfm", "spotify", "bitcoin", "ethereum", "solana", "paypal", "steam", "soundcloud", "kick", "onlyfans", "custom"];
 let socialOrder = [...socialIds];
 function renderSocialOrder() {
   const list = $("social-order-list"); list.replaceChildren();
@@ -90,9 +93,10 @@ function renderItems(kind, items = []) {
       const input = document.createElement(key === "platform" ? "select" : "input");
       input.dataset.key = key;
       if (key === "platform") for (const platform of extraPlatforms) input.add(new Option(platform === "x" ? "X / Twitter" : platform[0].toUpperCase() + platform.slice(1), platform));
-      else input.type = key === "color" ? "color" : key.toLowerCase().includes("url") ? "url" : "text";
+      else input.type = key === "color" ? "color" : key.toLowerCase().includes("url") && !(kind === "extraSocial" && key === "url" && item.platform === "discord") ? "url" : "text";
       input.maxLength = key === "title" ? 60 : key === "description" ? 180 : key === "label" ? 30 : 2000;
       input.value = item[key] || (key === "color" ? "#b99af7" : "");
+      if (kind === "extraSocial" && key === "url" && item.platform === "discord") { wrap.firstChild.textContent = "Discord username"; input.placeholder = "yourname"; }
       wrap.append(input); grid.append(wrap);
     }
     card.append(grid);
@@ -127,8 +131,9 @@ for (const kind of Object.keys(dynamicFields)) {
   $({ project: "add-project", badge: "add-custom-badge", customLink: "add-custom-link", extraSocial: "add-extra-social" }[kind]).addEventListener("click", () => {
     const items = readItems(kind);
     if (items.length >= limit) { message("editor-status", `Maximum ${limit} ${kind}s.`); return; }
-    items.push({ project: { id: crypto.randomUUID(), title: "", description: "", imageUrl: "", url: "" }, badge: { label: "", imageUrl: "", color: "#b99af7" }, customLink: { title: "", url: "", iconUrl: "" }, extraSocial: { platform: "instagram", label: "", url: "", iconUrl: "" } }[kind]);
+    items.push({ project: { id: crypto.randomUUID(), title: "", description: "", imageUrl: "", url: "" }, badge: { label: "", imageUrl: "", color: "#b99af7" }, customLink: { title: "", url: "", iconUrl: "" }, extraSocial: { platform: "discord", label: "", url: "", iconUrl: "" } }[kind]);
     renderItems(kind, items); dirty = true;
+    if (kind === "extraSocial") updateMiniPreview();
     $(list).lastElementChild.querySelector("input,select").focus();
   });
   $(list).addEventListener("click", event => {
@@ -140,8 +145,46 @@ for (const kind of Object.keys(dynamicFields)) {
     if (button.dataset.action === "remove") items.splice(index, 1);
     else { const next = index + (button.dataset.action === "up" ? -1 : 1); if (next < 0 || next >= items.length) return; [items[index], items[next]] = [items[next], items[index]]; }
     renderItems(kind, items); dirty = true;
+    if (kind === "extraSocial") updateMiniPreview();
   });
+  if (kind === "extraSocial") $(list).addEventListener("change", event => {
+    if (event.target.dataset.key !== "platform") return;
+    const url = event.target.closest(".custom-item").querySelector('[data-key="url"]');
+    url.type = event.target.value === "discord" ? "text" : "url";
+    url.parentElement.firstChild.textContent = event.target.value === "discord" ? "Discord username" : "Destination URL";
+    url.placeholder = event.target.value === "discord" ? "yourname" : "https://...";
+    url.value = "";
+    updateMiniPreview();
+  });
+  if (kind === "extraSocial") $(list).addEventListener("input", updateMiniPreview);
 }
+
+for (const [id, label] of Object.entries(badgeChoices)) $("badge-color-target").add(new Option(label, id));
+$("badge-color-target").value = "owner";
+function refreshBadgeEditor() {
+  const id = $("badge-color-target").value;
+  const colors = badgeColors[id];
+  $("badge-primary-color").value = colors?.primary || "#b99af7";
+  $("badge-secondary-color").value = colors?.secondary || "#ffffff";
+  const sample = $("badge-color-sample");
+  sample.style.background = colors ? `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` : `center / contain no-repeat url("${badgeAsset(id)}")`;
+  sample.style.maskImage = colors ? `url("${badgeAsset(id)}")` : "none";
+  sample.style.maskSize = "contain";
+  sample.style.maskRepeat = "no-repeat";
+  sample.style.maskPosition = "center";
+  $("badge-color-state").textContent = colors ? "Custom colors · unsaved until you save" : "Original colors";
+  $("badge-color-reset").disabled = !colors;
+}
+$("badge-color-target").addEventListener("change", refreshBadgeEditor);
+for (const id of ["badge-primary-color", "badge-secondary-color"]) $(id).addEventListener("input", () => {
+  badgeColors[$("badge-color-target").value] = { primary: $("badge-primary-color").value, secondary: $("badge-secondary-color").value };
+  refreshBadgeEditor(); updateMiniPreview(); dirty = true;
+});
+$("badge-color-reset").addEventListener("click", () => {
+  delete badgeColors[$("badge-color-target").value];
+  refreshBadgeEditor(); updateMiniPreview(); dirty = true;
+});
+refreshBadgeEditor();
 
 function message(id, text, kind = "") {
   const el = $(id);
@@ -181,6 +224,8 @@ function fillForm(data = {}, clipLabel = "Saved clip") {
   }
   for (const key of musicTrimKeys) form.elements.namedItem(key).value = typeof data[key] === "number" ? data[key] : 0;
   for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).checked = Array.isArray(data.badges) && data.badges.includes(badge);
+  badgeColors = Object.fromEntries(Object.entries(data.badgeColors || {}).filter(([id, colors]) => Object.hasOwn(badgeChoices, id) && validColor(colors?.primary) && validColor(colors?.secondary)));
+  refreshBadgeEditor();
   renderItems("project", Array.isArray(data.projects) ? data.projects : []);
   renderItems("badge", Array.isArray(data.customBadges) ? data.customBadges : []);
   renderItems("customLink", Array.isArray(data.customLinks) ? data.customLinks : []);
@@ -214,6 +259,7 @@ function readForm() {
   for (const key of Object.keys(cropDefaults)) data[key] = Number(form.elements.namedItem(key).value);
   for (const key of musicTrimKeys) data[key] = Number(form.elements.namedItem(key).value);
   data.badges = Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked);
+  data.badgeColors = structuredClone(badgeColors);
   data.projects = readItems("project");
   data.customBadges = readItems("badge");
   data.customLinks = readItems("customLink");
@@ -258,7 +304,12 @@ for (const button of document.querySelectorAll(".nav-button")) button.addEventLi
   $("section-description").textContent = sectionCopy[target][1];
   document.querySelector(".editor-heading").scrollIntoView({ behavior: "smooth", block: "start" });
 });
-$("edit-icon-style").addEventListener("click", () => document.querySelector('.nav-button[data-target="appearance"]').click());
+$("edit-icon-style").addEventListener("click", () => { document.querySelector('.nav-button[data-target="appearance"]').click(); $("appearance-colors").open = true; $("appearance-colors").scrollIntoView({ behavior: "smooth", block: "start" }); });
+for (const button of document.querySelectorAll("[data-appearance-jump]")) button.addEventListener("click", () => {
+  const section = $(button.dataset.appearanceJump);
+  section.open = true;
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 $("open-badges").addEventListener("click", () => document.querySelector('.nav-button[data-target="badges"]').click());
 for (const button of document.querySelectorAll("[data-social-focus]")) button.addEventListener("click", () => {
   $(button.dataset.socialFocus).focus();
@@ -272,9 +323,10 @@ function updateMiniPreview() {
   const miniBadges = $("mini-badges");
   miniBadges.replaceChildren();
   for (const badge of Object.keys(badgeChoices).filter(badge => $(`badge-${badge}`).checked)) {
-    const icon = document.createElement("img");
-    icon.src = `./assets/badge-${badge}.svg?v=2`;
-    icon.alt = badgeChoices[badge];
+    const colors = badgeColors[badge];
+    const icon = document.createElement(colors ? "span" : "img");
+    if (colors) { icon.className = "tinted-badge-icon"; icon.style.maskImage = `url("${badgeAsset(badge)}")`; icon.style.background = `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`; icon.setAttribute("role", "img"); icon.setAttribute("aria-label", badgeChoices[badge]); }
+    else { icon.src = badgeAsset(badge); icon.alt = badgeChoices[badge]; }
     miniBadges.append(icon);
   }
   for (const badge of readItems("badge")) if (badge.imageUrl && validUrl(badge.imageUrl)) { const icon = document.createElement("img"); icon.src = badge.imageUrl; icon.alt = badge.label; miniBadges.append(icon); }
@@ -288,6 +340,14 @@ function updateMiniPreview() {
     icon.className = `mini-social-icon icon-${name}`;
     icon.setAttribute("role", "img");
     icon.setAttribute("aria-label", name);
+    miniSocials.append(icon);
+  }
+  for (const item of readItems("extraSocial")) {
+    if (!item.url || !["discord", "telegram"].includes(item.platform)) continue;
+    const icon = document.createElement("span");
+    icon.className = `mini-social-icon icon-${item.platform}`;
+    icon.setAttribute("role", "img");
+    icon.setAttribute("aria-label", item.label || item.platform);
     miniSocials.append(icon);
   }
   const avatar = $("avatar-url").value.trim();
@@ -317,7 +377,7 @@ function updateMiniPreview() {
   $("mini-bio").style.fontSize = `${Math.round(Number($("bio-size").value) / 19 * 11)}px`;
   miniSocials.style.setProperty("--mini-social-size", `${Math.round(Number($("social-size").value) / 42 * 18)}px`);
   miniSocials.style.gap = `${Math.round(Number($("social-gap").value) * .7)}px`;
-  miniBadges.querySelectorAll("img").forEach(icon => { icon.style.width = `${Math.round(Number($("badge-size").value) * .6)}px`; icon.style.height = icon.style.width; });
+  miniBadges.querySelectorAll("img, .tinted-badge-icon").forEach(icon => { icon.style.width = `${Math.round(Number($("badge-size").value) * .6)}px`; icon.style.height = icon.style.width; });
   miniSocials.style.setProperty("--mini-icon-color", $("social-icon-color").value);
   $("mini-name").style.fontFamily = { serif: "Georgia, serif", sans: "Arial, sans-serif", mono: "monospace" }[$("font-style").value];
   $("opacity-value").textContent = `${$("profile-opacity").value}%`;
@@ -339,7 +399,7 @@ $("mini-avatar").addEventListener("error", event => {
 });
 for (const key of ["profile-name", "profile-bio", "avatar-url", "avatar-hidden", "profile-alignment", "badge-placement", "badge-color", "border-opacity", "gradient-primary", "gradient-secondary", "link-hover-color", "accent-color", "text-color", "background-color", "social-icon-color", "social-icon-set", "font-style", "profile-opacity", "profile-blur", "avatar-radius", "card-width", "avatar-size", "name-size", "bio-size", "social-size", "card-style", "border-color", "border-width", "card-radius", "card-padding", "card-glow", "badge-size", "social-gap"]) $(key).addEventListener("input", updateMiniPreview);
 for (const key of ["profile-gradient", "monochrome-icons"]) $(key).addEventListener("change", updateMiniPreview);
-for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", updateMiniPreview);
+for (const badge of Object.keys(badgeChoices)) $(`badge-${badge}`).addEventListener("change", () => { $("badge-color-target").value = badge; refreshBadgeEditor(); updateMiniPreview(); });
 for (const id of ["discord-username", "roblox-url", "github-url", "youtube-url", "tiktok-url", "telegram-url"]) $(id).addEventListener("input", updateMiniPreview);
 const palettes = {
   violet: ["#b99af7", "#090b10"], rose: ["#f28dbe", "#150d19"],
@@ -732,7 +792,7 @@ function settingsError(data) {
   if (data.projects.some(item => !item.title || !validUrl(item.imageUrl) || !validUrl(item.url))) return "Each project needs a name and valid image/link URLs.";
   if (data.customBadges.some(item => !item.label || !item.imageUrl || !validUrl(item.imageUrl))) return "Each custom badge needs a label and an icon URL.";
   if (data.customLinks.some(item => !item.title || !item.url || !validUrl(item.url) || !validUrl(item.iconUrl))) return "Each custom button needs a name and a valid URL.";
-  if (data.extraSocials.some(item => !item.url || !validUrl(item.url) || !validUrl(item.iconUrl))) return "Each extra social icon needs a valid URL.";
+  if (data.extraSocials.some(item => !item.url || (item.platform === "discord" ? !/^[A-Za-z0-9_.]{2,32}$/.test(item.url.replace(/^@/, "")) : !validUrl(item.url)) || !validUrl(item.iconUrl))) return "Extra Discord accounts need a username; other social icons need a valid URL.";
   try { new Intl.DateTimeFormat("en", { timeZone: data.clockTimezone }); } catch { return "Enter a valid timezone, such as Europe/Warsaw."; }
   if (data.discordPresenceId && !/^\d{17,20}$/.test(data.discordPresenceId)) return "Discord user ID must contain 17–20 digits.";
   if (data.valorantRiotId && !/^[^#\s][^#]{0,59}#[A-Za-z0-9]{2,12}$/.test(data.valorantRiotId)) return "Riot ID must look like Player#EUW.";
