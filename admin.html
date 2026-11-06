@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Control panel</title>
   <link rel="stylesheet" href="./src/css/admin.css?v=17">
-  <script type="module" src="./src/js/admin.js?v=23"></script>
+  <script type="module" src="./src/js/admin.js?v=24"></script>
 </head>
 <body>
   <main class="admin-shell">
@@ -76,6 +76,7 @@
           <div class="section-heading"><span class="section-number">✦</span><h2>Badges</h2></div>
           <p class="muted">Choose badge designs for your own profile. These are decorative on this site and do not represent guns.lol awards or verification.</p>
           <div class="badge-options badge-gallery">
+            <label><input id="badge-staff" type="checkbox"><img src="./assets/badge-staff.svg" alt=""><span><strong>Staff</strong><small>Decorative tools</small></span></label>
             <label><input id="badge-owner" type="checkbox"><img src="./assets/badge-owner.svg" alt=""><span><strong>Owner</strong><small>Profile owner</small></span></label>
             <label><input id="badge-verified" type="checkbox"><img src="./assets/badge-verified.svg" alt=""><span><strong>Verified</strong><small>Decorative check</small></span></label>
             <label><input id="badge-developer" type="checkbox"><img src="./assets/badge-developer.svg" alt=""><span><strong>Developer</strong><small>Code themed</small></span></label>
@@ -90,6 +91,16 @@
             <label><input id="badge-gifter" type="checkbox"><img src="./assets/badge-gifter.svg" alt=""><span><strong>Gifter</strong><small>Gift themed</small></span></label>
             <label><input id="badge-imagehost" type="checkbox"><img src="./assets/badge-imagehost.svg" alt=""><span><strong>Image Host</strong><small>Star themed</small></span></label>
             <label><input id="badge-domainlegend" type="checkbox"><img src="./assets/badge-domainlegend.svg" alt=""><span><strong>Domain Legend</strong><small>Rocket themed</small></span></label>
+            <label><input id="badge-hone" type="checkbox"><img src="./assets/badge-hone.svg" alt=""><span><strong>Hone.gg</strong><small>Speedometer themed</small></span></label>
+            <label><input id="badge-summer2026" type="checkbox"><img src="./assets/badge-summer2026.svg" alt=""><span><strong>Summer 2026</strong><small>Sun themed</small></span></label>
+            <label><input id="badge-easter2026" type="checkbox"><img src="./assets/badge-easter2026.svg" alt=""><span><strong>Easter 2026</strong><small>Bunny themed</small></span></label>
+            <label><input id="badge-christmas2025" type="checkbox"><img src="./assets/badge-christmas2025.svg" alt=""><span><strong>Christmas 2025</strong><small>Snowflake themed</small></span></label>
+            <label><input id="badge-easter2025" type="checkbox"><img src="./assets/badge-easter2025.svg" alt=""><span><strong>Easter 2025</strong><small>Egg themed</small></span></label>
+            <label><input id="badge-christmas2024" type="checkbox"><img src="./assets/badge-christmas2024.svg" alt=""><span><strong>Christmas 2024</strong><small>Winter themed</small></span></label>
+            <label><input id="badge-million" type="checkbox"><img src="./assets/badge-million.svg" alt=""><span><strong>The Million</strong><small>Milestone themed</small></span></label>
+            <label><input id="badge-winner" type="checkbox"><img src="./assets/badge-winner.svg" alt=""><span><strong>Winner</strong><small>Gold trophy</small></span></label>
+            <label><input id="badge-secondplace" type="checkbox"><img src="./assets/badge-secondplace.svg" alt=""><span><strong>Second Place</strong><small>Silver medal</small></span></label>
+            <label><input id="badge-thirdplace" type="checkbox"><img src="./assets/badge-thirdplace.svg" alt=""><span><strong>Third Place</strong><small>Bronze medal</small></span></label>
           </div>
           <div class="customization-group"><h3>Your badges</h3><p class="muted">Upload your own icon and choose its label and color. Up to six badges.</p><div id="custom-badge-list" class="custom-list"></div><button id="add-custom-badge" type="button" class="quiet-button">+ Add badge</button></div>
         </div>
@@ -197,6 +208,7 @@
             <label class="toggle-row" for="show-themes" hidden><span><strong>Show theme switcher</strong><small>Let visitors choose one of five themes</small></span><span class="switch"><input id="show-themes" name="showThemes" type="checkbox"><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-volume"><span><strong>Show music control</strong><small>Volume slider on the public page</small></span><span class="switch"><input id="show-volume" name="showVolume" type="checkbox" checked><span class="slider"></span></span></label>
             <label class="toggle-row" for="show-share"><span><strong>Show share button</strong><small>Visitors can share or copy this profile's URL</small></span><span class="switch"><input id="show-share" name="showShare" type="checkbox" checked><span class="slider"></span></span></label>
+            <label class="toggle-row" for="show-profile-switcher"><span><strong>Show other profiles</strong><small>Add profiles above, then let visitors open them from a corner menu</small></span><span class="switch"><input id="show-profile-switcher" name="showProfileSwitcher" type="checkbox"><span class="slider"></span></span></label>
           </div>
         </div>
         <div class="panel section-panel" data-section="animations" hidden>
